@@ -192,7 +192,7 @@ namespace CongNo
                         worksheet.Column(14).Width = 15;
                         worksheet.Column(15).Width = 15.20;
 
-                        worksheet.Cells["A:O"].Style.Font.Size = 9;
+                        worksheet.Cells["A:O"].Style.Font.Size = 8;
                         worksheet.Cells["A:O"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
                         worksheet.Cells["A:O"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
                         worksheet.Cells["A:O"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
