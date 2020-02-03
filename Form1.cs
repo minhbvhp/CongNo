@@ -11,6 +11,7 @@ using OfficeOpenXml;
 using System.IO;
 using System.Data.OleDb;
 using OfficeOpenXml.Style;
+using System.Globalization;
 
 
 namespace CongNo
@@ -24,6 +25,7 @@ namespace CongNo
 
         private void upload_Click(object sender, EventArgs e)
         {
+            //Đọc file Sunweb
             openFileDialog1.Filter = "File mẫu|Mau lay du lieu Sunweb.xlsx";
             openFileDialog1.FileName = "Mau lay du lieu Sunweb";
             DialogResult result = openFileDialog1.ShowDialog();
@@ -36,35 +38,116 @@ namespace CongNo
                     ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault();
                     int lastRow = (int)worksheet.Dimension.End.Row;
 
-                    StreamWriter sw = new StreamWriter(Environment.CurrentDirectory + @"\Database\Input.txt");
-                    for (int i = 2; i <= lastRow; i++)
+                    //Đổ dữ liệu vào Database
+                    int row;
+                    String loai_ct;
+                    String no_co;
+                    String so_bk;
+                    String mst;
+                    String cong_ty1;
+                    String cong_ty2;
+                    String ky_hieu_hd;
+                    String so_hoa_don;
+                    String ngay_hoa_don;
+                    String ma_nv;
+                    String ma_phong;
+                    String so_tien;
+                    String han_tt;
+                    String ngay_ct;
+                    String user;
+
+                    String db_name = "2019.accdb";
+                    String db_path = Environment.CurrentDirectory + "\\";
+                    String connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source =" + db_path + db_name;
+                    OleDbConnection conn = new OleDbConnection(connectionString);
+                    OleDbCommand dbCmd = new OleDbCommand();
+                    
+                    try
                     {
-                        var loai_ct = worksheet.Cells["A" + i].Value;
-                        var no_co = worksheet.Cells["D" + i].Value;
-                        var so_bk = worksheet.Cells["E" + i].Value;
-                        var mst = worksheet.Cells["J" + i].Value;
-                        var cong_ty1 = worksheet.Cells["E" + i].Value;
-                        var cong_ty2 = worksheet.Cells["F" + i].Value;
-                        var ky_hieu_hd = worksheet.Cells["K" + i].Value;
-                        var so_hoa_don = worksheet.Cells["L" + i].Value;
-                        var ngay_hoa_don = worksheet.Cells["M" + i].Value;
-                        var ma_nv = worksheet.Cells["H" + i].Value;
-                        var ma_phong = worksheet.Cells["I" + i].Value;
-                        var so_tien = worksheet.Cells["C" + i].Value;
-                        var han_tt = worksheet.Cells["G" + i].Value;
-                        var ngay_ct = worksheet.Cells["B" + i].Value;
-                        var user = worksheet.Cells["N" + i].Value;
-
-                        sw.Write("{0} - {1} - {2} - {3} - {4} - {5} - {6} - {7} - {8} - {9}" +
-                            " - {10} - {11} - {12} - {13} - {14}" + Environment.NewLine, NullToString(loai_ct), NullToString(no_co), NullToString(so_bk), NullToString(mst), NullToString(cong_ty1),
-                            NullToString(cong_ty2), NullToString(ky_hieu_hd), NullToString(so_hoa_don),
-                            NullToString(ngay_hoa_don), NullToString(ma_nv), NullToString(ma_phong), NullToString(so_tien),
-                            NullToString(han_tt), NullToString(ngay_ct), NullToString(user));
-
-                        uploadProgress.Value = i / lastRow * 100;
+                        conn.Open();
                     }
-                    sw.Close();
-                    MessageBox.Show("Đã upload dữ liệu xong");
+                    catch (OleDbException exp)
+                    {
+                        MessageBox.Show("Database Error: " + exp.Message.ToString());
+                    }
+
+                    OleDbCommand cmd = conn.CreateCommand();
+                    cmd.CommandText = "INSERT INTO draft " +
+                            "VALUES (@dong, @loai_ct, @no_co, @so_bk, @mst, @cong_ty1, " +
+                            "@cong_ty2, @ky_hieu_hd, @so_hoa_don, @ngay_hoa_don, @ma_nv, " +
+                            "@ma_phong, @so_tien, @han_tt, @ngay_ct, user)";
+
+                    for (row = 2; row < lastRow; row++)
+                    {
+                        loai_ct = NullToString(worksheet.Cells["A" + row].Value);
+                        no_co = NullToString(worksheet.Cells["D" + row].Value);
+                        so_bk = NullToString(worksheet.Cells["E" + row].Value);
+                        mst = NullToString(worksheet.Cells["K" + row].Value);
+                        cong_ty1 = NullToString(worksheet.Cells["F" + row].Value);
+                        cong_ty2 = NullToString(worksheet.Cells["G" + row].Value);
+                        ky_hieu_hd = NullToString(worksheet.Cells["L" + row].Value);
+                        so_hoa_don = NullToString(worksheet.Cells["M" + row].Value);
+                        ngay_hoa_don = NullToString(worksheet.Cells["N" + row].Value);
+                        ma_nv = NullToString(worksheet.Cells["I" + row].Value);
+                        ma_phong = NullToString(worksheet.Cells["J" + row].Value);
+                        so_tien = NullToString(worksheet.Cells["C" + row].Value);
+                        han_tt = NullToString(worksheet.Cells["H" + row].Value);
+                        ngay_ct = NullToString(worksheet.Cells["B" + row].Value);
+                        user = NullToString(worksheet.Cells["O" + row].Value);
+
+
+                        cmd.Parameters.Add("@dong", row.ToString());
+                        cmd.Parameters.Add("@loai_ct", loai_ct);
+                        cmd.Parameters.Add("@no_co", no_co);
+                        cmd.Parameters.Add("@so_bk", so_bk);
+                        cmd.Parameters.Add("@mst", mst);
+                        cmd.Parameters.Add("@cong_ty1", cong_ty1);
+                        cmd.Parameters.Add("@cong_ty2", cong_ty2);
+                        cmd.Parameters.Add("@ky_hieu_hd", ky_hieu_hd);
+                        cmd.Parameters.Add("@so_hoa_don", so_hoa_don);
+                        cmd.Parameters.Add("@ngay_hoa_don", ngay_hoa_don);
+                        cmd.Parameters.Add("@ma_nv", ma_nv);
+                        cmd.Parameters.Add("@ma_phong", ma_phong);
+                        cmd.Parameters.Add("@so_tien", so_tien);
+                        cmd.Parameters.Add("@han_tt", han_tt);
+                        cmd.Parameters.Add("@ngay_ct", ngay_ct);
+                        cmd.Parameters.Add("@user", user);
+
+                        cmd.ExecuteNonQuery();
+                    }
+                    
+
+                    /*
+                    for (row = 2; row < lastRow; row++)
+                    {
+                        
+                        loai_ct = NullToString(worksheet.Cells["A" + row].Value);
+                        no_co = NullToString(worksheet.Cells["D" + row].Value);
+                        so_bk = NullToString(worksheet.Cells["E" + row].Value);
+                        mst = NullToString(worksheet.Cells["K" + row].Value);
+                        cong_ty1 = NullToString(worksheet.Cells["F" + row].Value);
+                        cong_ty2 = NullToString(worksheet.Cells["G" + row].Value);
+                        ky_hieu_hd = NullToString(worksheet.Cells["L" + row].Value);
+                        so_hoa_don = NullToString(worksheet.Cells["M" + row].Value);
+                        ngay_hoa_don = NullToDateTime(worksheet.Cells["N" + row].Value);
+                        ma_nv = NullToString(worksheet.Cells["I" + row].Value);
+                        ma_phong = NullToString(worksheet.Cells["J" + row].Value);
+                        so_tien = NullToNumber(worksheet.Cells["C" + row].Value);
+                        han_tt = NullToDateTime(worksheet.Cells["H" + row].Value);
+                        ngay_ct = NullToDateTime(worksheet.Cells["B" + row].Value);
+                        user = NullToString(worksheet.Cells["O" + row].Value);
+                        
+                        _2019DataSetTableAdapters.draftTableAdapter draftTableAdapter = new _2019DataSetTableAdapters.draftTableAdapter();
+                        draftTableAdapter.Insert(row, loai_ct, no_co, so_bk, mst, cong_ty1, cong_ty2,
+                            ky_hieu_hd, so_hoa_don, ngay_hoa_don, ma_nv, ma_phong, so_tien, han_tt, ngay_ct, user);
+
+                        uploadProgress.Value = row / lastRow * 100;
+                    }
+                    */
+
+                    if (conn.State == ConnectionState.Open)
+                        conn.Close();
+                    MessageBox.Show("Đã upload dữ liệu xong " + (lastRow - 1).ToString() + " bản ghi.");
                 }
             }
                 
@@ -94,12 +177,22 @@ namespace CongNo
 
         private void Search_Click(object sender, EventArgs e)
         {
-            OpenDb("2019");
+            DateTime test = DateTime.ParseExact("01/01/2019", "dd/MM/yyyy", CultureInfo.InvariantCulture);
+            MessageBox.Show(test.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture));
         }
 
         static string NullToString(object Value)
         {
             return Value == null ? "" : Value.ToString();
+        }
+
+        static double NullToNumber(object Value)
+        {
+            return Value == null ? 0 : (double)Value;
+        }
+        static DateTime NullToDateTime(object Value)
+        {
+            return Value == null ? Convert.ToDateTime("01/01/1900") : Convert.ToDateTime(Value);
         }
         public void OpenDb(string dbname)
         {
