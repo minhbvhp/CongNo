@@ -249,7 +249,8 @@
             // 
             this.uploadProgress.Location = new System.Drawing.Point(98, 19);
             this.uploadProgress.Name = "uploadProgress";
-            this.uploadProgress.Size = new System.Drawing.Size(471, 22);
+            this.uploadProgress.Size = new System.Drawing.Size(470, 22);
+            this.uploadProgress.Step = 1;
             this.uploadProgress.TabIndex = 3;
             // 
             // groupBox2
