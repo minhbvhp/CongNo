@@ -9,65 +9,28 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using OfficeOpenXml;
 using System.IO;
-using System.Data.OleDb;
 using OfficeOpenXml.Style;
-using System.Globalization;
 
 
 namespace CongNo
 {
     public partial class Form1 : Form
     {
-        public void OpenDb(string dbname)
+        static string NullToString(object Value)
         {
-            String db_name = dbname + ".accdb";
-            String db_path = Environment.CurrentDirectory + @"\Database\";
-            String connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source =" + db_path + db_name;
+            return Value == null ? null : Value.ToString();
+        }
+        public String GhiChu(String soHoaDon, String khachHang, String maHoaDon)
+        {
+            String result = "";
+            if (string.IsNullOrEmpty(soHoaDon) || string.IsNullOrWhiteSpace(soHoaDon))
+                result =  "Thiếu số hóa đơn";
+            if (string.IsNullOrEmpty(khachHang) || string.IsNullOrWhiteSpace(khachHang))
+                result = "Thiếu MST và tên khách hàng";
+            if (string.IsNullOrEmpty(maHoaDon) || string.IsNullOrWhiteSpace(maHoaDon))
+                result = "Thiếu mã hóa đơn";
 
-            //Mở Database, tạo mới nếu chưa có
-            if (!File.Exists(db_path + db_name))
-            {
-                ADOX.Catalog cat = new ADOX.Catalog();
-                cat.Create(connectionString);
-
-                ADODB.Connection con = cat.ActiveConnection as ADODB.Connection;
-
-                //Tạo bảng
-                String createCustomers = @"CREATE TABLE customers(mst VARCHAR(200) PRIMARY KEY NOT NULL, " +
-                    "cong_ty VARCHAR(200))";
-                OleDbConnection conn = new OleDbConnection(connectionString);
-                OleDbCommand dbCmd = new OleDbCommand();
-
-                try
-                {
-                    conn.Open();
-                    MessageBox.Show(createCustomers);
-                    dbCmd.Connection = conn;
-                    dbCmd.CommandText = createCustomers;
-                    dbCmd.ExecuteNonQuery();
-                    MessageBox.Show("Table created");
-
-                    String qery = @"CREATE PROCEDURE test as SELECT * FROM customers";
-                    OleDbCommand createQuery = new OleDbCommand(qery, conn);
-                    createQuery.ExecuteNonQuery();
-                    MessageBox.Show("Query created");
-                }
-                catch (OleDbException exp)
-                {
-                    MessageBox.Show("Database Error: " + exp.Message.ToString());
-                }
-                finally
-                {
-                    if (conn.State == ConnectionState.Open)
-                        conn.Close();
-                }
-                if (con != null)
-                    con.Close();
-            }
-            else
-            {
-
-            }
+            return result;
         }
         public Form1()
         {
@@ -86,138 +49,117 @@ namespace CongNo
                 var importExcel = new FileInfo(inputPath);
                 using (var package = new ExcelPackage(importExcel))
                 {
+                    //Lấy tổng số bản ghi
                     ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault();
                     int lastRow = (int)worksheet.Dimension.End.Row;
 
-                    //Đổ dữ liệu vào Database
+                    //Tạo connection
                     int row;
-                    String loai_ct;
-                    String no_co;
-                    String so_bk;
-                    String mst;
-                    String cong_ty1;
-                    String cong_ty2;
-                    String ky_hieu_hd;
-                    String so_hoa_don;
-                    String ngay_hoa_don;
-                    String ma_nv;
-                    String ma_phong;
-                    String so_tien;
-                    String han_tt;
-                    String ngay_ct;
-                    String user;
-
-                    String db_name = "2019.accdb";
-                    String db_path = Environment.CurrentDirectory + @"\Database\";
-                    String connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source =" + db_path + db_name;
-                    OleDbConnection conn = new OleDbConnection(connectionString);
-                    OleDbCommand dbCmd = new OleDbCommand();
                     
+                    String db_name = "2019.mdb";
+                    String db_path = Environment.CurrentDirectory + @"\Database\";
+                    String db_file = db_path + db_name;
+
+                    dao.DBEngine dBEngine = new dao.DBEngine();
+                    dao.Database db;
+                    dao.Recordset rs;
+
+                    //Đổ dữ liệu vào Database
                     try
                     {
-                        conn.Open();
-                    }
-                    catch (OleDbException exp)
-                    {
-                        MessageBox.Show("Database Error: " + exp.Message.ToString());
-                    }
+                        db = dBEngine.OpenDatabase(db_file);
+                        rs = db.OpenRecordset("draft");
+                        for (row = 2; row < lastRow; row++)
+                        {
+                            rs.AddNew();
+                            rs.Fields["dong"].Value = row;
+                            rs.Fields["loai_ct"].Value = NullToString(worksheet.Cells["A" + row].Value);
+                            rs.Fields["no_co"].Value = NullToString(worksheet.Cells["D" + row].Value);
+                            rs.Fields["so_bk"].Value = NullToString(worksheet.Cells["E" + row].Value);
+                            rs.Fields["mst"].Value = NullToString(worksheet.Cells["K" + row].Value);
+                            rs.Fields["cong_ty1"].Value = NullToString(worksheet.Cells["F" + row].Value);
+                            rs.Fields["cong_ty2"].Value = NullToString(worksheet.Cells["G" + row].Value);
+                            rs.Fields["ky_hieu_hd"].Value = NullToString(worksheet.Cells["L" + row].Value);
+                            rs.Fields["so_hoa_don"].Value = NullToString(worksheet.Cells["M" + row].Value);
+                            rs.Fields["ngay_hoa_don"].Value = NullToString(worksheet.Cells["N" + row].Value);
+                            rs.Fields["ma_nv"].Value = NullToString(worksheet.Cells["I" + row].Value);
+                            rs.Fields["ma_phong"].Value = NullToString(worksheet.Cells["J" + row].Value);
+                            rs.Fields["so_tien"].Value = NullToString(worksheet.Cells["C" + row].Value);
+                            rs.Fields["han_tt"].Value = NullToString(worksheet.Cells["H" + row].Value);
+                            rs.Fields["ngay_ct"].Value = NullToString(worksheet.Cells["B" + row].Value);
+                            rs.Fields["user"].Value = NullToString(worksheet.Cells["O" + row].Value);
+                            rs.Update();
 
-                    OleDbCommand cmd;
+                            uploadProgress.Value = row * 100 / lastRow;
+                            uploadProgress.Refresh();
+                            Application.DoEvents();
+                        }
 
-                    for (row = 2; row < lastRow; row++)
-                    {
-                        loai_ct = NullToString(worksheet.Cells["A" + row].Value);
-                        no_co = NullToString(worksheet.Cells["D" + row].Value);
-                        so_bk = NullToString(worksheet.Cells["E" + row].Value);
-                        mst = NullToString(worksheet.Cells["K" + row].Value);
-                        cong_ty1 = NullToString(worksheet.Cells["F" + row].Value);
-                        cong_ty2 = NullToString(worksheet.Cells["G" + row].Value);
-                        ky_hieu_hd = NullToString(worksheet.Cells["L" + row].Value);
-                        so_hoa_don = NullToString(worksheet.Cells["M" + row].Value);
-                        ngay_hoa_don = NullToString(worksheet.Cells["N" + row].Value);
-                        ma_nv = NullToString(worksheet.Cells["I" + row].Value);
-                        ma_phong = NullToString(worksheet.Cells["J" + row].Value);
-                        so_tien = NullToString(worksheet.Cells["C" + row].Value);
-                        han_tt = NullToString(worksheet.Cells["H" + row].Value);
-                        ngay_ct = NullToString(worksheet.Cells["B" + row].Value);
-                        user = NullToString(worksheet.Cells["O" + row].Value);
-
-                        cmd = conn.CreateCommand();
-                        cmd.CommandText = "INSERT INTO draft " +
-                            "VALUES (@dong, @loai_ct, @no_co, @so_bk, @mst, @cong_ty1, " +
-                            "@cong_ty2, @ky_hieu_hd, @so_hoa_don, @ngay_hoa_don, @ma_nv, " +
-                            "@ma_phong, @so_tien, @han_tt, @ngay_ct, user)";
-
-                        cmd.Parameters.AddWithValue("@dong", row.ToString());
-                        cmd.Parameters.AddWithValue("@loai_ct", loai_ct);
-                        cmd.Parameters.AddWithValue("@no_co", no_co);
-                        cmd.Parameters.AddWithValue("@so_bk", so_bk);
-                        cmd.Parameters.AddWithValue("@mst", mst);
-                        cmd.Parameters.AddWithValue("@cong_ty1", cong_ty1);
-                        cmd.Parameters.AddWithValue("@cong_ty2", cong_ty2);
-                        cmd.Parameters.AddWithValue("@ky_hieu_hd", ky_hieu_hd);
-                        cmd.Parameters.AddWithValue("@so_hoa_don", so_hoa_don);
-                        cmd.Parameters.AddWithValue("@ngay_hoa_don", ngay_hoa_don);
-                        cmd.Parameters.AddWithValue("@ma_nv", ma_nv);
-                        cmd.Parameters.AddWithValue("@ma_phong", ma_phong);
-                        cmd.Parameters.AddWithValue("@so_tien", so_tien);
-                        cmd.Parameters.AddWithValue("@han_tt", han_tt);
-                        cmd.Parameters.AddWithValue("@ngay_ct", ngay_ct);
-                        cmd.Parameters.AddWithValue("@user", user);
-
-                        cmd.ExecuteNonQueryAsync();
-
-                        uploadProgress.Value = row * 100 / lastRow;
+                        db.Execute("update_mst");
+                        db.Execute("add_mst_to_customers");
+                        db.Execute("invoice_filter");
+                        db.Execute("update_invoice");
+                        db.Execute("add_invoice");
+                        db.Execute("update_paid");
+                        db.Execute("add_paid");
+                        db.Execute("update_revenue");
+                        db.Execute("add_revenue");
+                        
+                        uploadProgress.Value += 1;
                         uploadProgress.Refresh();
-                        Application.DoEvents();
 
+                        MessageBox.Show("Đã upload dữ liệu xong.", "Chúc mừng", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        //Liệt kê dữ liệu chưa được Upload
+                        rs = db.OpenRecordset("not_upload");
+                        rs.MoveLast();
+                        if (rs.RecordCount > 0)
+                        {
+                            String dong;
+                            String ten_cong_ty;
+                            String so_bk;
+                            String ky_hieu_hd;
+                            String so_hoa_don;
+                            double so_tien;
+                            String user;
+                            String ghiChu;
+
+                            if (!rs.BOF)
+                                rs.MoveFirst();
+
+                            while (!rs.EOF)
+                            {
+                                dong = Convert.ToString(rs.Fields["dong"].Value);
+                                ten_cong_ty = Convert.ToString(rs.Fields["ten_cong_ty"].Value);
+                                so_bk = Convert.ToString(rs.Fields["so_bk"].Value);
+                                ky_hieu_hd = Convert.ToString(rs.Fields["ky_hieu_hd"].Value);
+                                so_hoa_don = Convert.ToString(rs.Fields["so_hoa_don"].Value);
+                                so_tien = rs.Fields["so_tien"].Value;
+                                user = Convert.ToString(rs.Fields["user"].Value);
+                                ghiChu = GhiChu(so_hoa_don, ten_cong_ty, ky_hieu_hd);
+
+                                notUploadList.Rows.Add(dong, ten_cong_ty, so_bk, ky_hieu_hd, so_hoa_don, so_tien, user, ghiChu);
+                                rs.MoveNext();
+                            }
+                        }
+                    rs.Close();
                     }
-                    if (conn.State == ConnectionState.Open)
-                        conn.Close();
-                    uploadProgress.Value += 1;
-                    uploadProgress.Refresh();
-                    MessageBox.Show("Đã upload dữ liệu xong " + (lastRow - 1).ToString() + " bản ghi.");
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Database error: " + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
         }
 
         private void Report_Click(object sender, EventArgs e)
         {
-            using (SaveFileDialog saveDialog = new SaveFileDialog())
-            {
-                saveDialog.Filter = "Excel phiên bản 2007 trở lên|*.xlsx";
-                if (saveDialog.ShowDialog() != DialogResult.Cancel)
-                {
-                    string exportFilePath = saveDialog.FileName;
-                    var newFile = new FileInfo(exportFilePath);
-                    using (var package = new ExcelPackage(newFile))
-                    {
-                        ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("NewSheet1");
-                        worksheet.Cells["A1"].Value = "Xin chào mẹ Thương ngố";
-                        package.Save();
-                    }
-                }
-            }
+            
         }
 
         private void Search_Click(object sender, EventArgs e)
         {
-            DateTime test = DateTime.ParseExact("01/01/2019", "dd/MM/yyyy", CultureInfo.InvariantCulture);
-            MessageBox.Show(test.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture));
-        }
-
-        static string NullToString(object Value)
-        {
-            return Value == null ? "" : Value.ToString();
-        }
-
-        static double NullToNumber(object Value)
-        {
-            return Value == null ? 0 : (double)Value;
-        }
-        static DateTime NullToDateTime(object Value)
-        {
-            return Value == null ? Convert.ToDateTime("01/01/1900") : Convert.ToDateTime(Value);
+            
         }
 
         //Export file "Mau lay du lieu Sunweb.xlsx"
