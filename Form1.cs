@@ -68,7 +68,10 @@ namespace CongNo
                     try
                     {
                         db = dBEngine.OpenDatabase(db_file);
+                        db.Execute("draft_clear");
                         rs = db.OpenRecordset("draft");
+                        dBEngine.BeginTrans();
+
                         for (row = 2; row < lastRow; row++)
                         {
                             rs.AddNew();
@@ -112,7 +115,9 @@ namespace CongNo
 
                         //Liệt kê dữ liệu chưa được Upload
                         rs = db.OpenRecordset("not_upload");
-                        rs.MoveLast();
+                        if(!rs.EOF)
+                            rs.MoveLast();
+
                         if (rs.RecordCount > 0)
                         {
                             String dong;
@@ -142,7 +147,18 @@ namespace CongNo
                                 rs.MoveNext();
                             }
                         }
-                    rs.Close();
+
+                        db.Execute("draft_clear");
+                        db.Execute("invoice_draft_clear");
+                        dBEngine.CommitTrans();
+                        rs.Close();
+                        db.Close();
+
+                        String compactDbTemp = db_path + "temp.mdb";
+                        String compactDbName = db_path + "2019.mdb";
+                        dBEngine.CompactDatabase(db_file, compactDbTemp);
+                        File.Delete(db_file);
+                        File.Move(compactDbTemp, compactDbName);
                     }
                     catch (Exception ex)
                     {
