@@ -30,10 +30,6 @@
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -42,7 +38,19 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
             this.notUploadList = new System.Windows.Forms.DataGridView();
+            this.notUpload_dong = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.notUpload_don_vi = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.notUpload_so_bk = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.notUpload_ma_hoa_don = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.notUpload_so_hoa_don = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.notUpload_so_tien = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.notUpload_user = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.notUpload_ghi_chu = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.label1 = new System.Windows.Forms.Label();
             this.upload = new System.Windows.Forms.Button();
             this.categorySearch = new System.Windows.Forms.ComboBox();
@@ -51,11 +59,6 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.tbSearch = new System.Windows.Forms.TextBox();
             this.searchList = new System.Windows.Forms.DataGridView();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.fieldSearch = new System.Windows.Forms.ComboBox();
             this.search = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -106,14 +109,12 @@
             this.label22 = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
-            this.notUpload_dong = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.notUpload_don_vi = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.notUpload_so_bk = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.notUpload_ma_hoa_don = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.notUpload_so_hoa_don = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.notUpload_so_tien = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.notUpload_user = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.notUpload_ghi_chu = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.mst = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ten_don_vi = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ma_hoa_don = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.so_hoa_don = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.so_tien = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.recNumber = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.notUploadList)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -156,6 +157,95 @@
             this.notUploadList.Size = new System.Drawing.Size(563, 244);
             this.notUploadList.TabIndex = 0;
             // 
+            // notUpload_dong
+            // 
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.notUpload_dong.DefaultCellStyle = dataGridViewCellStyle3;
+            this.notUpload_dong.FillWeight = 85.27918F;
+            this.notUpload_dong.HeaderText = "Dòng";
+            this.notUpload_dong.Name = "notUpload_dong";
+            this.notUpload_dong.ReadOnly = true;
+            this.notUpload_dong.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.notUpload_dong.Width = 73;
+            // 
+            // notUpload_don_vi
+            // 
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.notUpload_don_vi.DefaultCellStyle = dataGridViewCellStyle4;
+            this.notUpload_don_vi.FillWeight = 85.27918F;
+            this.notUpload_don_vi.HeaderText = "Tên đơn vị";
+            this.notUpload_don_vi.Name = "notUpload_don_vi";
+            this.notUpload_don_vi.ReadOnly = true;
+            this.notUpload_don_vi.Width = 74;
+            // 
+            // notUpload_so_bk
+            // 
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.notUpload_so_bk.DefaultCellStyle = dataGridViewCellStyle5;
+            this.notUpload_so_bk.FillWeight = 85.27918F;
+            this.notUpload_so_bk.HeaderText = "Số BK";
+            this.notUpload_so_bk.Name = "notUpload_so_bk";
+            this.notUpload_so_bk.ReadOnly = true;
+            this.notUpload_so_bk.Width = 74;
+            // 
+            // notUpload_ma_hoa_don
+            // 
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.notUpload_ma_hoa_don.DefaultCellStyle = dataGridViewCellStyle6;
+            this.notUpload_ma_hoa_don.FillWeight = 85.27918F;
+            this.notUpload_ma_hoa_don.HeaderText = "Mã hóa đơn";
+            this.notUpload_ma_hoa_don.Name = "notUpload_ma_hoa_don";
+            this.notUpload_ma_hoa_don.ReadOnly = true;
+            this.notUpload_ma_hoa_don.Width = 74;
+            // 
+            // notUpload_so_hoa_don
+            // 
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.notUpload_so_hoa_don.DefaultCellStyle = dataGridViewCellStyle7;
+            this.notUpload_so_hoa_don.FillWeight = 85.27918F;
+            this.notUpload_so_hoa_don.HeaderText = "Số hóa đơn";
+            this.notUpload_so_hoa_don.Name = "notUpload_so_hoa_don";
+            this.notUpload_so_hoa_don.ReadOnly = true;
+            this.notUpload_so_hoa_don.Width = 74;
+            // 
+            // notUpload_so_tien
+            // 
+            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.notUpload_so_tien.DefaultCellStyle = dataGridViewCellStyle8;
+            this.notUpload_so_tien.FillWeight = 85.27918F;
+            this.notUpload_so_tien.HeaderText = "Số tiền";
+            this.notUpload_so_tien.Name = "notUpload_so_tien";
+            this.notUpload_so_tien.ReadOnly = true;
+            this.notUpload_so_tien.Width = 74;
+            // 
+            // notUpload_user
+            // 
+            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.notUpload_user.DefaultCellStyle = dataGridViewCellStyle9;
+            this.notUpload_user.FillWeight = 50F;
+            this.notUpload_user.HeaderText = "User nhập";
+            this.notUpload_user.Name = "notUpload_user";
+            this.notUpload_user.ReadOnly = true;
+            this.notUpload_user.Width = 43;
+            // 
+            // notUpload_ghi_chu
+            // 
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle10.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.notUpload_ghi_chu.DefaultCellStyle = dataGridViewCellStyle10;
+            this.notUpload_ghi_chu.FillWeight = 85.27918F;
+            this.notUpload_ghi_chu.HeaderText = "Ghi chú";
+            this.notUpload_ghi_chu.Name = "notUpload_ghi_chu";
+            this.notUpload_ghi_chu.ReadOnly = true;
+            this.notUpload_ghi_chu.Width = 74;
+            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -179,14 +269,11 @@
             // 
             this.categorySearch.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.categorySearch.FormattingEnabled = true;
-            this.categorySearch.Items.AddRange(new object[] {
-            "Khách hàng",
-            "Phát sinh",
-            "Thu nợ"});
             this.categorySearch.Location = new System.Drawing.Point(6, 22);
             this.categorySearch.Name = "categorySearch";
             this.categorySearch.Size = new System.Drawing.Size(121, 21);
             this.categorySearch.TabIndex = 6;
+            this.categorySearch.SelectedIndexChanged += new System.EventHandler(this.CategorySearch_SelectedIndexChanged);
             // 
             // groupBox1
             // 
@@ -250,11 +337,12 @@
             this.searchList.ColumnHeadersHeight = 40;
             this.searchList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.searchList.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn1,
-            this.dataGridViewTextBoxColumn2,
-            this.dataGridViewTextBoxColumn3,
-            this.dataGridViewTextBoxColumn5,
-            this.dataGridViewTextBoxColumn7});
+            this.mst,
+            this.ten_don_vi,
+            this.ma_hoa_don,
+            this.so_hoa_don,
+            this.so_tien,
+            this.recNumber});
             this.searchList.Location = new System.Drawing.Point(6, 56);
             this.searchList.Name = "searchList";
             this.searchList.ReadOnly = true;
@@ -262,53 +350,10 @@
             this.searchList.Size = new System.Drawing.Size(563, 159);
             this.searchList.TabIndex = 0;
             // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.dataGridViewTextBoxColumn1.HeaderText = "Mã hóa đơn";
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            this.dataGridViewTextBoxColumn1.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle13.Font = new System.Drawing.Font("Times New Roman", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.dataGridViewTextBoxColumn2.DefaultCellStyle = dataGridViewCellStyle13;
-            this.dataGridViewTextBoxColumn2.HeaderText = "Số hóa đơn";
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.dataGridViewTextBoxColumn3.HeaderText = "Tên đơn vị";
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn5
-            // 
-            this.dataGridViewTextBoxColumn5.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.dataGridViewTextBoxColumn5.HeaderText = "Số tiền";
-            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
-            this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn7
-            // 
-            this.dataGridViewTextBoxColumn7.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.dataGridViewTextBoxColumn7.HeaderText = "Chỉnh sửa lần cuối";
-            this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
-            this.dataGridViewTextBoxColumn7.ReadOnly = true;
-            // 
             // fieldSearch
             // 
             this.fieldSearch.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.fieldSearch.FormattingEnabled = true;
-            this.fieldSearch.Items.AddRange(new object[] {
-            "Mã số thuế",
-            "Số hóa đơn",
-            "Số tiền"});
             this.fieldSearch.Location = new System.Drawing.Point(133, 22);
             this.fieldSearch.Name = "fieldSearch";
             this.fieldSearch.Size = new System.Drawing.Size(121, 21);
@@ -795,94 +840,50 @@
             this.linkLabel1.Text = "Chưa có File mẫu ?";
             this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
-            // notUpload_dong
+            // mst
             // 
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.notUpload_dong.DefaultCellStyle = dataGridViewCellStyle3;
-            this.notUpload_dong.FillWeight = 85.27918F;
-            this.notUpload_dong.HeaderText = "Dòng";
-            this.notUpload_dong.Name = "notUpload_dong";
-            this.notUpload_dong.ReadOnly = true;
-            this.notUpload_dong.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.notUpload_dong.Width = 73;
+            this.mst.HeaderText = "Mã số thuế";
+            this.mst.Name = "mst";
+            this.mst.ReadOnly = true;
             // 
-            // notUpload_don_vi
+            // ten_don_vi
             // 
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.notUpload_don_vi.DefaultCellStyle = dataGridViewCellStyle4;
-            this.notUpload_don_vi.FillWeight = 85.27918F;
-            this.notUpload_don_vi.HeaderText = "Tên đơn vị";
-            this.notUpload_don_vi.Name = "notUpload_don_vi";
-            this.notUpload_don_vi.ReadOnly = true;
-            this.notUpload_don_vi.Width = 74;
+            this.ten_don_vi.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.ten_don_vi.HeaderText = "Tên đơn vị";
+            this.ten_don_vi.Name = "ten_don_vi";
+            this.ten_don_vi.ReadOnly = true;
             // 
-            // notUpload_so_bk
+            // ma_hoa_don
             // 
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.notUpload_so_bk.DefaultCellStyle = dataGridViewCellStyle5;
-            this.notUpload_so_bk.FillWeight = 85.27918F;
-            this.notUpload_so_bk.HeaderText = "Số BK";
-            this.notUpload_so_bk.Name = "notUpload_so_bk";
-            this.notUpload_so_bk.ReadOnly = true;
-            this.notUpload_so_bk.Width = 74;
+            this.ma_hoa_don.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.ma_hoa_don.HeaderText = "Mã hóa đơn";
+            this.ma_hoa_don.Name = "ma_hoa_don";
+            this.ma_hoa_don.ReadOnly = true;
+            this.ma_hoa_don.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             // 
-            // notUpload_ma_hoa_don
+            // so_hoa_don
             // 
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.notUpload_ma_hoa_don.DefaultCellStyle = dataGridViewCellStyle6;
-            this.notUpload_ma_hoa_don.FillWeight = 85.27918F;
-            this.notUpload_ma_hoa_don.HeaderText = "Mã hóa đơn";
-            this.notUpload_ma_hoa_don.Name = "notUpload_ma_hoa_don";
-            this.notUpload_ma_hoa_don.ReadOnly = true;
-            this.notUpload_ma_hoa_don.Width = 74;
+            this.so_hoa_don.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle13.Font = new System.Drawing.Font("Times New Roman", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.so_hoa_don.DefaultCellStyle = dataGridViewCellStyle13;
+            this.so_hoa_don.HeaderText = "Số hóa đơn";
+            this.so_hoa_don.Name = "so_hoa_don";
+            this.so_hoa_don.ReadOnly = true;
             // 
-            // notUpload_so_hoa_don
+            // so_tien
             // 
-            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.notUpload_so_hoa_don.DefaultCellStyle = dataGridViewCellStyle7;
-            this.notUpload_so_hoa_don.FillWeight = 85.27918F;
-            this.notUpload_so_hoa_don.HeaderText = "Số hóa đơn";
-            this.notUpload_so_hoa_don.Name = "notUpload_so_hoa_don";
-            this.notUpload_so_hoa_don.ReadOnly = true;
-            this.notUpload_so_hoa_don.Width = 74;
+            this.so_tien.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.so_tien.HeaderText = "Số tiền";
+            this.so_tien.Name = "so_tien";
+            this.so_tien.ReadOnly = true;
             // 
-            // notUpload_so_tien
+            // recNumber
             // 
-            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.notUpload_so_tien.DefaultCellStyle = dataGridViewCellStyle8;
-            this.notUpload_so_tien.FillWeight = 85.27918F;
-            this.notUpload_so_tien.HeaderText = "Số tiền";
-            this.notUpload_so_tien.Name = "notUpload_so_tien";
-            this.notUpload_so_tien.ReadOnly = true;
-            this.notUpload_so_tien.Width = 74;
-            // 
-            // notUpload_user
-            // 
-            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.notUpload_user.DefaultCellStyle = dataGridViewCellStyle9;
-            this.notUpload_user.FillWeight = 50F;
-            this.notUpload_user.HeaderText = "User nhập";
-            this.notUpload_user.Name = "notUpload_user";
-            this.notUpload_user.ReadOnly = true;
-            this.notUpload_user.Width = 43;
-            // 
-            // notUpload_ghi_chu
-            // 
-            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle10.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.notUpload_ghi_chu.DefaultCellStyle = dataGridViewCellStyle10;
-            this.notUpload_ghi_chu.FillWeight = 85.27918F;
-            this.notUpload_ghi_chu.HeaderText = "Ghi chú";
-            this.notUpload_ghi_chu.Name = "notUpload_ghi_chu";
-            this.notUpload_ghi_chu.ReadOnly = true;
-            this.notUpload_ghi_chu.Width = 74;
+            this.recNumber.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.recNumber.HeaderText = "Record No.";
+            this.recNumber.Name = "recNumber";
+            this.recNumber.ReadOnly = true;
             // 
             // Form1
             // 
@@ -905,6 +906,7 @@
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Đối chiếu công nợ";
+            this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.notUploadList)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -979,11 +981,6 @@
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.ComboBox fieldSearch;
         private System.Windows.Forms.Label label22;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn7;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.LinkLabel linkLabel1;
         private System.Windows.Forms.DataGridViewTextBoxColumn notUpload_dong;
@@ -994,6 +991,12 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn notUpload_so_tien;
         private System.Windows.Forms.DataGridViewTextBoxColumn notUpload_user;
         private System.Windows.Forms.DataGridViewTextBoxColumn notUpload_ghi_chu;
+        private System.Windows.Forms.DataGridViewTextBoxColumn mst;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ten_don_vi;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ma_hoa_don;
+        private System.Windows.Forms.DataGridViewTextBoxColumn so_hoa_don;
+        private System.Windows.Forms.DataGridViewTextBoxColumn so_tien;
+        private System.Windows.Forms.DataGridViewTextBoxColumn recNumber;
     }
 }
 

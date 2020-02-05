@@ -16,6 +16,7 @@ namespace CongNo
 {
     public partial class Form1 : Form
     {
+        Dictionary<string, string[]> searchBy = new Dictionary<string, string[]>();
         static string NullToString(object Value)
         {
             return Value == null ? null : Value.ToString();
@@ -32,9 +33,56 @@ namespace CongNo
 
             return result;
         }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            searchBy["Khách hàng"] = new string[] { "Mã số thuế" };
+            searchBy["Phát sinh"] = new string[] { "Mã hóa đơn", "Số hóa đơn", "Số tiền" };
+            searchBy["Thu nợ"] = new string[] { "Mã hóa đơn", "Số hóa đơn", "Số tiền" };
+
+            foreach (String search in searchBy.Keys)
+                categorySearch.Items.Add(search);
+
+        }
         public Form1()
         {
             InitializeComponent();
+        }
+        private void CategorySearch_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            fieldSearch.Items.Clear();
+            if (categorySearch.SelectedIndex > -1)
+            {
+                String field = searchBy.Keys.ElementAt(categorySearch.SelectedIndex);
+                fieldSearch.Items.AddRange(searchBy[field]);
+
+                switch (field)
+                {
+                    case "Khách hàng":
+                        searchList.Columns["mst"].Visible = true;
+                        searchList.Columns["ten_don_vi"].Visible = true;
+                        searchList.Columns["ma_hoa_don"].Visible = false;
+                        searchList.Columns["so_hoa_don"].Visible = false;
+                        searchList.Columns["so_tien"].Visible = false;
+                        searchList.Columns["recNumber"].Visible = true;
+                        break;
+                    case "Phát sinh":
+                        searchList.Columns["mst"].Visible = false;
+                        searchList.Columns["ten_don_vi"].Visible = true;
+                        searchList.Columns["ma_hoa_don"].Visible = true;
+                        searchList.Columns["so_hoa_don"].Visible = true;
+                        searchList.Columns["so_tien"].Visible = true;
+                        searchList.Columns["recNumber"].Visible = true;
+                        break;
+                    case "Thu nợ":
+                        searchList.Columns["mst"].Visible = false;
+                        searchList.Columns["ten_don_vi"].Visible = true;
+                        searchList.Columns["ma_hoa_don"].Visible = true;
+                        searchList.Columns["so_hoa_don"].Visible = true;
+                        searchList.Columns["so_tien"].Visible = true;
+                        searchList.Columns["recNumber"].Visible = true;
+                        break;
+                }
+            }
         }
 
         private void upload_Click(object sender, EventArgs e)
