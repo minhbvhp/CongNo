@@ -19,7 +19,7 @@ namespace CongNo
         Dictionary<string, string[]> searchBy = new Dictionary<string, string[]>();
         static string NullToString(object Value)
         {
-            return Value == null ? null : Value.ToString();
+            return Value == null ? null : Value.ToString().Trim();
         }
         public String GhiChu(String soHoaDon, String khachHang, String maHoaDon)
         {
@@ -35,9 +35,9 @@ namespace CongNo
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            searchBy["Khách hàng"] = new string[] { "Mã số thuế" };
-            searchBy["Phát sinh"] = new string[] { "Mã hóa đơn", "Số hóa đơn", "Số tiền" };
-            searchBy["Thu nợ"] = new string[] { "Mã hóa đơn", "Số hóa đơn", "Số tiền" };
+            searchBy["Khách hàng"] = new string[] { "Mã số thuế", "Tên đơn vị" };
+            searchBy["Phát sinh"] = new string[] { "Số hóa đơn", "Số tiền" };
+            searchBy["Thu nợ"] = new string[] { "Số hóa đơn", "Số tiền" };
 
             foreach (String search in searchBy.Keys)
                 categorySearch.Items.Add(search);
@@ -47,46 +47,12 @@ namespace CongNo
         {
             InitializeComponent();
         }
-        private void CategorySearch_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            fieldSearch.Items.Clear();
-            if (categorySearch.SelectedIndex > -1)
-            {
-                String field = searchBy.Keys.ElementAt(categorySearch.SelectedIndex);
-                fieldSearch.Items.AddRange(searchBy[field]);
-
-                switch (field)
-                {
-                    case "Khách hàng":
-                        searchList.Columns["mst"].Visible = true;
-                        searchList.Columns["ten_don_vi"].Visible = true;
-                        searchList.Columns["ma_hoa_don"].Visible = false;
-                        searchList.Columns["so_hoa_don"].Visible = false;
-                        searchList.Columns["so_tien"].Visible = false;
-                        searchList.Columns["recNumber"].Visible = true;
-                        break;
-                    case "Phát sinh":
-                        searchList.Columns["mst"].Visible = false;
-                        searchList.Columns["ten_don_vi"].Visible = true;
-                        searchList.Columns["ma_hoa_don"].Visible = true;
-                        searchList.Columns["so_hoa_don"].Visible = true;
-                        searchList.Columns["so_tien"].Visible = true;
-                        searchList.Columns["recNumber"].Visible = true;
-                        break;
-                    case "Thu nợ":
-                        searchList.Columns["mst"].Visible = false;
-                        searchList.Columns["ten_don_vi"].Visible = true;
-                        searchList.Columns["ma_hoa_don"].Visible = true;
-                        searchList.Columns["so_hoa_don"].Visible = true;
-                        searchList.Columns["so_tien"].Visible = true;
-                        searchList.Columns["recNumber"].Visible = true;
-                        break;
-                }
-            }
-        }
 
         private void upload_Click(object sender, EventArgs e)
         {
+            notUploadList.Rows.Clear();
+            searchList.Rows.Clear();
+
             //Đọc file Sunweb
             openFileDialog1.Filter = "File mẫu|Mau lay du lieu Sunweb.xlsx";
             openFileDialog1.FileName = "Mau lay du lieu Sunweb";
@@ -103,7 +69,7 @@ namespace CongNo
 
                     //Tạo connection
                     int row;
-                    
+
                     String db_name = "2019.mdb";
                     String db_path = Environment.CurrentDirectory + @"\Database\";
                     String db_file = db_path + db_name;
@@ -155,7 +121,7 @@ namespace CongNo
                         db.Execute("add_paid");
                         db.Execute("update_revenue");
                         db.Execute("add_revenue");
-                        
+
                         uploadProgress.Value += 1;
                         uploadProgress.Refresh();
 
@@ -163,7 +129,7 @@ namespace CongNo
 
                         //Liệt kê dữ liệu chưa được Upload
                         rs = db.OpenRecordset("not_upload");
-                        if(!rs.EOF)
+                        if (!rs.EOF)
                             rs.MoveLast();
 
                         if (rs.RecordCount > 0)
@@ -215,15 +181,213 @@ namespace CongNo
                 }
             }
         }
+        private void CategorySearch_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            fieldSearch.Items.Clear();
+            if (categorySearch.SelectedIndex > -1)
+            {
+                String field = searchBy.Keys.ElementAt(categorySearch.SelectedIndex);
+                fieldSearch.Items.AddRange(searchBy[field]);
+
+                switch (field)
+                {
+                    case "Khách hàng":
+                        searchList.Columns["mst"].Visible = true;
+                        searchList.Columns["ten_don_vi"].Visible = true;
+                        searchList.Columns["ma_hoa_don"].Visible = false;
+                        searchList.Columns["so_hoa_don"].Visible = false;
+                        searchList.Columns["so_tien"].Visible = false;
+                        searchList.Columns["recNumber"].Visible = true;
+                        break;
+                    case "Phát sinh":
+                        searchList.Columns["mst"].Visible = true;
+                        searchList.Columns["ten_don_vi"].Visible = false;
+                        searchList.Columns["ma_hoa_don"].Visible = true;
+                        searchList.Columns["so_hoa_don"].Visible = true;
+                        searchList.Columns["so_tien"].Visible = true;
+                        searchList.Columns["recNumber"].Visible = true;
+                        break;
+                    case "Thu nợ":
+                        searchList.Columns["mst"].Visible = true;
+                        searchList.Columns["ten_don_vi"].Visible = false;
+                        searchList.Columns["ma_hoa_don"].Visible = true;
+                        searchList.Columns["so_hoa_don"].Visible = true;
+                        searchList.Columns["so_tien"].Visible = true;
+                        searchList.Columns["recNumber"].Visible = true;
+                        break;
+                }
+            }
+        }
 
         private void Report_Click(object sender, EventArgs e)
         {
-            
+            String db_name = "2019.mdb";
+            String db_path = Environment.CurrentDirectory + @"\Database\";
+            String db_file = db_path + db_name;
+
+            dao.DBEngine dBEngine = new dao.DBEngine();
+            dao.Database db;
+            dao.Recordset rs;
+
+            db = dBEngine.OpenDatabase(db_file);
+            rs = db.OpenRecordset("invoice");
+            MessageBox.Show(rs.Name);
+
+            MessageBox.Show(fieldSearch.Text);
         }
 
         private void Search_Click(object sender, EventArgs e)
         {
+            searchList.Rows.Clear();
+            String searchWhat = tbSearch.Text.Trim();
+
+            String db_name = "2019.mdb";
+            String db_path = Environment.CurrentDirectory + @"\Database\";
+            String db_file = db_path + db_name;
+
+            dao.DBEngine dBEngine = new dao.DBEngine();
+            dao.Database db;
+            dao.Recordset rs = null;
+
+            /*
+             * Toxic ways to avoid SQL injection
+             * Don't think another ways.
+             * Will optimize when find out.
+             */
+
+            try
+            {
+                db = dBEngine.OpenDatabase(db_file);
+                String field = searchBy.Keys.ElementAt(categorySearch.SelectedIndex);
+
+                String searchValue;
+                Double searchDouble;
+                bool matchSearchCondition = false;
+                String mst = null;
+                String ten_don_vi = null;
+                String ma_hoa_don = null;
+                String so_hoa_don = null;
+                double so_tien = 0;
+                double recordNumber = 0;
             
+                switch (field)
+                {
+                    case "Khách hàng":
+                        rs = db.OpenRecordset("customers");
+                        break;
+                    case "Phát sinh":
+                        rs = db.OpenRecordset("invoice");
+                        break;
+                    case "Thu nợ":
+                        rs = db.OpenRecordset("paid");
+                        break;
+                }
+
+                if (!rs.EOF)
+                    rs.MoveLast();
+
+                if (rs.RecordCount > 0)
+                {
+                    if (!rs.BOF)
+                        rs.MoveFirst();
+
+                    double i = 1;
+                    while (!rs.EOF)
+                    {
+                        switch (fieldSearch.Text)
+                        {
+                            case "Mã số thuế":
+                                searchValue = Convert.ToString(rs.Fields["mst"].Value);
+                                matchSearchCondition = searchValue.Contains(searchWhat);
+                                if (matchSearchCondition)
+                                {
+                                    mst = rs.Fields["mst"].Value;
+                                    ten_don_vi = rs.Fields["cong_ty"].Value;
+                                    recordNumber = i;
+                                }
+                                break;
+                            case "Tên đơn vị":
+                                searchValue = Convert.ToString(rs.Fields["cong_ty"].Value);
+                                matchSearchCondition = searchValue.Contains(searchWhat);
+                                if (matchSearchCondition)
+                                {
+                                    mst = rs.Fields["mst"].Value;
+                                    ten_don_vi = rs.Fields["cong_ty"].Value;
+                                    recordNumber = i;
+                                }
+                                break;
+                            case "Số hóa đơn":
+                                if (rs.Name == "invoice")
+                                {
+                                    searchValue = Convert.ToString(rs.Fields["so_hoa_don"].Value);
+                                    matchSearchCondition = searchValue.Contains(searchWhat);
+                                    if (matchSearchCondition)
+                                    {
+                                        ten_don_vi = rs.Fields["mst"].Value;
+                                        mst = rs.Fields["mst"].Value;
+                                        ma_hoa_don = rs.Fields["ki_hieu_hoa_don"].Value;
+                                        so_hoa_don = rs.Fields["so_hoa_don"].Value;
+                                        so_tien = Convert.ToDouble(rs.Fields["so_tien_phat_sinh"].Value);
+                                        recordNumber = i;
+                                    }
+                                }
+                                else
+                                {
+                                    searchValue = Convert.ToString(rs.Fields["so_hoa_don"].Value);
+                                    matchSearchCondition = searchValue.Contains(searchWhat);
+                                    if (matchSearchCondition)
+                                    {
+                                        ma_hoa_don = rs.Fields["ki_hieu_hoa_don"].Value;
+                                        so_hoa_don = rs.Fields["so_hoa_don"].Value;
+                                        so_tien = Convert.ToDouble(rs.Fields["so_tien_thanh_toan"].Value);
+                                        recordNumber = i;
+                                    }
+                                }
+                                break;
+                            case "Số tiền":
+                                if (rs.Name == "invoice")
+                                {
+                                    searchDouble = Convert.ToDouble(rs.Fields["so_tien_phat_sinh"].Value);
+                                    matchSearchCondition = searchDouble.Equals(Convert.ToDouble(searchWhat));
+                                    if (matchSearchCondition)
+                                    {
+                                        mst = rs.Fields["mst"].Value;
+                                        ma_hoa_don = rs.Fields["ki_hieu_hoa_don"].Value;
+                                        so_hoa_don = rs.Fields["so_hoa_don"].Value;
+                                        so_tien = Convert.ToDouble(rs.Fields["so_tien_phat_sinh"].Value);
+                                        recordNumber = i;
+                                    }
+                                }
+                                else
+                                {
+                                    searchDouble = Convert.ToDouble(rs.Fields["so_tien_thanh_toan"].Value);
+                                    matchSearchCondition = searchDouble.Equals(Convert.ToDouble(searchWhat));
+                                    if (matchSearchCondition)
+                                    {
+                                        ma_hoa_don = rs.Fields["ki_hieu_hoa_don"].Value;
+                                        so_hoa_don = rs.Fields["so_hoa_don"].Value;
+                                        so_tien = Convert.ToDouble(rs.Fields["so_tien_thanh_toan"].Value);
+                                        recordNumber = i;
+                                    }
+                                }
+                                break;
+                            default:
+                                MessageBox.Show("Lỗi tìm kiếm", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                break;
+                        }
+
+                        if (matchSearchCondition)
+                            searchList.Rows.Add(mst, ten_don_vi, ma_hoa_don, so_hoa_don, so_tien, recordNumber);
+
+                        rs.MoveNext();
+                        i++;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         //Export file "Mau lay du lieu Sunweb.xlsx"
@@ -296,6 +460,13 @@ namespace CongNo
                     MessageBox.Show("Bạn đã tải xuống File này rồi", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void TbSearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+                search.PerformClick();
+
         }
     }
 }
