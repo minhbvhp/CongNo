@@ -74,6 +74,7 @@
             this.search = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.currentKhachHang = new System.Windows.Forms.TextBox();
+            this.recNo = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.currentNgayHoaDon = new System.Windows.Forms.TextBox();
             this.currentNgayChungTu = new System.Windows.Forms.TextBox();
@@ -97,12 +98,8 @@
             this.afterKhachHang = new System.Windows.Forms.TextBox();
             this.accept = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
-            this.afterNgayHoaDon = new System.Windows.Forms.TextBox();
-            this.afterNgayChungTu = new System.Windows.Forms.TextBox();
             this.afterSoTienTra = new System.Windows.Forms.TextBox();
             this.afterSoTienNo = new System.Windows.Forms.TextBox();
-            this.afterNgayTra = new System.Windows.Forms.TextBox();
-            this.afterHanTra = new System.Windows.Forms.TextBox();
             this.afterSoHoaDon = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
@@ -119,7 +116,10 @@
             this.delete = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
-            this.recNo = new System.Windows.Forms.Label();
+            this.afterHanTra = new System.Windows.Forms.DateTimePicker();
+            this.afterNgayChungTu = new System.Windows.Forms.DateTimePicker();
+            this.afterNgayTra = new System.Windows.Forms.DateTimePicker();
+            this.afterNgayHoaDon = new System.Windows.Forms.DateTimePicker();
             ((System.ComponentModel.ISupportInitialize)(this.notUploadList)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -432,6 +432,7 @@
             this.fieldSearch.Name = "fieldSearch";
             this.fieldSearch.Size = new System.Drawing.Size(121, 21);
             this.fieldSearch.TabIndex = 6;
+            this.fieldSearch.SelectedIndexChanged += new System.EventHandler(this.FieldSearch_SelectedIndexChanged);
             // 
             // search
             // 
@@ -483,6 +484,15 @@
             this.currentKhachHang.ReadOnly = true;
             this.currentKhachHang.Size = new System.Drawing.Size(121, 140);
             this.currentKhachHang.TabIndex = 11;
+            // 
+            // recNo
+            // 
+            this.recNo.AutoSize = true;
+            this.recNo.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.recNo.Location = new System.Drawing.Point(521, 0);
+            this.recNo.Name = "recNo";
+            this.recNo.Size = new System.Drawing.Size(0, 13);
+            this.recNo.TabIndex = 13;
             // 
             // label3
             // 
@@ -657,15 +667,15 @@
             // 
             // modifyGroup
             // 
+            this.modifyGroup.Controls.Add(this.afterNgayHoaDon);
+            this.modifyGroup.Controls.Add(this.afterNgayChungTu);
+            this.modifyGroup.Controls.Add(this.afterNgayTra);
+            this.modifyGroup.Controls.Add(this.afterHanTra);
             this.modifyGroup.Controls.Add(this.afterKhachHang);
             this.modifyGroup.Controls.Add(this.accept);
             this.modifyGroup.Controls.Add(this.label10);
-            this.modifyGroup.Controls.Add(this.afterNgayHoaDon);
-            this.modifyGroup.Controls.Add(this.afterNgayChungTu);
             this.modifyGroup.Controls.Add(this.afterSoTienTra);
             this.modifyGroup.Controls.Add(this.afterSoTienNo);
-            this.modifyGroup.Controls.Add(this.afterNgayTra);
-            this.modifyGroup.Controls.Add(this.afterHanTra);
             this.modifyGroup.Controls.Add(this.afterSoHoaDon);
             this.modifyGroup.Controls.Add(this.label11);
             this.modifyGroup.Controls.Add(this.label14);
@@ -683,6 +693,7 @@
             this.modifyGroup.TabStop = false;
             this.modifyGroup.Text = "Thông tin mới";
             this.modifyGroup.Visible = false;
+            this.modifyGroup.VisibleChanged += new System.EventHandler(this.ModifyGroup_VisibleChanged);
             // 
             // afterKhachHang
             // 
@@ -702,6 +713,7 @@
             this.accept.Size = new System.Drawing.Size(32, 32);
             this.accept.TabIndex = 10;
             this.accept.UseVisualStyleBackColor = true;
+            this.accept.Click += new System.EventHandler(this.Accept_Click);
             // 
             // label10
             // 
@@ -711,22 +723,6 @@
             this.label10.Size = new System.Drawing.Size(65, 13);
             this.label10.TabIndex = 10;
             this.label10.Text = "Khách hàng";
-            // 
-            // afterNgayHoaDon
-            // 
-            this.afterNgayHoaDon.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.afterNgayHoaDon.Location = new System.Drawing.Point(287, 223);
-            this.afterNgayHoaDon.Name = "afterNgayHoaDon";
-            this.afterNgayHoaDon.Size = new System.Drawing.Size(100, 20);
-            this.afterNgayHoaDon.TabIndex = 11;
-            // 
-            // afterNgayChungTu
-            // 
-            this.afterNgayChungTu.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.afterNgayChungTu.Location = new System.Drawing.Point(287, 187);
-            this.afterNgayChungTu.Name = "afterNgayChungTu";
-            this.afterNgayChungTu.Size = new System.Drawing.Size(100, 20);
-            this.afterNgayChungTu.TabIndex = 11;
             // 
             // afterSoTienTra
             // 
@@ -743,22 +739,6 @@
             this.afterSoTienNo.Name = "afterSoTienNo";
             this.afterSoTienNo.Size = new System.Drawing.Size(100, 20);
             this.afterSoTienNo.TabIndex = 11;
-            // 
-            // afterNgayTra
-            // 
-            this.afterNgayTra.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.afterNgayTra.Location = new System.Drawing.Point(464, 22);
-            this.afterNgayTra.Name = "afterNgayTra";
-            this.afterNgayTra.Size = new System.Drawing.Size(100, 20);
-            this.afterNgayTra.TabIndex = 11;
-            // 
-            // afterHanTra
-            // 
-            this.afterHanTra.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.afterHanTra.Location = new System.Drawing.Point(287, 105);
-            this.afterHanTra.Name = "afterHanTra";
-            this.afterHanTra.Size = new System.Drawing.Size(100, 20);
-            this.afterHanTra.TabIndex = 11;
             // 
             // afterSoHoaDon
             // 
@@ -878,6 +858,7 @@
             this.modify.TabIndex = 10;
             this.modify.UseVisualStyleBackColor = true;
             this.modify.Visible = false;
+            this.modify.Click += new System.EventHandler(this.Modify_Click);
             // 
             // delete
             // 
@@ -889,6 +870,7 @@
             this.delete.TabIndex = 10;
             this.delete.UseVisualStyleBackColor = true;
             this.delete.Visible = false;
+            this.delete.Click += new System.EventHandler(this.Delete_Click);
             // 
             // openFileDialog1
             // 
@@ -906,15 +888,37 @@
             this.linkLabel1.Text = "Chưa có File mẫu ?";
             this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
-            // recNo
+            // afterHanTra
             // 
-            this.recNo.AutoSize = true;
-            this.recNo.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.recNo.Location = new System.Drawing.Point(522, 4);
-            this.recNo.Name = "recNo";
-            this.recNo.Size = new System.Drawing.Size(25, 9);
-            this.recNo.TabIndex = 13;
-            this.recNo.Text = "12546";
+            this.afterHanTra.Location = new System.Drawing.Point(287, 105);
+            this.afterHanTra.Name = "afterHanTra";
+            this.afterHanTra.Size = new System.Drawing.Size(100, 20);
+            this.afterHanTra.TabIndex = 12;
+            this.afterHanTra.Value = new System.DateTime(2020, 2, 7, 15, 30, 18, 0);
+            // 
+            // afterNgayChungTu
+            // 
+            this.afterNgayChungTu.Location = new System.Drawing.Point(287, 187);
+            this.afterNgayChungTu.Name = "afterNgayChungTu";
+            this.afterNgayChungTu.Size = new System.Drawing.Size(100, 20);
+            this.afterNgayChungTu.TabIndex = 12;
+            this.afterNgayChungTu.Value = new System.DateTime(2020, 2, 7, 15, 30, 13, 0);
+            // 
+            // afterNgayTra
+            // 
+            this.afterNgayTra.Location = new System.Drawing.Point(464, 24);
+            this.afterNgayTra.Name = "afterNgayTra";
+            this.afterNgayTra.Size = new System.Drawing.Size(100, 20);
+            this.afterNgayTra.TabIndex = 12;
+            this.afterNgayTra.Value = new System.DateTime(2020, 2, 7, 15, 30, 18, 0);
+            // 
+            // afterNgayHoaDon
+            // 
+            this.afterNgayHoaDon.Location = new System.Drawing.Point(287, 223);
+            this.afterNgayHoaDon.Name = "afterNgayHoaDon";
+            this.afterNgayHoaDon.Size = new System.Drawing.Size(100, 20);
+            this.afterNgayHoaDon.TabIndex = 12;
+            this.afterNgayHoaDon.Value = new System.DateTime(2020, 2, 7, 15, 30, 13, 0);
             // 
             // Form1
             // 
@@ -990,12 +994,8 @@
         private System.Windows.Forms.GroupBox modifyGroup;
         private System.Windows.Forms.TextBox afterKhachHang;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.TextBox afterNgayHoaDon;
-        private System.Windows.Forms.TextBox afterNgayChungTu;
         private System.Windows.Forms.TextBox afterSoTienTra;
         private System.Windows.Forms.TextBox afterSoTienNo;
-        private System.Windows.Forms.TextBox afterNgayTra;
-        private System.Windows.Forms.TextBox afterHanTra;
         private System.Windows.Forms.TextBox afterSoHoaDon;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label14;
@@ -1027,6 +1027,10 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn so_tien;
         private System.Windows.Forms.DataGridViewTextBoxColumn recNumber;
         private System.Windows.Forms.Label recNo;
+        private System.Windows.Forms.DateTimePicker afterHanTra;
+        private System.Windows.Forms.DateTimePicker afterNgayChungTu;
+        private System.Windows.Forms.DateTimePicker afterNgayTra;
+        private System.Windows.Forms.DateTimePicker afterNgayHoaDon;
     }
 }
 

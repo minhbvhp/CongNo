@@ -33,6 +33,28 @@ namespace CongNo
 
             return result;
         }
+        public void CurrentInfoRefresh(RefreshOption refreshOption)
+        {
+            currentMST.Clear();
+            currentKhachHang.Clear();
+            currentMaHoaDon.Clear();
+            currentSoHoaDon.Clear();
+            currentHanTra.Clear();
+            currentSoTienNo.Clear();
+            currentNgayChungTu.Clear();
+            currentNgayHoaDon.Clear();
+            currentNgayTra.Clear();
+            currentSoTienTra.Clear();
+            recNo.ResetText();
+            modify.Visible = false;
+            delete.Visible = false;
+
+            if (refreshOption == RefreshOption.All)
+            {
+                modifyGroup.Visible = false;
+            }
+            
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
             searchBy["Khách hàng"] = new string[] { "Mã số thuế", "Tên đơn vị" };
@@ -183,6 +205,8 @@ namespace CongNo
         }
         private void CategorySearch_SelectedIndexChanged(object sender, EventArgs e)
         {
+            CurrentInfoRefresh(RefreshOption.All);
+            searchList.Enabled = false;
             fieldSearch.Items.Clear();
             if (categorySearch.SelectedIndex > -1)
             {
@@ -221,24 +245,14 @@ namespace CongNo
 
         private void Report_Click(object sender, EventArgs e)
         {
-            String db_name = "2019.mdb";
-            String db_path = Environment.CurrentDirectory + @"\Database\";
-            String db_file = db_path + db_name;
-
-            dao.DBEngine dBEngine = new dao.DBEngine();
-            dao.Database db;
-            dao.Recordset rs;
-
-            db = dBEngine.OpenDatabase(db_file);
-            rs = db.OpenRecordset("invoice");
-            MessageBox.Show(rs.Name);
-
-            MessageBox.Show(fieldSearch.Text);
+            
         }
 
         private void Search_Click(object sender, EventArgs e)
         {
+            searchList.Enabled = true;
             searchList.Rows.Clear();
+            CurrentInfoRefresh(RefreshOption.All);
             String searchWhat = tbSearch.Text.Trim();
 
             String db_name = "2019.mdb";
@@ -389,6 +403,8 @@ namespace CongNo
 
         private void SearchList_SelectionChanged(object sender, EventArgs e)
         {
+            CurrentInfoRefresh(RefreshOption.InfoOnly);
+
             String db_name = "2019.mdb";
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
@@ -406,8 +422,8 @@ namespace CongNo
                 recNo.Text = (recordNumber + 1).ToString();
             }
 
-            //try
-            //{
+            try
+            {
                 db = dBEngine.OpenDatabase(db_file);
 
                 String field = searchBy.Keys.ElementAt(categorySearch.SelectedIndex);
@@ -422,6 +438,8 @@ namespace CongNo
                         rs.Move(recordNumber);
                         currentMST.Text = rs.Fields["mst"].Value;
                         currentKhachHang.Text = rs.Fields["cong_ty"].Value;
+                        if (searchList.SelectedRows.Count > 0)
+                            modify.Visible = true;
                         break;
                     case "Số hóa đơn":
                     case "Số tiền":
@@ -432,7 +450,9 @@ namespace CongNo
                                 rs.MoveFirst();
                             rs.Move(recordNumber);
                             currentMST.Text = rs.Fields["mst"].Value;
-                            //currentKhachHang.Text = db.Execute("SELECT cong_ty FROM customers WHERE mst = " + currentMST.Text).ToString();
+                            dao.Recordset rsKhachHang = db.OpenRecordset("SELECT cong_ty FROM customers WHERE mst = '" + currentMST.Text + "'");
+                            if (rsKhachHang.RecordCount > 0)
+                                currentKhachHang.Text = rsKhachHang.Fields["cong_ty"].Value;
                             currentMaHoaDon.Text = rs.Fields["ki_hieu_hoa_don"].Value;
                             currentSoHoaDon.Text = rs.Fields["so_hoa_don"].Value;
                             currentHanTra.Text = String.Format("{0:dd/MM/yyyy}", rs.Fields["han_thanh_toan"].Value);
@@ -443,32 +463,37 @@ namespace CongNo
                         else if (field == "Thu nợ")
                         {
                             rs = db.OpenRecordset("paid");
-
+                            if (!rs.BOF)
+                                rs.MoveFirst();
+                            rs.Move(recordNumber);
+                            currentMaHoaDon.Text = rs.Fields["ki_hieu_hoa_don"].Value;
+                            currentSoHoaDon.Text = rs.Fields["so_hoa_don"].Value;
+                            currentNgayTra.Text = String.Format("{0:dd/MM/yyyy}", rs.Fields["ngay_thanh_toan"].Value);
+                            currentSoTienTra.Text = String.Format("{0:n0}", rs.Fields["so_tien_thanh_toan"].Value);
+                        }
+                        if (searchList.SelectedRows.Count > 0)
+                        {
+                            modify.Visible = true;
+                            delete.Visible = true;
                         }
                         break;
                     default:
                         MessageBox.Show("Không có thông tin", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                 }
-                
-
-
                 rs.Close();
                 db.Close();
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show("Error: " + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //}
-
-
-
-            
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
-        //Export file "Mau lay du lieu Sunweb.xlsx"
+        
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
+            //Export file "Mau lay du lieu Sunweb.xlsx"
             String selectedFolder = "";
             FolderBrowserDialog sunwebLocation = new FolderBrowserDialog();
             sunwebLocation.SelectedPath = selectedFolder;
@@ -543,6 +568,43 @@ namespace CongNo
             if (e.KeyCode == Keys.Enter)
                 search.PerformClick();
 
+        }
+
+        private void Modify_Click(object sender, EventArgs e)
+        {
+            modifyGroup.Visible = true;
+            searchList.Enabled = false;
+        }
+
+        private void Delete_Click(object sender, EventArgs e)
+        {
+            searchList.Rows.Clear();
+            CurrentInfoRefresh(RefreshOption.All);
+        }
+
+        private void Accept_Click(object sender, EventArgs e)
+        {
+            CurrentInfoRefresh(RefreshOption.All);
+            searchList.Rows.Clear();
+        }
+
+        private void FieldSearch_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            searchList.Enabled = false;
+            CurrentInfoRefresh(RefreshOption.All);
+        }
+
+        private void ModifyGroup_VisibleChanged(object sender, EventArgs e)
+        {
+            afterKhachHang.Clear();
+            afterMaHoaDon.Clear();
+            afterSoHoaDon.Clear();
+            afterHanTra.ResetText();
+            afterSoTienTra.Clear();
+            afterNgayChungTu.ResetText();
+            afterNgayHoaDon.ResetText();
+            afterNgayTra.ResetText();
+            afterSoTienTra.Clear();
         }
     }
 }
