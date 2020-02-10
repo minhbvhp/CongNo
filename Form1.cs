@@ -16,6 +16,9 @@ namespace CongNo
 {
     public partial class Form1 : Form
     {
+        public TextBox[] textBoxes = new TextBox[5];
+        public DateTimePicker[] dateTimePickers = new DateTimePicker[4];
+
         Dictionary<string, string[]> searchBy = new Dictionary<string, string[]>();
         static string NullToString(object Value)
         {
@@ -64,6 +67,16 @@ namespace CongNo
             foreach (String search in searchBy.Keys)
                 categorySearch.Items.Add(search);
 
+            textBoxes[0] = afterKhachHang;
+            textBoxes[1] = afterMaHoaDon;
+            textBoxes[2] = afterSoHoaDon;
+            textBoxes[3] = afterSoTienNo;
+            textBoxes[4] = afterSoTienTra;
+
+            dateTimePickers[0] = afterHanTra;
+            dateTimePickers[1] = afterNgayChungTu;
+            dateTimePickers[2] = afterNgayHoaDon;
+            dateTimePickers[3] = afterNgayTra;
         }
         public Form1()
         {
@@ -574,6 +587,19 @@ namespace CongNo
         {
             modifyGroup.Visible = true;
             searchList.Enabled = false;
+
+            afterKhachHang.Text = currentKhachHang.Text;
+            afterMaHoaDon.Text = currentMaHoaDon.Text;
+            afterSoHoaDon.Text = currentSoHoaDon.Text;
+            afterHanTra.Text = currentHanTra.Text;
+            afterSoTienNo.Text = currentSoTienNo.Text;
+            afterNgayChungTu.Text = currentNgayChungTu.Text;
+            afterNgayHoaDon.Text = currentNgayHoaDon.Text;
+            afterNgayTra.Text = currentNgayTra.Text;
+            afterSoTienTra.Text = currentSoTienTra.Text;
+
+            foreach (TextBox textBox in textBoxes)
+                textBox.BackColor = SystemColors.Window;
         }
 
         private void Delete_Click(object sender, EventArgs e)
@@ -584,8 +610,40 @@ namespace CongNo
 
         private void Accept_Click(object sender, EventArgs e)
         {
-            CurrentInfoRefresh(RefreshOption.All);
-            searchList.Rows.Clear();
+            int emptyAmount = 0;
+
+            foreach (TextBox textBox in textBoxes)
+            {
+                if (textBox.Enabled == true)
+                {
+                    if (String.IsNullOrEmpty(textBox.Text.Trim()))
+                    {
+                        textBox.BackColor = Color.Red;
+                        textBox.Refresh();
+                        emptyAmount++;
+                    }
+                }
+            }
+
+            if (emptyAmount > 0)
+            {
+                MessageBox.Show("Thông tin không thể để trống");
+            }
+            else
+            {
+                MessageBox.Show("OK");
+                foreach (TextBox textBox in textBoxes)
+                {
+                    textBox.BackColor = SystemColors.Window;
+                    textBox.Enabled = false;
+                }
+
+                foreach (DateTimePicker dateTimePicker in dateTimePickers)
+                    dateTimePicker.Enabled = false;
+
+                CurrentInfoRefresh(RefreshOption.All);
+                searchList.Rows.Clear();
+            }
         }
 
         private void FieldSearch_SelectedIndexChanged(object sender, EventArgs e)
@@ -605,6 +663,38 @@ namespace CongNo
             afterNgayHoaDon.ResetText();
             afterNgayTra.ResetText();
             afterSoTienTra.Clear();
+
+            if (modifyGroup.Visible == true)
+            {
+                String field = searchBy.Keys.ElementAt(categorySearch.SelectedIndex);
+
+                switch (fieldSearch.Text)
+                {
+                    case "Mã số thuế":
+                    case "Tên đơn vị":
+                        afterKhachHang.Enabled = true;
+                        break;
+                    case "Số hóa đơn":
+                    case "Số tiền":
+                        afterMaHoaDon.Enabled = true;
+                        afterSoHoaDon.Enabled = true;
+                        if (field == "Phát sinh")
+                        {
+                            afterHanTra.Enabled = true;
+                            afterSoTienNo.Enabled = true;
+                            afterNgayChungTu.Enabled = true;
+                            afterNgayHoaDon.Enabled = true;
+                        }
+                        else if (field == "Thu nợ")
+                        {
+                            afterNgayTra.Enabled = true;
+                            afterSoTienTra.Enabled = true;
+                        }
+                        break;
+                    default:
+                        return;
+                }
+            }
         }
     }
 }

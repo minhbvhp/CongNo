@@ -95,6 +95,10 @@
             this.currentMST = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.modifyGroup = new System.Windows.Forms.GroupBox();
+            this.afterNgayHoaDon = new System.Windows.Forms.DateTimePicker();
+            this.afterNgayChungTu = new System.Windows.Forms.DateTimePicker();
+            this.afterNgayTra = new System.Windows.Forms.DateTimePicker();
+            this.afterHanTra = new System.Windows.Forms.DateTimePicker();
             this.afterKhachHang = new System.Windows.Forms.TextBox();
             this.accept = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
@@ -116,10 +120,6 @@
             this.delete = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
-            this.afterHanTra = new System.Windows.Forms.DateTimePicker();
-            this.afterNgayChungTu = new System.Windows.Forms.DateTimePicker();
-            this.afterNgayTra = new System.Windows.Forms.DateTimePicker();
-            this.afterNgayHoaDon = new System.Windows.Forms.DateTimePicker();
             ((System.ComponentModel.ISupportInitialize)(this.notUploadList)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -695,9 +695,46 @@
             this.modifyGroup.Visible = false;
             this.modifyGroup.VisibleChanged += new System.EventHandler(this.ModifyGroup_VisibleChanged);
             // 
+            // afterNgayHoaDon
+            // 
+            this.afterNgayHoaDon.Enabled = false;
+            this.afterNgayHoaDon.Location = new System.Drawing.Point(287, 223);
+            this.afterNgayHoaDon.Name = "afterNgayHoaDon";
+            this.afterNgayHoaDon.Size = new System.Drawing.Size(100, 20);
+            this.afterNgayHoaDon.TabIndex = 12;
+            this.afterNgayHoaDon.Value = new System.DateTime(2020, 2, 7, 15, 30, 13, 0);
+            // 
+            // afterNgayChungTu
+            // 
+            this.afterNgayChungTu.Enabled = false;
+            this.afterNgayChungTu.Location = new System.Drawing.Point(287, 187);
+            this.afterNgayChungTu.Name = "afterNgayChungTu";
+            this.afterNgayChungTu.Size = new System.Drawing.Size(100, 20);
+            this.afterNgayChungTu.TabIndex = 12;
+            this.afterNgayChungTu.Value = new System.DateTime(2020, 2, 7, 15, 30, 13, 0);
+            // 
+            // afterNgayTra
+            // 
+            this.afterNgayTra.Enabled = false;
+            this.afterNgayTra.Location = new System.Drawing.Point(464, 24);
+            this.afterNgayTra.Name = "afterNgayTra";
+            this.afterNgayTra.Size = new System.Drawing.Size(100, 20);
+            this.afterNgayTra.TabIndex = 12;
+            this.afterNgayTra.Value = new System.DateTime(2020, 2, 7, 15, 30, 18, 0);
+            // 
+            // afterHanTra
+            // 
+            this.afterHanTra.Enabled = false;
+            this.afterHanTra.Location = new System.Drawing.Point(287, 105);
+            this.afterHanTra.Name = "afterHanTra";
+            this.afterHanTra.Size = new System.Drawing.Size(100, 20);
+            this.afterHanTra.TabIndex = 12;
+            this.afterHanTra.Value = new System.DateTime(2020, 2, 7, 15, 30, 18, 0);
+            // 
             // afterKhachHang
             // 
             this.afterKhachHang.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.afterKhachHang.Enabled = false;
             this.afterKhachHang.Location = new System.Drawing.Point(70, 26);
             this.afterKhachHang.Multiline = true;
             this.afterKhachHang.Name = "afterKhachHang";
@@ -727,6 +764,7 @@
             // afterSoTienTra
             // 
             this.afterSoTienTra.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.afterSoTienTra.Enabled = false;
             this.afterSoTienTra.Location = new System.Drawing.Point(464, 63);
             this.afterSoTienTra.Name = "afterSoTienTra";
             this.afterSoTienTra.Size = new System.Drawing.Size(100, 20);
@@ -735,6 +773,7 @@
             // afterSoTienNo
             // 
             this.afterSoTienNo.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.afterSoTienNo.Enabled = false;
             this.afterSoTienNo.Location = new System.Drawing.Point(287, 146);
             this.afterSoTienNo.Name = "afterSoTienNo";
             this.afterSoTienNo.Size = new System.Drawing.Size(100, 20);
@@ -743,6 +782,7 @@
             // afterSoHoaDon
             // 
             this.afterSoHoaDon.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.afterSoHoaDon.Enabled = false;
             this.afterSoHoaDon.Location = new System.Drawing.Point(287, 63);
             this.afterSoHoaDon.Name = "afterSoHoaDon";
             this.afterSoHoaDon.Size = new System.Drawing.Size(100, 20);
@@ -814,6 +854,7 @@
             // afterMaHoaDon
             // 
             this.afterMaHoaDon.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.afterMaHoaDon.Enabled = false;
             this.afterMaHoaDon.Location = new System.Drawing.Point(287, 22);
             this.afterMaHoaDon.Name = "afterMaHoaDon";
             this.afterMaHoaDon.Size = new System.Drawing.Size(100, 20);
@@ -887,38 +928,6 @@
             this.linkLabel1.TabStop = true;
             this.linkLabel1.Text = "Chưa có File mẫu ?";
             this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
-            // 
-            // afterHanTra
-            // 
-            this.afterHanTra.Location = new System.Drawing.Point(287, 105);
-            this.afterHanTra.Name = "afterHanTra";
-            this.afterHanTra.Size = new System.Drawing.Size(100, 20);
-            this.afterHanTra.TabIndex = 12;
-            this.afterHanTra.Value = new System.DateTime(2020, 2, 7, 15, 30, 18, 0);
-            // 
-            // afterNgayChungTu
-            // 
-            this.afterNgayChungTu.Location = new System.Drawing.Point(287, 187);
-            this.afterNgayChungTu.Name = "afterNgayChungTu";
-            this.afterNgayChungTu.Size = new System.Drawing.Size(100, 20);
-            this.afterNgayChungTu.TabIndex = 12;
-            this.afterNgayChungTu.Value = new System.DateTime(2020, 2, 7, 15, 30, 13, 0);
-            // 
-            // afterNgayTra
-            // 
-            this.afterNgayTra.Location = new System.Drawing.Point(464, 24);
-            this.afterNgayTra.Name = "afterNgayTra";
-            this.afterNgayTra.Size = new System.Drawing.Size(100, 20);
-            this.afterNgayTra.TabIndex = 12;
-            this.afterNgayTra.Value = new System.DateTime(2020, 2, 7, 15, 30, 18, 0);
-            // 
-            // afterNgayHoaDon
-            // 
-            this.afterNgayHoaDon.Location = new System.Drawing.Point(287, 223);
-            this.afterNgayHoaDon.Name = "afterNgayHoaDon";
-            this.afterNgayHoaDon.Size = new System.Drawing.Size(100, 20);
-            this.afterNgayHoaDon.TabIndex = 12;
-            this.afterNgayHoaDon.Value = new System.DateTime(2020, 2, 7, 15, 30, 13, 0);
             // 
             // Form1
             // 
