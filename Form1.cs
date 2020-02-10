@@ -245,7 +245,7 @@ namespace CongNo
                         searchList.Columns["recNumber"].Visible = true;
                         break;
                     case "Thu nợ":
-                        searchList.Columns["mst"].Visible = true;
+                        searchList.Columns["mst"].Visible = false;
                         searchList.Columns["ten_don_vi"].Visible = false;
                         searchList.Columns["ma_hoa_don"].Visible = true;
                         searchList.Columns["so_hoa_don"].Visible = true;
@@ -433,6 +433,7 @@ namespace CongNo
                 DataGridViewRow viewRow = searchList.SelectedRows[0];
                 recordNumber = Convert.ToInt32(viewRow.Cells["recNumber"].Value) - 1;
                 recNo.Text = (recordNumber + 1).ToString();
+                modify.Visible = true;
             }
 
             try
@@ -451,11 +452,11 @@ namespace CongNo
                         rs.Move(recordNumber);
                         currentMST.Text = rs.Fields["mst"].Value;
                         currentKhachHang.Text = rs.Fields["cong_ty"].Value;
-                        if (searchList.SelectedRows.Count > 0)
-                            modify.Visible = true;
                         break;
                     case "Số hóa đơn":
                     case "Số tiền":
+                        delete.Visible = true;
+
                         if (field == "Phát sinh")
                         {
                             rs = db.OpenRecordset("invoice");
@@ -484,15 +485,7 @@ namespace CongNo
                             currentNgayTra.Text = String.Format("{0:dd/MM/yyyy}", rs.Fields["ngay_thanh_toan"].Value);
                             currentSoTienTra.Text = String.Format("{0:n0}", rs.Fields["so_tien_thanh_toan"].Value);
                         }
-                        if (searchList.SelectedRows.Count > 0)
-                        {
-                            modify.Visible = true;
-                            delete.Visible = true;
-                        }
                         break;
-                    default:
-                        MessageBox.Show("Không có thông tin", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
                 }
                 rs.Close();
                 db.Close();
@@ -597,15 +590,65 @@ namespace CongNo
             afterNgayHoaDon.Text = currentNgayHoaDon.Text;
             afterNgayTra.Text = currentNgayTra.Text;
             afterSoTienTra.Text = currentSoTienTra.Text;
-
-            foreach (TextBox textBox in textBoxes)
-                textBox.BackColor = SystemColors.Window;
         }
 
         private void Delete_Click(object sender, EventArgs e)
         {
-            searchList.Rows.Clear();
-            CurrentInfoRefresh(RefreshOption.All);
+            String db_name = "2019.mdb";
+            String db_path = Environment.CurrentDirectory + @"\Database\";
+            String db_file = db_path + db_name;
+
+            dao.DBEngine dBEngine = new dao.DBEngine();
+            dao.Database db;
+            dao.Recordset rs = null;
+            int recordNumber = Convert.ToInt32(recNo.Text) - 1;
+
+            try
+            {
+                db = dBEngine.OpenDatabase(db_file);
+
+                String field = searchBy.Keys.ElementAt(categorySearch.SelectedIndex);
+
+                switch (fieldSearch.Text)
+                {
+                    case "Mã số thuế":
+                    case "Tên đơn vị":
+                        rs = db.OpenRecordset("customers");
+                        break;
+                    case "Số hóa đơn":
+                    case "Số tiền":
+                        if (field == "Phát sinh")
+                        {
+                            rs = db.OpenRecordset("invoice");
+                        }
+                        else if (field == "Thu nợ")
+                        {
+                            rs = db.OpenRecordset("paid");
+                        }
+                        break;
+                }
+
+                DialogResult dialogResult = MessageBox.Show("Bạn có chắc chắn muốn xóa thông tin này không?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    if (!rs.BOF)
+                        rs.MoveFirst();
+                    rs.Move(recordNumber);
+                    rs.Delete();
+                }
+
+                rs.Close();
+                db.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                searchList.Rows.Clear();
+                CurrentInfoRefresh(RefreshOption.All);
+            }
         }
 
         private void Accept_Click(object sender, EventArgs e)
@@ -631,19 +674,87 @@ namespace CongNo
             }
             else
             {
-                MessageBox.Show("OK");
-                foreach (TextBox textBox in textBoxes)
+                String db_name = "2019.mdb";
+                String db_path = Environment.CurrentDirectory + @"\Database\";
+                String db_file = db_path + db_name;
+
+                dao.DBEngine dBEngine = new dao.DBEngine();
+                dao.Database db;
+                dao.Recordset rs = null;
+                int recordNumber = Convert.ToInt32(recNo.Text) - 1;
+
+                try
                 {
-                    textBox.BackColor = SystemColors.Window;
-                    textBox.Enabled = false;
+                    db = dBEngine.OpenDatabase(db_file);
+
+                    String field = searchBy.Keys.ElementAt(categorySearch.SelectedIndex);
+
+                    switch (fieldSearch.Text)
+                    {
+                        case "Mã số thuế":
+                        case "Tên đơn vị":
+                            rs = db.OpenRecordset("customers");
+                            if (!rs.BOF)
+                                rs.MoveFirst();
+                            rs.Move(recordNumber);
+                            rs.Edit();
+                            rs.Fields["cong_ty"].Value = afterKhachHang.Text;
+                            break;
+                        case "Số hóa đơn":
+                        case "Số tiền":
+                            if (field == "Phát sinh")
+                            {
+                                rs = db.OpenRecordset("invoice");
+                                if (!rs.BOF)
+                                    rs.MoveFirst();
+                                rs.Move(recordNumber);
+                                rs.Edit();
+                                rs.Fields["ki_hieu_hoa_don"].Value = afterMaHoaDon.Text;
+                                rs.Fields["so_hoa_don"].Value = afterSoHoaDon.Text;
+                                rs.Fields["han_thanh_toan"].Value = afterHanTra.Text;
+                                rs.Fields["so_tien_phat_sinh"].Value = afterSoTienNo.Text;
+                                rs.Fields["ngay_ct"].Value = afterNgayChungTu.Text;
+                                rs.Fields["ngay_hoa_don"].Value = afterNgayHoaDon.Text;
+                            }
+                            else if (field == "Thu nợ")
+                            {
+                                rs = db.OpenRecordset("paid");
+                                if (!rs.BOF)
+                                    rs.MoveFirst();
+                                rs.Move(recordNumber);
+                                rs.Edit();
+                                rs.Fields["ki_hieu_hoa_don"].Value = afterMaHoaDon.Text;
+                                rs.Fields["so_hoa_don"].Value = afterSoHoaDon.Text;
+                                rs.Fields["ngay_thanh_toan"].Value = afterNgayTra.Text;
+                                rs.Fields["so_tien_thanh_toan"].Value = afterSoTienTra.Text;
+                            }
+                            break;
+                    }
+
+                    DialogResult dialogResult = MessageBox.Show("Bạn có chắc chắn muốn chỉnh sửa thông tin này không?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (dialogResult == DialogResult.Yes)
+                    {
+                        rs.Update();
+                    }
+                    else
+                    {
+                        rs.CancelUpdate();
+                    }
+                    rs.Close();
+                    db.Close();
                 }
-
-                foreach (DateTimePicker dateTimePicker in dateTimePickers)
-                    dateTimePicker.Enabled = false;
-
-                CurrentInfoRefresh(RefreshOption.All);
-                searchList.Rows.Clear();
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    searchList.Rows.Clear();
+                    CurrentInfoRefresh(RefreshOption.All);
+                }
             }
+            searchList.Rows.Clear();
+            CurrentInfoRefresh(RefreshOption.All);
         }
 
         private void FieldSearch_SelectedIndexChanged(object sender, EventArgs e)
@@ -666,6 +777,15 @@ namespace CongNo
 
             if (modifyGroup.Visible == true)
             {
+                foreach (TextBox textBox in textBoxes)
+                {
+                    textBox.BackColor = Control.DefaultBackColor;
+                    textBox.Enabled = false;
+                }
+
+                foreach (DateTimePicker dateTimePicker in dateTimePickers)
+                    dateTimePicker.Enabled = false;
+
                 String field = searchBy.Keys.ElementAt(categorySearch.SelectedIndex);
 
                 switch (fieldSearch.Text)
@@ -673,22 +793,37 @@ namespace CongNo
                     case "Mã số thuế":
                     case "Tên đơn vị":
                         afterKhachHang.Enabled = true;
+                        afterKhachHang.BackColor = SystemColors.Window;
                         break;
                     case "Số hóa đơn":
                     case "Số tiền":
                         afterMaHoaDon.Enabled = true;
+                        afterMaHoaDon.BackColor = SystemColors.Window;
+
                         afterSoHoaDon.Enabled = true;
+                        afterSoHoaDon.BackColor = SystemColors.Window;
+
                         if (field == "Phát sinh")
                         {
                             afterHanTra.Enabled = true;
+                            afterHanTra.BackColor = SystemColors.Window;
+
                             afterSoTienNo.Enabled = true;
+                            afterSoTienNo.BackColor = SystemColors.Window;
+
                             afterNgayChungTu.Enabled = true;
+                            afterNgayChungTu.BackColor = SystemColors.Window;
+
                             afterNgayHoaDon.Enabled = true;
+                            afterNgayHoaDon.BackColor = SystemColors.Window;
                         }
                         else if (field == "Thu nợ")
                         {
                             afterNgayTra.Enabled = true;
+                            afterNgayTra.BackColor = SystemColors.Window;
+
                             afterSoTienTra.Enabled = true;
+                            afterSoTienTra.BackColor = SystemColors.Window;
                         }
                         break;
                     default:
