@@ -89,12 +89,12 @@ namespace CongNo
             searchList.Rows.Clear();
 
             //Đọc file Sunweb
-            openFileDialog1.Filter = "File mẫu|Mau lay du lieu Sunweb.xlsx";
-            openFileDialog1.FileName = "Mau lay du lieu Sunweb";
-            DialogResult result = openFileDialog1.ShowDialog();
-            if (result == DialogResult.OK)
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "File mẫu|Mau lay du lieu Sunweb.xlsx";
+            openFileDialog.FileName = "Mau lay du lieu Sunweb";
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                String inputPath = Path.GetFullPath(openFileDialog1.FileName);
+                String inputPath = Path.GetFullPath(openFileDialog.FileName);
                 var importExcel = new FileInfo(inputPath);
                 using (var package = new ExcelPackage(importExcel))
                 {
@@ -258,7 +258,85 @@ namespace CongNo
 
         private void Report_Click(object sender, EventArgs e)
         {
-            
+            //Tạo mẫu báo cáo
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.DefaultExt = "xlsx";
+                saveFileDialog.Filter = "Excel Workbook(*.xlsx)|*.xlsx";
+                saveFileDialog.FileName = "Doi chieu cong no";
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    var newFile = new FileInfo(saveFileDialog.FileName);
+
+                    if (newFile.Exists)
+                        newFile.Delete();
+
+                    using (var package = new ExcelPackage(newFile))
+                    {
+                        ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Doi chieu cong no");
+
+                        worksheet.Column(1).Width = GetTrueColumnWidth(12.14);
+                        worksheet.Column(2).Width = GetTrueColumnWidth(7.57);
+                        worksheet.Column(3).Width = GetTrueColumnWidth(6.86);
+                        worksheet.Column(4).Width = GetTrueColumnWidth(80.00);
+                        worksheet.Column(5).Width = GetTrueColumnWidth(15.00);
+                        worksheet.Column(6).Width = GetTrueColumnWidth(15.00);
+                        worksheet.Column(7).Width = GetTrueColumnWidth(15.00);
+                        worksheet.Column(8).Width = GetTrueColumnWidth(15.00);
+                        worksheet.Column(9).Width = GetTrueColumnWidth(10.00);
+
+                        for (int i = 10; i < 45; i++)
+                        {
+                            worksheet.Column(i).Width = GetTrueColumnWidth(20.00);
+                        }
+
+                        worksheet.Cells["A:AS"].Style.Font.Name = "Times New Roman ";
+                        worksheet.Cells["A:AS"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+
+                        //Cell ngày đối chiếu
+                        worksheet.Row(1).Height = 35.25;
+                        worksheet.Cells["E1"].Style.Font.Bold = true;
+                        worksheet.Cells["E1"].Style.Border.BorderAround(ExcelBorderStyle.Double);
+                        worksheet.Cells["E1"].Style.Numberformat.Format = "dd/MM/yyyy";
+                        worksheet.Cells["E1"].Value = DateTime.Today;
+                        worksheet.Cells["E1"].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        worksheet.Cells["E1"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(255, 192, 0));
+                        worksheet.Cells["E1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                        /*
+                        worksheet.Cells["F1"].Style.Font.Bold = true;
+                        worksheet.Cells["F1"].Style.Font.Color.SetColor(Color.FromArgb(149, 55, 53));
+                        
+
+                        worksheet.Cells["A:O"].Style.Font.Size = 8;
+                        worksheet.Cells["A:O"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        worksheet.Cells["A:O"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        worksheet.Cells["A:O"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                        worksheet.Cells["A:O"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+
+                        worksheet.Cells["A1"].Value = "LOAICT";
+                        worksheet.Cells["B1"].Value = "NGAYCT";
+                        worksheet.Cells["C1"].Value = "SOTIENQUYDOI";
+                        worksheet.Cells["D1"].Value = "NOCO";
+                        worksheet.Cells["E1"].Value = "SOTHAMCHIEU";
+                        worksheet.Cells["F1"].Value = "GNRL_DESCR_01";
+                        worksheet.Cells["G1"].Value = "GNRL_DESCR_02";
+                        worksheet.Cells["H1"].Value = "NGAYDAOHAN";
+                        worksheet.Cells["I1"].Value = "T2";
+                        worksheet.Cells["J1"].Value = "T3";
+                        worksheet.Cells["K1"].Value = "MASOTHUE";
+                        worksheet.Cells["L1"].Value = "KYHIEUHOADON";
+                        worksheet.Cells["M1"].Value = "SOHOADON";
+                        worksheet.Cells["N1"].Value = "NGAYHOADONGOC";
+                        worksheet.Cells["O1"].Value = "USERNHAP";
+                        */
+                        package.SaveAs(newFile);
+                        MessageBox.Show("Đã lập đối chiếu công nợ", "Chúc mừng", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+
+            }
         }
 
         private void Search_Click(object sender, EventArgs e)
@@ -517,24 +595,24 @@ namespace CongNo
                     using (var package = new ExcelPackage(newFile))
                     {
                         ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Du lieu Sunweb");
-                        worksheet.Cells["A1:O1"].Style.Font.Name = "Calibri";
+                        worksheet.Cells["A:O"].Style.Font.Name = "Calibri";
                         worksheet.Cells["A1:O1"].Style.Font.Bold = true;
 
-                        worksheet.Column(1).Width = 6;
-                        worksheet.Column(2).Width = 9;
-                        worksheet.Column(3).Width = 12;
-                        worksheet.Column(4).Width = 5;
-                        worksheet.Column(5).Width = 12;
-                        worksheet.Column(6).Width = 35;
-                        worksheet.Column(7).Width = 30;
-                        worksheet.Column(8).Width = 11;
-                        worksheet.Column(9).Width = 8;
-                        worksheet.Column(10).Width = 8.5;
-                        worksheet.Column(11).Width = 13;
-                        worksheet.Column(12).Width = 13;
-                        worksheet.Column(13).Width = 9;
-                        worksheet.Column(14).Width = 15;
-                        worksheet.Column(15).Width = 15.20;
+                        worksheet.Column(1).Width = GetTrueColumnWidth(6);
+                        worksheet.Column(2).Width = GetTrueColumnWidth(9);
+                        worksheet.Column(3).Width = GetTrueColumnWidth(12);
+                        worksheet.Column(4).Width = GetTrueColumnWidth(5);
+                        worksheet.Column(5).Width = GetTrueColumnWidth(12);
+                        worksheet.Column(6).Width = GetTrueColumnWidth(35);
+                        worksheet.Column(7).Width = GetTrueColumnWidth(30);
+                        worksheet.Column(8).Width = GetTrueColumnWidth(11);
+                        worksheet.Column(9).Width = GetTrueColumnWidth(8);
+                        worksheet.Column(10).Width = GetTrueColumnWidth(8.5);
+                        worksheet.Column(11).Width = GetTrueColumnWidth(13);
+                        worksheet.Column(12).Width = GetTrueColumnWidth(13);
+                        worksheet.Column(13).Width = GetTrueColumnWidth(9);
+                        worksheet.Column(14).Width = GetTrueColumnWidth(15);
+                        worksheet.Column(15).Width = GetTrueColumnWidth(15.20);
 
                         worksheet.Cells["A:O"].Style.Font.Size = 8;
                         worksheet.Cells["A:O"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
@@ -830,6 +908,42 @@ namespace CongNo
                         return;
                 }
             }
+        }
+
+        public static double GetTrueColumnWidth(double width)
+        {
+            //DEDUCE WHAT THE COLUMN WIDTH WOULD REALLY GET SET TO
+            double z = 1d;
+            if (width >= (1 + 2 / 3))
+            {
+                z = Math.Round((Math.Round(7 * (width - 1 / 256), 0) - 5) / 7, 2);
+            }
+            else
+            {
+                z = Math.Round((Math.Round(12 * (width - 1 / 256), 0) - Math.Round(5 * width, 0)) / 12, 2);
+            }
+
+            //HOW FAR OFF? (WILL BE LESS THAN 1)
+            double errorAmt = width - z;
+
+            //CALCULATE WHAT AMOUNT TO TACK ONTO THE ORIGINAL AMOUNT TO RESULT IN THE CLOSEST POSSIBLE SETTING 
+            double adj = 0d;
+            if (width >= (1 + 2 / 3))
+            {
+                adj = (Math.Round(7 * errorAmt - 7 / 256, 0)) / 7;
+            }
+            else
+            {
+                adj = ((Math.Round(12 * errorAmt - 12 / 256, 0)) / 12) + (2 / 12);
+            }
+
+            //RETURN A SCALED-VALUE THAT SHOULD RESULT IN THE NEAREST POSSIBLE VALUE TO THE TRUE DESIRED SETTING
+            if (z > 0)
+            {
+                return width + adj;
+            }
+
+            return 0d;
         }
     }
 }
