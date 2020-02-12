@@ -56,7 +56,12 @@ namespace CongNo
             {
                 modifyGroup.Visible = false;
             }
-            
+        }
+
+        public int DateToColumnTienVe(DateTime dateTime)
+        {
+            int month = dateTime.Month;
+            return month;
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -532,6 +537,10 @@ namespace CongNo
                         worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + maxRowExcel].Style.Border.Left.Style = ExcelBorderStyle.Thin;
                         worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + maxRowExcel].Style.Border.Right.Style = ExcelBorderStyle.Thin;
 
+                        Dictionary<String, int> invoices = new Dictionary<string, int>();
+                        String invoiceID = String.Empty;
+                        int invoiceRow = 0;
+
                         for (i = 1; i <= maxPhatSinh; i++)
                         {
                             currentRow = i + ROW_BEFORE_START_EXCEL;
@@ -567,11 +576,34 @@ namespace CongNo
                             String fCongPhatSinh = String.Format("=(SUBTOTAL(109,K{0}:V{0}))", currentRow);
                             worksheet.Cells["W" + currentRow].Formula = fCongPhatSinh;
 
+                            invoiceID = rs.Fields["ki_hieu_hoa_don"].Value + "+" + rs.Fields["so_hoa_don"].Value;
+                            invoiceRow = currentRow;
+
+                            if (!invoices.ContainsKey(invoiceID))
+                                invoices.Add(invoiceID, invoiceRow);
+
+                            worksheet.Cells["AT" + currentRow].Value = invoiceID;
+                            worksheet.Cells["AU" + currentRow].Value = invoices[invoiceID];
+
                             rs.MoveNext();
                         }
 
 
                         //Chạy số liệu tiền về
+                        rs = db.OpenRecordset("tra_tien");
+                        int maxTraTien = rs.RecordCount;
+                        String paidID = String.Empty;
+
+                        for (i = 1; i <= maxTraTien; i++)
+                        {
+                            paidID = rs.Fields["ki_hieu_hoa_don"].Value + "+" + rs.Fields["so_hoa_don"].Value;
+                            if (invoices.ContainsKey(paidID))
+                                worksheet.Cells["X" + invoices[paidID]].Value = rs.Fields["tong_thanh_toan"].Value;
+
+                            rs.MoveNext();
+                        }
+
+
 
                         worksheet.View.ZoomScale = 85;
                         package.SaveAs(newFile);
@@ -1194,6 +1226,9 @@ namespace CongNo
 
         private void NextYear_Click(object sender, EventArgs e)
         {
+            DateTime dateTime = DateTime.Parse("05/01/2020");
+            int a = DateToColumnTienVe(dateTime);
+            MessageBox.Show(a.ToString());
             MessageBox.Show("Chưa được đâu, ahihi");
         }
     }
