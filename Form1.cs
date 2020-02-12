@@ -44,7 +44,7 @@ namespace CongNo
             currentSoHoaDon.Clear();
             currentHanTra.Clear();
             currentSoTienNo.Clear();
-            currentNgayChungTu.Clear();
+            currentNgayPhatSinh.Clear();
             currentNgayHoaDon.Clear();
             currentNgayTra.Clear();
             currentSoTienTra.Clear();
@@ -79,7 +79,7 @@ namespace CongNo
             textBoxes[4] = afterSoTienTra;
 
             dateTimePickers[0] = afterHanTra;
-            dateTimePickers[1] = afterNgayChungTu;
+            dateTimePickers[1] = afterNgayPhatSinh;
             dateTimePickers[2] = afterNgayHoaDon;
             dateTimePickers[3] = afterNgayTra;
         }
@@ -157,6 +157,7 @@ namespace CongNo
                         db.Execute("invoice_filter");
                         db.Execute("update_invoice");
                         db.Execute("add_invoice");
+                        db.Execute("paid_filter");
                         db.Execute("update_paid");
                         db.Execute("add_paid");
                         db.Execute("update_revenue");
@@ -204,6 +205,7 @@ namespace CongNo
 
                         db.Execute("draft_clear");
                         db.Execute("invoice_draft_clear");
+                        db.Execute("paid_draft_clear");
                         dBEngine.CommitTrans();
                         rs.Close();
                         db.Close();
@@ -242,15 +244,8 @@ namespace CongNo
                         searchList.Columns["recNumber"].Visible = true;
                         break;
                     case "Phát sinh":
-                        searchList.Columns["mst"].Visible = true;
-                        searchList.Columns["ten_don_vi"].Visible = false;
-                        searchList.Columns["ma_hoa_don"].Visible = true;
-                        searchList.Columns["so_hoa_don"].Visible = true;
-                        searchList.Columns["so_tien"].Visible = true;
-                        searchList.Columns["recNumber"].Visible = true;
-                        break;
                     case "Thu nợ":
-                        searchList.Columns["mst"].Visible = false;
+                        searchList.Columns["mst"].Visible = true;
                         searchList.Columns["ten_don_vi"].Visible = false;
                         searchList.Columns["ma_hoa_don"].Visible = true;
                         searchList.Columns["so_hoa_don"].Visible = true;
@@ -576,18 +571,18 @@ namespace CongNo
                             String fCongPhatSinh = String.Format("=(SUBTOTAL(109,K{0}:V{0}))", currentRow);
                             worksheet.Cells["W" + currentRow].Formula = fCongPhatSinh;
 
-                            invoiceID = rs.Fields["ki_hieu_hoa_don"].Value + "+" + rs.Fields["so_hoa_don"].Value;
+
+                            //Lấy thông tin phát sinh để matching với thu nợ
+                            invoiceID = String.Format("{0};{1};{2};{3};{4};{5};{6}", rs.Fields["ten_phong"].Value, rs.Fields["cong_ty"].Value, 
+                                rs.Fields["ki_hieu_hoa_don"].Value, rs.Fields["so_hoa_don"].Value, rs.Fields["han_thanh_toan"].Value,
+                                rs.Fields["ma_nv"].Value, rs.Fields["ngay_hoa_don"].Value);
                             invoiceRow = currentRow;
 
                             if (!invoices.ContainsKey(invoiceID))
                                 invoices.Add(invoiceID, invoiceRow);
 
-                            worksheet.Cells["AT" + currentRow].Value = invoiceID;
-                            worksheet.Cells["AU" + currentRow].Value = invoices[invoiceID];
-
                             rs.MoveNext();
                         }
-
 
                         //Chạy số liệu tiền về
                         rs = db.OpenRecordset("tra_tien");
@@ -596,14 +591,27 @@ namespace CongNo
 
                         for (i = 1; i <= maxTraTien; i++)
                         {
-                            paidID = rs.Fields["ki_hieu_hoa_don"].Value + "+" + rs.Fields["so_hoa_don"].Value;
-                            if (invoices.ContainsKey(paidID))
-                                worksheet.Cells["X" + invoices[paidID]].Value = rs.Fields["tong_thanh_toan"].Value;
+                            paidID = String.Format("{0};{1};{2};{3};{4};{5};{6}", rs.Fields["ten_phong"].Value, rs.Fields["cong_ty"].Value,
+                                rs.Fields["ki_hieu_hoa_don"].Value, rs.Fields["so_hoa_don"].Value, rs.Fields["han_thanh_toan"].Value,
+                                rs.Fields["ma_nv"].Value, rs.Fields["ngay_hoa_don"].Value);
 
+                            if (invoices.ContainsKey(paidID))
+                            {
+                                worksheet.Cells["X" + invoices[paidID]].Value = rs.Fields["tongtra1"].Value;
+                                worksheet.Cells["Y" + invoices[paidID]].Value = rs.Fields["tongtra2"].Value;
+                                worksheet.Cells["Z" + invoices[paidID]].Value = rs.Fields["tongtra3"].Value;
+                                worksheet.Cells["AA" + invoices[paidID]].Value = rs.Fields["tongtra4"].Value;
+                                worksheet.Cells["AB" + invoices[paidID]].Value = rs.Fields["tongtra5"].Value;
+                                worksheet.Cells["AC" + invoices[paidID]].Value = rs.Fields["tongtra6"].Value;
+                                worksheet.Cells["AD" + invoices[paidID]].Value = rs.Fields["tongtra7"].Value;
+                                worksheet.Cells["AE" + invoices[paidID]].Value = rs.Fields["tongtra8"].Value;
+                                worksheet.Cells["AF" + invoices[paidID]].Value = rs.Fields["tongtra9"].Value;
+                                worksheet.Cells["AG" + invoices[paidID]].Value = rs.Fields["tongtra10"].Value;
+                                worksheet.Cells["AH" + invoices[paidID]].Value = rs.Fields["tongtra11"].Value;
+                                worksheet.Cells["AI" + invoices[paidID]].Value = rs.Fields["tongtra12"].Value;
+                            }
                             rs.MoveNext();
                         }
-
-
 
                         worksheet.View.ZoomScale = 85;
                         package.SaveAs(newFile);
@@ -698,59 +706,42 @@ namespace CongNo
                                 }
                                 break;
                             case "Số hóa đơn":
+                                searchValue = Convert.ToString(rs.Fields["so_hoa_don"].Value);
+                                matchSearchCondition = searchValue.Contains(searchWhat);
+                                if (matchSearchCondition)
+                                {
+                                    ten_don_vi = rs.Fields["mst"].Value;
+                                    mst = rs.Fields["mst"].Value;
+                                    ma_hoa_don = rs.Fields["ki_hieu_hoa_don"].Value;
+                                    so_hoa_don = rs.Fields["so_hoa_don"].Value;
+                                }
                                 if (rs.Name == "invoice")
                                 {
-                                    searchValue = Convert.ToString(rs.Fields["so_hoa_don"].Value);
-                                    matchSearchCondition = searchValue.Contains(searchWhat);
-                                    if (matchSearchCondition)
-                                    {
-                                        ten_don_vi = rs.Fields["mst"].Value;
-                                        mst = rs.Fields["mst"].Value;
-                                        ma_hoa_don = rs.Fields["ki_hieu_hoa_don"].Value;
-                                        so_hoa_don = rs.Fields["so_hoa_don"].Value;
-                                        so_tien = Convert.ToDouble(rs.Fields["so_tien_phat_sinh"].Value);
-                                    }
+                                    so_tien = Convert.ToDouble(rs.Fields["so_tien_phat_sinh"].Value);
                                 }
                                 else
                                 {
-                                    searchValue = Convert.ToString(rs.Fields["so_hoa_don"].Value);
-                                    matchSearchCondition = searchValue.Contains(searchWhat);
-                                    if (matchSearchCondition)
-                                    {
-                                        ma_hoa_don = rs.Fields["ki_hieu_hoa_don"].Value;
-                                        so_hoa_don = rs.Fields["so_hoa_don"].Value;
-                                        so_tien = Convert.ToDouble(rs.Fields["so_tien_thanh_toan"].Value);
-                                    }
+                                    so_tien = Convert.ToDouble(rs.Fields["so_tien_thanh_toan"].Value);
                                 }
                                 break;
                             case "Số tiền":
                                 if (rs.Name == "invoice")
-                                {
                                     searchDouble = Convert.ToDouble(rs.Fields["so_tien_phat_sinh"].Value);
-                                    matchSearchCondition = searchDouble == Convert.ToDouble(searchWhat);
-                                    if (matchSearchCondition)
-                                    {
-                                        mst = rs.Fields["mst"].Value;
-                                        ma_hoa_don = rs.Fields["ki_hieu_hoa_don"].Value;
-                                        so_hoa_don = rs.Fields["so_hoa_don"].Value;
-                                        so_tien = Convert.ToDouble(rs.Fields["so_tien_phat_sinh"].Value);
-                                    }
-                                }
                                 else
-                                {
                                     searchDouble = Convert.ToDouble(rs.Fields["so_tien_thanh_toan"].Value);
-                                    matchSearchCondition = searchDouble == Convert.ToDouble(searchWhat);
-                                    if (matchSearchCondition)
-                                    {
-                                        ma_hoa_don = rs.Fields["ki_hieu_hoa_don"].Value;
-                                        so_hoa_don = rs.Fields["so_hoa_don"].Value;
+                                
+                                matchSearchCondition = searchDouble == Convert.ToDouble(searchWhat);
+                                if (matchSearchCondition)
+                                {
+                                    mst = rs.Fields["mst"].Value;
+                                    ma_hoa_don = rs.Fields["ki_hieu_hoa_don"].Value;
+                                    so_hoa_don = rs.Fields["so_hoa_don"].Value;
+                                    if (rs.Name == "invoice")
+                                        so_tien = Convert.ToDouble(rs.Fields["so_tien_phat_sinh"].Value);
+                                    else
                                         so_tien = Convert.ToDouble(rs.Fields["so_tien_thanh_toan"].Value);
-                                    }
                                 }
                                 break;
-                            default:
-                                MessageBox.Show("Lỗi tìm kiếm", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                return;
                         }
 
                         rcNumber = i;
@@ -814,32 +805,36 @@ namespace CongNo
                         delete.Visible = true;
 
                         if (field == "Phát sinh")
-                        {
                             rs = db.OpenRecordset("invoice");
-                            if (!rs.BOF)
-                                rs.MoveFirst();
-                            rs.Move(recordNumber);
-                            currentMST.Text = rs.Fields["mst"].Value;
-                            dao.Recordset rsKhachHang = db.OpenRecordset("SELECT cong_ty FROM customers WHERE mst = '" + currentMST.Text + "'");
-                            if (rsKhachHang.RecordCount > 0)
-                                currentKhachHang.Text = rsKhachHang.Fields["cong_ty"].Value;
-                            currentMaHoaDon.Text = rs.Fields["ki_hieu_hoa_don"].Value;
-                            currentSoHoaDon.Text = rs.Fields["so_hoa_don"].Value;
-                            currentHanTra.Text = String.Format("{0:dd/MM/yyyy}", rs.Fields["han_thanh_toan"].Value);
-                            currentSoTienNo.Text = String.Format("{0:n0}", rs.Fields["so_tien_phat_sinh"].Value);
-                            currentNgayChungTu.Text = String.Format("{0:dd/MM/yyyy}", rs.Fields["ngay_ct"].Value);
-                            currentNgayHoaDon.Text = String.Format("{0:dd/MM/yyyy}", rs.Fields["ngay_hoa_don"].Value);
-                        }
                         else if (field == "Thu nợ")
-                        {
                             rs = db.OpenRecordset("paid");
-                            if (!rs.BOF)
-                                rs.MoveFirst();
-                            rs.Move(recordNumber);
-                            currentMaHoaDon.Text = rs.Fields["ki_hieu_hoa_don"].Value;
-                            currentSoHoaDon.Text = rs.Fields["so_hoa_don"].Value;
-                            currentNgayTra.Text = String.Format("{0:dd/MM/yyyy}", rs.Fields["ngay_thanh_toan"].Value);
+
+                        if (!rs.BOF)
+                            rs.MoveFirst();
+
+                        rs.Move(recordNumber);
+
+                        currentMST.Text = rs.Fields["mst"].Value;
+                        dao.Recordset rsKhachHang = db.OpenRecordset("SELECT cong_ty FROM customers WHERE mst = '" + currentMST.Text + "'");
+                        if (rsKhachHang.RecordCount > 0)
+                            currentKhachHang.Text = rsKhachHang.Fields["cong_ty"].Value;
+
+                        currentMaHoaDon.Text = rs.Fields["ki_hieu_hoa_don"].Value;
+                        currentSoHoaDon.Text = rs.Fields["so_hoa_don"].Value;
+                        currentHanTra.Text = String.Format("{0:dd/MM/yyyy}", rs.Fields["han_thanh_toan"].Value);
+                        
+                        currentNgayHoaDon.Text = String.Format("{0:dd/MM/yyyy}", rs.Fields["ngay_hoa_don"].Value);
+
+                        if (field == "Thu nợ")
+                        {
+                            currentNgayTra.Text = String.Format("{0:dd/MM/yyyy}", rs.Fields["ngay_ct"].Value);
                             currentSoTienTra.Text = String.Format("{0:n0}", rs.Fields["so_tien_thanh_toan"].Value);
+                            currentNgayTra.Text = String.Format("{0:dd/MM/yyyy}", rs.Fields["ngay_ct"].Value);
+                        }
+                        else if (field == "Phát sinh")
+                        {
+                            currentSoTienNo.Text = String.Format("{0:n0}", rs.Fields["so_tien_phat_sinh"].Value);
+                            currentNgayPhatSinh.Text = String.Format("{0:dd/MM/yyyy}", rs.Fields["ngay_ct"].Value);
                         }
                         break;
                 }
@@ -942,7 +937,7 @@ namespace CongNo
             afterSoHoaDon.Text = currentSoHoaDon.Text;
             afterHanTra.Text = currentHanTra.Text;
             afterSoTienNo.Text = currentSoTienNo.Text;
-            afterNgayChungTu.Text = currentNgayChungTu.Text;
+            afterNgayPhatSinh.Text = currentNgayPhatSinh.Text;
             afterNgayHoaDon.Text = currentNgayHoaDon.Text;
             afterNgayTra.Text = currentNgayTra.Text;
             afterSoTienTra.Text = currentSoTienTra.Text;
@@ -1059,30 +1054,29 @@ namespace CongNo
                         case "Số hóa đơn":
                         case "Số tiền":
                             if (field == "Phát sinh")
-                            {
                                 rs = db.OpenRecordset("invoice");
-                                if (!rs.BOF)
-                                    rs.MoveFirst();
-                                rs.Move(recordNumber);
-                                rs.Edit();
-                                rs.Fields["ki_hieu_hoa_don"].Value = afterMaHoaDon.Text;
-                                rs.Fields["so_hoa_don"].Value = afterSoHoaDon.Text;
-                                rs.Fields["han_thanh_toan"].Value = afterHanTra.Text;
+                            else if (field == "Thu nợ")
+                                rs = db.OpenRecordset("paid");
+
+                            if (!rs.BOF)
+                                rs.MoveFirst();
+
+                            rs.Move(recordNumber);
+                            rs.Edit();
+                            rs.Fields["ki_hieu_hoa_don"].Value = afterMaHoaDon.Text;
+                            rs.Fields["so_hoa_don"].Value = afterSoHoaDon.Text;
+                            rs.Fields["han_thanh_toan"].Value = afterHanTra.Text;
+                            rs.Fields["ngay_hoa_don"].Value = afterNgayHoaDon.Text;
+
+                            if (field == "Phát sinh")
+                            {
                                 rs.Fields["so_tien_phat_sinh"].Value = afterSoTienNo.Text;
-                                rs.Fields["ngay_ct"].Value = afterNgayChungTu.Text;
-                                rs.Fields["ngay_hoa_don"].Value = afterNgayHoaDon.Text;
+                                rs.Fields["ngay_ct"].Value = afterNgayPhatSinh.Text;
                             }
                             else if (field == "Thu nợ")
                             {
-                                rs = db.OpenRecordset("paid");
-                                if (!rs.BOF)
-                                    rs.MoveFirst();
-                                rs.Move(recordNumber);
-                                rs.Edit();
-                                rs.Fields["ki_hieu_hoa_don"].Value = afterMaHoaDon.Text;
-                                rs.Fields["so_hoa_don"].Value = afterSoHoaDon.Text;
-                                rs.Fields["ngay_thanh_toan"].Value = afterNgayTra.Text;
                                 rs.Fields["so_tien_thanh_toan"].Value = afterSoTienTra.Text;
+                                rs.Fields["ngay_ct"].Value = afterNgayTra.Text;
                             }
                             break;
                     }
@@ -1126,7 +1120,7 @@ namespace CongNo
             afterSoHoaDon.Clear();
             afterHanTra.ResetText();
             afterSoTienTra.Clear();
-            afterNgayChungTu.ResetText();
+            afterNgayPhatSinh.ResetText();
             afterNgayHoaDon.ResetText();
             afterNgayTra.ResetText();
             afterSoTienTra.Clear();
@@ -1159,19 +1153,19 @@ namespace CongNo
                         afterSoHoaDon.Enabled = true;
                         afterSoHoaDon.BackColor = SystemColors.Window;
 
+                        afterHanTra.Enabled = true;
+                        afterHanTra.BackColor = SystemColors.Window;
+
+                        afterNgayHoaDon.Enabled = true;
+                        afterNgayHoaDon.BackColor = SystemColors.Window;
+
                         if (field == "Phát sinh")
                         {
-                            afterHanTra.Enabled = true;
-                            afterHanTra.BackColor = SystemColors.Window;
+                            afterNgayPhatSinh.Enabled = true;
+                            afterNgayPhatSinh.BackColor = SystemColors.Window;
 
                             afterSoTienNo.Enabled = true;
                             afterSoTienNo.BackColor = SystemColors.Window;
-
-                            afterNgayChungTu.Enabled = true;
-                            afterNgayChungTu.BackColor = SystemColors.Window;
-
-                            afterNgayHoaDon.Enabled = true;
-                            afterNgayHoaDon.BackColor = SystemColors.Window;
                         }
                         else if (field == "Thu nợ")
                         {
