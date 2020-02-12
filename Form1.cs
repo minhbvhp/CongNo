@@ -508,10 +508,78 @@ namespace CongNo
                         worksheet.Cells["A6:AS8"].Style.WrapText = true;
                         worksheet.Cells["A6:AS8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
+
+                        //Pull dữ liệu phát sinh nợ từ Database vào bảng
+                        rs = db.OpenRecordset("cong_no");
+                        const byte ROW_BEFORE_START_EXCEL = 8;
+                        int maxPhatSinh = rs.RecordCount;
+                        int maxRowExcel = maxPhatSinh + ROW_BEFORE_START_EXCEL;
+                        int currentRow = 0;
+                        
+                        //Format dữ liệu (bao gồm cột tổng)
+                        worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":A" + maxRowExcel].Style.Numberformat.Format = "dd/MM/yyyy";
+                        worksheet.Cells["B" + ROW_BEFORE_START_EXCEL + ":B" + maxRowExcel].Style.Numberformat.Format = "@";
+                        worksheet.Cells["C" + ROW_BEFORE_START_EXCEL + ":C" + maxRowExcel].Style.Numberformat.Format = "#";
+                        worksheet.Cells["D" + ROW_BEFORE_START_EXCEL + ":D" + maxRowExcel].Style.Numberformat.Format = "@";
+                        worksheet.Cells["E" + ROW_BEFORE_START_EXCEL + ":F" + maxRowExcel].Style.Numberformat.Format = "@";
+                        worksheet.Cells["G" + ROW_BEFORE_START_EXCEL + ":G" + maxRowExcel].Style.Numberformat.Format = "dd/MM/yyyy";
+                        worksheet.Cells["H" + ROW_BEFORE_START_EXCEL + ":H" + maxRowExcel].Style.Numberformat.Format = "@";
+                        worksheet.Cells["I" + ROW_BEFORE_START_EXCEL + ":I" + maxRowExcel].Style.Numberformat.Format = "#";
+                        worksheet.Cells["J" + ROW_BEFORE_START_EXCEL + ":AS" + maxRowExcel].Style.Numberformat.Format = "_(* #,##0_);_(* (#,##0);_(* \" - \"_);_(@_)";
+
+                        worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + maxRowExcel].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + maxRowExcel].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                        worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + maxRowExcel].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + maxRowExcel].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+
+                        for (i = 1; i <= maxPhatSinh; i++)
+                        {
+                            currentRow = i + ROW_BEFORE_START_EXCEL;
+                            worksheet.Cells["A" + currentRow].Value = rs.Fields["ngay_hoa_don"].Value;
+                            worksheet.Cells["B" + currentRow].Value = rs.Fields["ten_phong"].Value;
+
+                            String fSTT = String.Format("=(SUBTOTAL(3,$D${0}:D{1}))", ROW_BEFORE_START_EXCEL, currentRow);
+                            worksheet.Cells["C" + currentRow].Formula = fSTT;
+
+                            worksheet.Cells["D" + currentRow].Value = rs.Fields["cong_ty"].Value;
+                            worksheet.Cells["E" + currentRow].Value = rs.Fields["ki_hieu_hoa_don"].Value;
+                            worksheet.Cells["F" + currentRow].Value = rs.Fields["so_hoa_don"].Value;
+                            worksheet.Cells["G" + currentRow].Value = rs.Fields["han_thanh_toan"].Value;
+                            worksheet.Cells["H" + currentRow].Value = rs.Fields["ma_nv"].Value;
+
+                            String fNgayQuaHan = String.Format("=IF(AND(AK{0} > 0, $E$1 > G{0}), $E$1 - G{0}, 0)", currentRow);
+                            worksheet.Cells["I" + currentRow].Formula = fNgayQuaHan;
+
+                            worksheet.Cells["J" + currentRow].Value = rs.Fields["tong_dau_ky"].Value;
+                            worksheet.Cells["K" + currentRow].Value = rs.Fields["tongno1"].Value;
+                            worksheet.Cells["L" + currentRow].Value = rs.Fields["tongno2"].Value;
+                            worksheet.Cells["M" + currentRow].Value = rs.Fields["tongno3"].Value;
+                            worksheet.Cells["N" + currentRow].Value = rs.Fields["tongno4"].Value;
+                            worksheet.Cells["O" + currentRow].Value = rs.Fields["tongno5"].Value;
+                            worksheet.Cells["P" + currentRow].Value = rs.Fields["tongno6"].Value;
+                            worksheet.Cells["Q" + currentRow].Value = rs.Fields["tongno7"].Value;
+                            worksheet.Cells["R" + currentRow].Value = rs.Fields["tongno8"].Value;
+                            worksheet.Cells["S" + currentRow].Value = rs.Fields["tongno9"].Value;
+                            worksheet.Cells["T" + currentRow].Value = rs.Fields["tongno10"].Value;
+                            worksheet.Cells["U" + currentRow].Value = rs.Fields["tongno11"].Value;
+                            worksheet.Cells["V" + currentRow].Value = rs.Fields["tongno12"].Value;
+
+                            String fCongPhatSinh = String.Format("=(SUBTOTAL(109,K{0}:V{0}))", currentRow);
+                            worksheet.Cells["W" + currentRow].Formula = fCongPhatSinh;
+
+                            rs.MoveNext();
+                        }
+
+
+                        //Chạy số liệu tiền về
+
                         worksheet.View.ZoomScale = 85;
                         package.SaveAs(newFile);
+
                         MessageBox.Show("Đã lập đối chiếu công nợ", "Chúc mừng", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
+                    rs.Close();
+                    db.Close();
                 }
 
             }
