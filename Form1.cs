@@ -14,9 +14,10 @@ using OfficeOpenXml.Style;
 
 namespace CongNo
 {
+    
     public partial class Form1 : Form
     {
-        public String DbYear = "2020";
+        
         public TextBox[] textBoxes = new TextBox[5];
         public DateTimePicker[] dateTimePickers = new DateTimePicker[4];
 
@@ -66,7 +67,7 @@ namespace CongNo
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            String DBFileName = DbYear + ".mdb";
+            String DBFileName = Program.DbYear + ".mdb";
             FileInfo fileInfo = new FileInfo(Environment.CurrentDirectory + @"\Database\" + DBFileName);
             
             if (!fileInfo.Exists)
@@ -103,7 +104,7 @@ namespace CongNo
                     "Month(invoice.ngay_ct)=12,invoice.so_tien_phat_sinh) AS no12 FROM department " +
                     "INNER JOIN((revenue INNER JOIN invoice ON (revenue.ki_hieu_hoa_don = invoice.ki_hieu_hoa_don)" +
                     " AND(revenue.so_hoa_don = invoice.so_hoa_don)) INNER JOIN customers ON invoice.mst = customers.mst)" +
-                    " ON department.ma_phong = revenue.ma_phong ORDER BY invoice.ki_hieu_hoa_don, invoice.so_hoa_don;", DbYear);
+                    " ON department.ma_phong = revenue.ma_phong ORDER BY invoice.ki_hieu_hoa_don, invoice.so_hoa_don;", Program.DbYear);
 
                 DAO.QueryDef cong_no_draft = new DAO.QueryDef();
                 cong_no_draft.Name = queryName;
@@ -158,7 +159,7 @@ namespace CongNo
                     //Tạo connection
                     int row;
 
-                    String db_name = DbYear;
+                    String db_name = Program.DbYear;
                     String db_path = Environment.CurrentDirectory + @"\Database\";
                     String db_file = db_path + db_name;
 
@@ -257,7 +258,7 @@ namespace CongNo
                         db.Close();
 
                         String compactDbTemp = db_path + "temp.mdb";
-                        String compactDbName = db_path + DbYear;
+                        String compactDbName = db_path + Program.DbYear;
                         dBEngine.CompactDatabase(db_file, compactDbTemp);
                         File.Delete(db_file);
                         File.Move(compactDbTemp, compactDbName);
@@ -318,7 +319,7 @@ namespace CongNo
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
                         int i;
-                        String db_name = DbYear;
+                        String db_name = Program.DbYear;
                         String db_path = Environment.CurrentDirectory + @"\Database\";
                         String db_file = db_path + db_name;
 
@@ -781,7 +782,7 @@ namespace CongNo
             CurrentInfoRefresh(RefreshOption.All);
             String searchWhat = tbSearch.Text.Trim();
 
-            String db_name = DbYear;
+            String db_name = Program.DbYear;
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
@@ -914,7 +915,7 @@ namespace CongNo
         {
             CurrentInfoRefresh(RefreshOption.InfoOnly);
 
-            String db_name = DbYear;
+            String db_name = Program.DbYear;
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
@@ -1094,7 +1095,7 @@ namespace CongNo
 
         private void Delete_Click(object sender, EventArgs e)
         {
-            String db_name = DbYear;
+            String db_name = Program.DbYear;
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
@@ -1174,7 +1175,7 @@ namespace CongNo
             }
             else
             {
-                String db_name = DbYear;
+                String db_name = Program.DbYear;
                 String db_path = Environment.CurrentDirectory + @"\Database\";
                 String db_file = db_path + db_name;
 

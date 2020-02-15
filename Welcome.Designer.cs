@@ -29,53 +29,77 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Welcome));
-            this.namNghiepVu = new System.Windows.Forms.DateTimePicker();
             this.start = new System.Windows.Forms.Button();
+            this.numericNam = new System.Windows.Forms.NumericUpDown();
+            this.comboNam = new System.Windows.Forms.ComboBox();
+            ((System.ComponentModel.ISupportInitialize)(this.numericNam)).BeginInit();
             this.SuspendLayout();
-            // 
-            // namNghiepVu
-            // 
-            this.namNghiepVu.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.namNghiepVu.CalendarFont = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.namNghiepVu.CustomFormat = "yyyy";
-            this.namNghiepVu.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.namNghiepVu.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.namNghiepVu.Location = new System.Drawing.Point(47, 36);
-            this.namNghiepVu.Name = "namNghiepVu";
-            this.namNghiepVu.Size = new System.Drawing.Size(200, 26);
-            this.namNghiepVu.TabIndex = 0;
-            this.namNghiepVu.Value = new System.DateTime(2020, 1, 1, 0, 0, 0, 0);
             // 
             // start
             // 
-            this.start.Location = new System.Drawing.Point(104, 70);
+            this.start.Location = new System.Drawing.Point(46, 70);
             this.start.Name = "start";
-            this.start.Size = new System.Drawing.Size(79, 37);
+            this.start.Size = new System.Drawing.Size(81, 37);
             this.start.TabIndex = 1;
             this.start.Text = "Bắt đầu";
             this.start.UseVisualStyleBackColor = true;
             this.start.Click += new System.EventHandler(this.Start_Click);
             // 
+            // numericNam
+            // 
+            this.numericNam.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.numericNam.Location = new System.Drawing.Point(46, 30);
+            this.numericNam.Maximum = new decimal(new int[] {
+            2050,
+            0,
+            0,
+            0});
+            this.numericNam.Minimum = new decimal(new int[] {
+            2019,
+            0,
+            0,
+            0});
+            this.numericNam.Name = "numericNam";
+            this.numericNam.Size = new System.Drawing.Size(81, 22);
+            this.numericNam.TabIndex = 2;
+            this.numericNam.TabStop = false;
+            this.numericNam.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numericNam.Value = new decimal(new int[] {
+            2019,
+            0,
+            0,
+            0});
+            // 
+            // comboNam
+            // 
+            this.comboNam.FormattingEnabled = true;
+            this.comboNam.Location = new System.Drawing.Point(46, 30);
+            this.comboNam.Name = "comboNam";
+            this.comboNam.Size = new System.Drawing.Size(81, 21);
+            this.comboNam.TabIndex = 3;
+            // 
             // Welcome
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(279, 119);
+            this.ClientSize = new System.Drawing.Size(172, 119);
+            this.Controls.Add(this.comboNam);
+            this.Controls.Add(this.numericNam);
             this.Controls.Add(this.start);
-            this.Controls.Add(this.namNghiepVu);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "Welcome";
             this.Text = "Đối chiếu công nợ";
+            this.Load += new System.EventHandler(this.Welcome_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.numericNam)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private System.Windows.Forms.DateTimePicker namNghiepVu;
         private System.Windows.Forms.Button start;
+        private System.Windows.Forms.NumericUpDown numericNam;
+        private System.Windows.Forms.ComboBox comboNam;
     }
 }
