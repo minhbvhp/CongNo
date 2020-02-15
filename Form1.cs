@@ -16,6 +16,7 @@ namespace CongNo
 {
     public partial class Form1 : Form
     {
+        public String DbYear = "2020";
         public TextBox[] textBoxes = new TextBox[5];
         public DateTimePicker[] dateTimePickers = new DateTimePicker[4];
 
@@ -65,6 +66,53 @@ namespace CongNo
         }
         private void Form1_Load(object sender, EventArgs e)
         {
+            String DBFileName = DbYear + ".mdb";
+            FileInfo fileInfo = new FileInfo(Environment.CurrentDirectory + @"\Database\" + DBFileName);
+            
+            if (!fileInfo.Exists)
+            {
+                Directory.CreateDirectory(Environment.CurrentDirectory + @"\Database");
+                using (Stream s = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("CongNo.DB.mdb"))
+                {
+                    using (FileStream ResourceFile = new FileStream(fileInfo.ToString(), FileMode.Create, FileAccess.Write))
+                    {
+                        s.CopyTo(ResourceFile);
+                    }
+                }
+
+                String db_file = fileInfo.ToString();
+
+                dao.DBEngine dBEngine = new dao.DBEngine();
+                dao.Database db;
+                db = dBEngine.OpenDatabase(db_file);
+                String queryName = "cong_no_draft";
+                String querySql = String.Format("SELECT invoice.ngay_ct, invoice.ngay_hoa_don, department.ten_phong, customers.cong_ty," +
+                    "invoice.ki_hieu_hoa_don, invoice.so_hoa_don, invoice.han_thanh_toan, revenue.ma_nv," +
+                    "IIf(Year(invoice.ngay_ct)<{0},invoice.so_tien_phat_sinh) AS du_dau_ky, IIf(Year(invoice.ngay_ct)={0} " +
+                    "And Month(invoice.ngay_ct)=1,invoice.so_tien_phat_sinh) AS no1, IIf(Year(invoice.ngay_ct)={0} And " +
+                    "Month(invoice.ngay_ct)=2,invoice.so_tien_phat_sinh) AS no2, IIf(Year(invoice.ngay_ct)={0} And " +
+                    "Month(invoice.ngay_ct)=3,invoice.so_tien_phat_sinh) AS no3, IIf(Year(invoice.ngay_ct)={0} And " +
+                    "Month(invoice.ngay_ct)=4,invoice.so_tien_phat_sinh) AS no4, IIf(Year(invoice.ngay_ct)={0} And " +
+                    "Month(invoice.ngay_ct)=5,invoice.so_tien_phat_sinh) AS no5, IIf(Year(invoice.ngay_ct)={0} And " +
+                    "Month(invoice.ngay_ct)=6,invoice.so_tien_phat_sinh) AS no6, IIf(Year(invoice.ngay_ct)={0} And " +
+                    "Month(invoice.ngay_ct)=7,invoice.so_tien_phat_sinh) AS no7, IIf(Year(invoice.ngay_ct)={0} And " +
+                    "Month(invoice.ngay_ct)=8,invoice.so_tien_phat_sinh) AS no8, IIf(Year(invoice.ngay_ct)={0} And " +
+                    "Month(invoice.ngay_ct)=9,invoice.so_tien_phat_sinh) AS no9, IIf(Year(invoice.ngay_ct)={0} And " +
+                    "Month(invoice.ngay_ct)=10,invoice.so_tien_phat_sinh) AS no10, IIf(Year(invoice.ngay_ct)={0} And " +
+                    "Month(invoice.ngay_ct)=11,invoice.so_tien_phat_sinh) AS no11, IIf(Year(invoice.ngay_ct)={0} And " +
+                    "Month(invoice.ngay_ct)=12,invoice.so_tien_phat_sinh) AS no12 FROM department " +
+                    "INNER JOIN((revenue INNER JOIN invoice ON (revenue.ki_hieu_hoa_don = invoice.ki_hieu_hoa_don)" +
+                    " AND(revenue.so_hoa_don = invoice.so_hoa_don)) INNER JOIN customers ON invoice.mst = customers.mst)" +
+                    " ON department.ma_phong = revenue.ma_phong ORDER BY invoice.ki_hieu_hoa_don, invoice.so_hoa_don;", DbYear);
+
+                dao.QueryDef cong_no_draft = new dao.QueryDef();
+                cong_no_draft.Name = queryName;
+                cong_no_draft.SQL = querySql;
+
+                db.QueryDefs.Append(cong_no_draft);
+                db.Close();
+            }
+
             searchBy["Khách hàng"] = new string[] { "Mã số thuế", "Tên đơn vị" };
             searchBy["Phát sinh"] = new string[] { "Số hóa đơn", "Số tiền" };
             searchBy["Thu nợ"] = new string[] { "Số hóa đơn", "Số tiền" };
@@ -95,7 +143,7 @@ namespace CongNo
 
             //Đọc file Sunweb
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "File mẫu|Mau lay du lieu Sunweb.xlsx";
+            openFileDialog.Filter = "File mẫu|*.xlsx";
             openFileDialog.FileName = "Mau lay du lieu Sunweb";
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
@@ -110,7 +158,7 @@ namespace CongNo
                     //Tạo connection
                     int row;
 
-                    String db_name = "2019.mdb";
+                    String db_name = DbYear;
                     String db_path = Environment.CurrentDirectory + @"\Database\";
                     String db_file = db_path + db_name;
 
@@ -126,7 +174,7 @@ namespace CongNo
                         rs = db.OpenRecordset("draft");
                         dBEngine.BeginTrans();
 
-                        for (row = 2; row < lastRow; row++)
+                        for (row = 2; row <= lastRow; row++)
                         {
                             rs.AddNew();
                             rs.Fields["dong"].Value = row;
@@ -147,7 +195,7 @@ namespace CongNo
                             rs.Fields["user"].Value = NullToString(worksheet.Cells["O" + row].Value);
                             rs.Update();
 
-                            uploadProgress.Value = row * 100 / lastRow;
+                            uploadProgress.Value = (row - 1) * 100 / lastRow;
                             uploadProgress.Refresh();
                             Application.DoEvents();
                         }
@@ -165,8 +213,6 @@ namespace CongNo
 
                         uploadProgress.Value += 1;
                         uploadProgress.Refresh();
-
-                        MessageBox.Show("Đã upload dữ liệu xong.", "Chúc mừng", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         //Liệt kê dữ liệu chưa được Upload
                         rs = db.OpenRecordset("not_upload");
@@ -211,14 +257,17 @@ namespace CongNo
                         db.Close();
 
                         String compactDbTemp = db_path + "temp.mdb";
-                        String compactDbName = db_path + "2019.mdb";
+                        String compactDbName = db_path + DbYear;
                         dBEngine.CompactDatabase(db_file, compactDbTemp);
                         File.Delete(db_file);
                         File.Move(compactDbTemp, compactDbName);
+
+                        MessageBox.Show("Đã upload dữ liệu xong.", "Chúc mừng", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Database error: " + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Không ghi được dữ liệu.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        dBEngine.Rollback();
                     }
                 }
             }
@@ -258,370 +307,470 @@ namespace CongNo
 
         private void Report_Click(object sender, EventArgs e)
         {
-            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            try
             {
-                saveFileDialog.DefaultExt = "xlsx";
-                saveFileDialog.Filter = "Excel Workbook(*.xlsx)|*.xlsx";
-                saveFileDialog.FileName = "Doi chieu cong no";
-
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                using (SaveFileDialog saveFileDialog = new SaveFileDialog())
                 {
-                    int i;
-                    String db_name = "2019.mdb";
-                    String db_path = Environment.CurrentDirectory + @"\Database\";
-                    String db_file = db_path + db_name;
+                    saveFileDialog.DefaultExt = "xlsx";
+                    saveFileDialog.Filter = "Excel Workbook(*.xlsx)|*.xlsx";
+                    saveFileDialog.FileName = "Doi chieu cong no";
 
-                    dao.DBEngine dBEngine = new dao.DBEngine();
-                    dao.Database db;
-                    dao.Recordset rs;
-
-                    db = dBEngine.OpenDatabase(db_file);
-
-                    //Lấy list các phòng
-                    List<String> departments = new List<string>();
-                    rs = db.OpenRecordset("department");
-                    if (!rs.BOF)
-                        rs.MoveFirst();
-                    for (i = 1; i <= rs.RecordCount; i++)
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        departments.Add(rs.Fields["ten_phong"].Value);
-                        rs.MoveNext();
-                    }
+                        int i;
+                        String db_name = DbYear;
+                        String db_path = Environment.CurrentDirectory + @"\Database\";
+                        String db_file = db_path + db_name;
 
-                    //Tạo mẫu báo cáo
-                    var newFile = new FileInfo(saveFileDialog.FileName);
+                        dao.DBEngine dBEngine = new dao.DBEngine();
+                        dao.Database db;
+                        dao.Recordset rs;
 
-                    if (newFile.Exists)
-                        newFile.Delete();
+                        db = dBEngine.OpenDatabase(db_file);
 
-                    using (var package = new ExcelPackage(newFile))
-                    {
-                        //Sheet danh sách phòng
-                        ExcelWorksheet departmentWorksheet = package.Workbook.Worksheets.Add("List Phong");
-                        departmentWorksheet.Cells["A1"].Value = "TT";
-                        departmentWorksheet.Cells["B1"].Value = "TÀU THỦY";
-
-                        departmentWorksheet.Cells["A2"].Value = "CKT";
-                        departmentWorksheet.Cells["B2"].Value = "CHÁY KỸ THUẬT";
-
-                        departmentWorksheet.Cells["A3"].Value = "HH";
-                        departmentWorksheet.Cells["B3"].Value = "HÀNG HÓA";
-
-                        departmentWorksheet.Cells["A4"].Value = "CN";
-                        departmentWorksheet.Cells["B4"].Value = "CON NGƯỜI";
-
-                        departmentWorksheet.Cells["A5"].Value = "XCG";
-                        departmentWorksheet.Cells["B5"].Value = "XE CƠ GIỚI";
-
-                        departmentWorksheet.Cells["A6"].Value = "BH1";
-                        departmentWorksheet.Cells["B6"].Value = "SỐ 1";
-
-                        departmentWorksheet.Cells["A7"].Value = "BH2";
-                        departmentWorksheet.Cells["B7"].Value = "SỐ 2";
-
-                        departmentWorksheet.Cells["A8"].Value = "BH3";
-                        departmentWorksheet.Cells["B8"].Value = "SỐ 3";
-
-                        departmentWorksheet.Cells["A9"].Value = "BH4";
-                        departmentWorksheet.Cells["B9"].Value = "SỐ 4";
-
-                        departmentWorksheet.Cells["A10"].Value = "BH5";
-                        departmentWorksheet.Cells["B10"].Value = "SỐ 5";
-
-                        departmentWorksheet.Cells["A11"].Value = "BH6";
-                        departmentWorksheet.Cells["B11"].Value = "SỐ 6";
-
-                        departmentWorksheet.Cells["A12"].Value = "BH8";
-                        departmentWorksheet.Cells["B12"].Value = "SỐ 8";
-
-                        departmentWorksheet.Hidden = eWorkSheetHidden.VeryHidden;
-
-                        //Sheet đối chiếu công nợ
-                        ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Doi chieu cong no");
-
-                        worksheet.Column(1).Width = GetTrueColumnWidth(12.14);
-                        worksheet.Column(2).Width = GetTrueColumnWidth(7.57);
-                        worksheet.Column(3).Width = GetTrueColumnWidth(6.86);
-                        worksheet.Column(4).Width = GetTrueColumnWidth(80.00);
-                        worksheet.Column(5).Width = GetTrueColumnWidth(15.00);
-                        worksheet.Column(6).Width = GetTrueColumnWidth(15.00);
-                        worksheet.Column(7).Width = GetTrueColumnWidth(15.00);
-                        worksheet.Column(8).Width = GetTrueColumnWidth(15.00);
-                        worksheet.Column(9).Width = GetTrueColumnWidth(10.00);
-
-                        for (i = 10; i <= 45; i++)
+                        //Lấy list các phòng
+                        List<String> departments = new List<string>();
+                        rs = db.OpenRecordset("department");
+                        if (!rs.BOF)
+                            rs.MoveFirst();
+                        for (i = 1; i <= rs.RecordCount; i++)
                         {
-                            worksheet.Column(i).Width = GetTrueColumnWidth(20.00);
-                        }
-
-                        worksheet.Cells["A:AS"].Style.Font.Name = "Times New Roman ";
-                        worksheet.Cells["A:AS"].Style.Font.Size = 11;
-                        worksheet.Cells["A:AS"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                        worksheet.Row(1).Height = 35.25;
-                        worksheet.Row(2).Height = 9.75;
-                        worksheet.Row(3).Height = 35.25;
-                        worksheet.Row(4).Height = 35.25;
-                        worksheet.Row(5).Height = 25.5;
-                        worksheet.Row(6).Height = 35.25;
-                        worksheet.Row(7).Height = 38.25;
-                        worksheet.Row(8).Height = 15.75;
-
-                        //Cell ngày đối chiếu
-                        worksheet.Cells["E1"].Style.Font.Bold = true;
-                        worksheet.Cells["E1"].Style.Font.Size = 12;
-                        worksheet.Cells["E1"].Style.Border.BorderAround(ExcelBorderStyle.Double);
-                        worksheet.Cells["E1"].Style.Numberformat.Format = "dd/MM/yyyy";
-                        worksheet.Cells["E1"].Value = DateTime.Today;
-                        worksheet.Cells["E1"].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                        worksheet.Cells["E1"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(255, 192, 0));
-                        worksheet.Cells["E1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-
-                        //Cell tên phòng
-                        worksheet.Cells["F1"].Style.Font.Bold = true;
-                        worksheet.Cells["F1"].Style.Font.Size = 14;
-                        worksheet.Cells["F1"].Style.Border.BorderAround(ExcelBorderStyle.Double);
-                        worksheet.Cells["F1"].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                        worksheet.Cells["F1"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(250, 192, 144));
-                        worksheet.Cells["F1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                        var val = worksheet.Cells["F1"].DataValidation.AddListDataValidation();
-                        foreach (String department in departments)
-                            val.Formula.Values.Add(department);
-                        worksheet.Cells["F1"].Value = "TT";
-
-                        //Cell Phòng
-                        worksheet.Cells["D3"].Formula = @"= ""PHÒNG "" & VLOOKUP(F1,'List Phong'!A1:B12,2,FALSE)";
-                        worksheet.Cells["D3"].Style.Font.Bold = true;
-                        worksheet.Cells["D3"].Style.Font.Size = 12;
-
-                        //Cell Title
-                        worksheet.Cells["C4"].Value = "BẢNG ĐỐI CHIẾU NỢ PHẢI THU CHI TIẾT THEO TỪNG KHÁCH HÀNG";
-                        worksheet.Cells["C4:AS4"].Merge = true;
-                        worksheet.Cells["C4:AS4"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                        worksheet.Cells["C4:AS4"].Style.Font.Bold = true;
-                        worksheet.Cells["C4:AS4"].Style.Font.Size = 14;
-
-                        worksheet.Cells["C5"].Formula = @"= ""Tháng "" & MONTH(E1) & "" năm "" & YEAR(E1)";
-                        worksheet.Cells["C5:AS5"].Merge = true;
-                        worksheet.Cells["C5:AS5"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                        worksheet.Cells["C5:AS5"].Style.Font.Bold = true;
-                        worksheet.Cells["C5:AS5"].Style.Font.Size = 14;
-
-                        //Tạo đề mục các bảng
-                        worksheet.Cells["A6:AS8"].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                        worksheet.Cells["A6:B8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(255, 255, 0));
-                        worksheet.Cells["C6:D8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(221, 217, 195));
-                        worksheet.Cells["E6:H8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(204, 192, 218));
-                        worksheet.Cells["I6:J8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(221, 217, 195));
-                        worksheet.Cells["K6:W8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(230, 185, 184));
-                        worksheet.Cells["X6:AJ8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(197, 217, 241));
-                        worksheet.Cells["AK6:AS8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(221, 217, 195));
-
-                        worksheet.Cells["A6:A7"].Merge = true;
-                        worksheet.Cells["A6:A7"].Value = "Ngày hóa đơn";
-                        
-                        worksheet.Cells["B6:B7"].Merge = true;
-                        worksheet.Cells["B6:B7"].Value = "Phòng";
-
-                        worksheet.Cells["C6:C7"].Merge = true;
-                        worksheet.Cells["C6:C7"].Value = "STT";
-
-                        worksheet.Cells["D6:D7"].Merge = true;
-                        worksheet.Cells["D6:D7"].Value = "Tên đơn vị";
-
-                        worksheet.Cells["E6:H6"].Merge = true;
-                        worksheet.Cells["E6:H6"].Value = "Thông tin";
-                        worksheet.Cells["E7"].Value = "Mã hóa đơn";
-                        worksheet.Cells["F7"].Value = "Hóa đơn";
-                        worksheet.Cells["G7"].Value = "Hạn thanh toán";
-                        worksheet.Cells["H7"].Value = "Nghiệp vụ";
-
-                        worksheet.Cells["I6:I7"].Merge = true;
-                        worksheet.Cells["I6:I7"].Value = "Số ngày quá hạn";
-
-                        worksheet.Cells["J6:J7"].Merge = true;
-                        worksheet.Cells["J6:J7"].Value = "Dư đầu kỳ";
-
-                        worksheet.Cells["K6:W6"].Merge = true;
-                        worksheet.Cells["K6:W6"].Value = "Phát sinh tháng nợ";
-                        worksheet.Cells["K7"].Value = "Tháng 01";
-                        worksheet.Cells["L7"].Value = "Tháng 02";
-                        worksheet.Cells["M7"].Value = "Tháng 03";
-                        worksheet.Cells["N7"].Value = "Tháng 04";
-                        worksheet.Cells["O7"].Value = "Tháng 05";
-                        worksheet.Cells["P7"].Value = "Tháng 06";
-                        worksheet.Cells["Q7"].Value = "Tháng 07";
-                        worksheet.Cells["R7"].Value = "Tháng 08";
-                        worksheet.Cells["S7"].Value = "Tháng 09";
-                        worksheet.Cells["T7"].Value = "Tháng 10";
-                        worksheet.Cells["U7"].Value = "Tháng 11";
-                        worksheet.Cells["V7"].Value = "Tháng 12";
-                        worksheet.Cells["W7"].Value = "Cộng phát sinh";
-
-                        worksheet.Cells["X6:AJ6"].Merge = true;
-                        worksheet.Cells["X6:AJ6"].Value = "Theo dõi thu nợ";
-                        worksheet.Cells["X7"].Value = "Tháng 01";
-                        worksheet.Cells["Y7"].Value = "Tháng 02";
-                        worksheet.Cells["Z7"].Value = "Tháng 03";
-                        worksheet.Cells["AA7"].Value = "Tháng 04";
-                        worksheet.Cells["AB7"].Value = "Tháng 05";
-                        worksheet.Cells["AC7"].Value = "Tháng 06";
-                        worksheet.Cells["AD7"].Value = "Tháng 07";
-                        worksheet.Cells["AE7"].Value = "Tháng 08";
-                        worksheet.Cells["AF7"].Value = "Tháng 09";
-                        worksheet.Cells["AG7"].Value = "Tháng 10";
-                        worksheet.Cells["AH7"].Value = "Tháng 11";
-                        worksheet.Cells["AI7"].Value = "Tháng 12";
-                        worksheet.Cells["AJ7"].Value = "Cộng thanh toán";
-
-                        worksheet.Cells["AK6:AK7"].Merge = true;
-                        worksheet.Cells["AK6:AK7"].Value = "Cuối kì";
-
-                        worksheet.Cells["AL6:AL7"].Merge = true;
-                        worksheet.Cells["AL6:AL7"].Value = "Trong hạn thanh toán";
-
-                        worksheet.Cells["AM6:AM7"].Merge = true;
-                        worksheet.Cells["AM6:AM7"].Value = "Quá hạn thanh toán dưới 1 tháng";
-
-                        worksheet.Cells["AN6:AN7"].Merge = true;
-                        worksheet.Cells["AN6:AN7"].Value = "Quá hạn thanh toán dưới 3 tháng";
-
-                        worksheet.Cells["AO6:AO7"].Merge = true;
-                        worksheet.Cells["AO6:AO7"].Value = "Quá hạn thanh toán từ 3 - 6 tháng";
-
-                        worksheet.Cells["AP6:AP7"].Merge = true;
-                        worksheet.Cells["AP6:AP7"].Value = "Quá hạn thanh toán từ 6 tháng - dưới 1 năm";
-
-                        worksheet.Cells["AQ6:AQ7"].Merge = true;
-                        worksheet.Cells["AQ6:AQ7"].Value = "Quá hạn thanh toán từ 1 - 2 năm";
-
-                        worksheet.Cells["AR6:AR7"].Merge = true;
-                        worksheet.Cells["AR6:AR7"].Value = "Quá hạn thanh toán từ 2 - 3 năm";
-
-                        worksheet.Cells["AS6:AS7"].Merge = true;
-                        worksheet.Cells["AS6:AS7"].Value = "Quá hạn thanh toán trên 3 năm";
-
-                        worksheet.Cells["A6:AS8"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                        worksheet.Cells["A6:AS8"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                        worksheet.Cells["A6:AS8"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                        worksheet.Cells["A6:AS8"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                        worksheet.Cells["A6:AS8"].Style.Font.Bold = true;
-                        worksheet.Cells["A6:AS8"].Style.WrapText = true;
-                        worksheet.Cells["A6:AS8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-
-
-                        //Pull dữ liệu phát sinh nợ từ Database vào bảng
-                        rs = db.OpenRecordset("cong_no");
-                        const byte ROW_BEFORE_START_EXCEL = 8;
-                        int maxPhatSinh = rs.RecordCount;
-                        int maxRowExcel = maxPhatSinh + ROW_BEFORE_START_EXCEL;
-                        int currentRow = 0;
-                        
-                        //Format dữ liệu (bao gồm cột tổng)
-                        worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":A" + maxRowExcel].Style.Numberformat.Format = "dd/MM/yyyy";
-                        worksheet.Cells["B" + ROW_BEFORE_START_EXCEL + ":B" + maxRowExcel].Style.Numberformat.Format = "@";
-                        worksheet.Cells["C" + ROW_BEFORE_START_EXCEL + ":C" + maxRowExcel].Style.Numberformat.Format = "#";
-                        worksheet.Cells["D" + ROW_BEFORE_START_EXCEL + ":D" + maxRowExcel].Style.Numberformat.Format = "@";
-                        worksheet.Cells["E" + ROW_BEFORE_START_EXCEL + ":F" + maxRowExcel].Style.Numberformat.Format = "@";
-                        worksheet.Cells["G" + ROW_BEFORE_START_EXCEL + ":G" + maxRowExcel].Style.Numberformat.Format = "dd/MM/yyyy";
-                        worksheet.Cells["H" + ROW_BEFORE_START_EXCEL + ":H" + maxRowExcel].Style.Numberformat.Format = "@";
-                        worksheet.Cells["I" + ROW_BEFORE_START_EXCEL + ":I" + maxRowExcel].Style.Numberformat.Format = "#";
-                        worksheet.Cells["J" + ROW_BEFORE_START_EXCEL + ":AS" + maxRowExcel].Style.Numberformat.Format = "_(* #,##0_);_(* (#,##0);_(* \" - \"_);_(@_)";
-
-                        worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + maxRowExcel].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                        worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + maxRowExcel].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                        worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + maxRowExcel].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                        worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + maxRowExcel].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-
-                        Dictionary<String, int> invoices = new Dictionary<string, int>();
-                        String invoiceID = String.Empty;
-                        int invoiceRow = 0;
-
-                        for (i = 1; i <= maxPhatSinh; i++)
-                        {
-                            currentRow = i + ROW_BEFORE_START_EXCEL;
-                            worksheet.Cells["A" + currentRow].Value = rs.Fields["ngay_hoa_don"].Value;
-                            worksheet.Cells["B" + currentRow].Value = rs.Fields["ten_phong"].Value;
-
-                            String fSTT = String.Format("=(SUBTOTAL(3,$D${0}:D{1}))", ROW_BEFORE_START_EXCEL, currentRow);
-                            worksheet.Cells["C" + currentRow].Formula = fSTT;
-
-                            worksheet.Cells["D" + currentRow].Value = rs.Fields["cong_ty"].Value;
-                            worksheet.Cells["E" + currentRow].Value = rs.Fields["ki_hieu_hoa_don"].Value;
-                            worksheet.Cells["F" + currentRow].Value = rs.Fields["so_hoa_don"].Value;
-                            worksheet.Cells["G" + currentRow].Value = rs.Fields["han_thanh_toan"].Value;
-                            worksheet.Cells["H" + currentRow].Value = rs.Fields["ma_nv"].Value;
-
-                            String fNgayQuaHan = String.Format("=IF(AND(AK{0} > 0, $E$1 > G{0}), $E$1 - G{0}, 0)", currentRow);
-                            worksheet.Cells["I" + currentRow].Formula = fNgayQuaHan;
-
-                            worksheet.Cells["J" + currentRow].Value = rs.Fields["tong_dau_ky"].Value;
-                            worksheet.Cells["K" + currentRow].Value = rs.Fields["tongno1"].Value;
-                            worksheet.Cells["L" + currentRow].Value = rs.Fields["tongno2"].Value;
-                            worksheet.Cells["M" + currentRow].Value = rs.Fields["tongno3"].Value;
-                            worksheet.Cells["N" + currentRow].Value = rs.Fields["tongno4"].Value;
-                            worksheet.Cells["O" + currentRow].Value = rs.Fields["tongno5"].Value;
-                            worksheet.Cells["P" + currentRow].Value = rs.Fields["tongno6"].Value;
-                            worksheet.Cells["Q" + currentRow].Value = rs.Fields["tongno7"].Value;
-                            worksheet.Cells["R" + currentRow].Value = rs.Fields["tongno8"].Value;
-                            worksheet.Cells["S" + currentRow].Value = rs.Fields["tongno9"].Value;
-                            worksheet.Cells["T" + currentRow].Value = rs.Fields["tongno10"].Value;
-                            worksheet.Cells["U" + currentRow].Value = rs.Fields["tongno11"].Value;
-                            worksheet.Cells["V" + currentRow].Value = rs.Fields["tongno12"].Value;
-
-                            String fCongPhatSinh = String.Format("=(SUBTOTAL(109,K{0}:V{0}))", currentRow);
-                            worksheet.Cells["W" + currentRow].Formula = fCongPhatSinh;
-
-
-                            //Lấy thông tin phát sinh để matching với thu nợ
-                            invoiceID = String.Format("{0};{1};{2};{3};{4};{5};{6}", rs.Fields["ten_phong"].Value, rs.Fields["cong_ty"].Value, 
-                                rs.Fields["ki_hieu_hoa_don"].Value, rs.Fields["so_hoa_don"].Value, rs.Fields["han_thanh_toan"].Value,
-                                rs.Fields["ma_nv"].Value, rs.Fields["ngay_hoa_don"].Value);
-                            invoiceRow = currentRow;
-
-                            if (!invoices.ContainsKey(invoiceID))
-                                invoices.Add(invoiceID, invoiceRow);
-
+                            departments.Add(rs.Fields["ten_phong"].Value);
                             rs.MoveNext();
                         }
 
-                        //Chạy số liệu tiền về
-                        rs = db.OpenRecordset("tra_tien");
-                        int maxTraTien = rs.RecordCount;
-                        String paidID = String.Empty;
+                        //Tạo mẫu báo cáo
+                        var newFile = new FileInfo(saveFileDialog.FileName);
 
-                        for (i = 1; i <= maxTraTien; i++)
+                        if (newFile.Exists)
+                            newFile.Delete();
+
+                        using (var package = new ExcelPackage(newFile))
                         {
-                            paidID = String.Format("{0};{1};{2};{3};{4};{5};{6}", rs.Fields["ten_phong"].Value, rs.Fields["cong_ty"].Value,
-                                rs.Fields["ki_hieu_hoa_don"].Value, rs.Fields["so_hoa_don"].Value, rs.Fields["han_thanh_toan"].Value,
-                                rs.Fields["ma_nv"].Value, rs.Fields["ngay_hoa_don"].Value);
+                            //Sheet danh sách phòng
+                            ExcelWorksheet departmentWorksheet = package.Workbook.Worksheets.Add("List Phong");
+                            departmentWorksheet.Cells["A1"].Value = "TT";
+                            departmentWorksheet.Cells["B1"].Value = "BẢO HIỂM TÀU THỦY";
 
-                            if (invoices.ContainsKey(paidID))
+                            departmentWorksheet.Cells["A2"].Value = "CKT";
+                            departmentWorksheet.Cells["B2"].Value = "BẢO HIỂM CHÁY KỸ THUẬT";
+
+                            departmentWorksheet.Cells["A3"].Value = "HH";
+                            departmentWorksheet.Cells["B3"].Value = "BẢO HIỂM HÀNG HÓA";
+
+                            departmentWorksheet.Cells["A4"].Value = "CN";
+                            departmentWorksheet.Cells["B4"].Value = "BẢO HIỂM CON NGƯỜI";
+
+                            departmentWorksheet.Cells["A5"].Value = "XCG";
+                            departmentWorksheet.Cells["B5"].Value = "BẢO HIỂM XE CƠ GIỚI";
+
+                            departmentWorksheet.Cells["A6"].Value = "BH1";
+                            departmentWorksheet.Cells["B6"].Value = "BẢO HIỂM SỐ 1";
+
+                            departmentWorksheet.Cells["A7"].Value = "BH2";
+                            departmentWorksheet.Cells["B7"].Value = "BẢO HIỂM SỐ 2";
+
+                            departmentWorksheet.Cells["A8"].Value = "BH3";
+                            departmentWorksheet.Cells["B8"].Value = "BẢO HIỂM SỐ 3";
+
+                            departmentWorksheet.Cells["A9"].Value = "BH4";
+                            departmentWorksheet.Cells["B9"].Value = "BẢO HIỂM SỐ 4";
+
+                            departmentWorksheet.Cells["A10"].Value = "BH5";
+                            departmentWorksheet.Cells["B10"].Value = "BẢO HIỂM SỐ 5";
+
+                            departmentWorksheet.Cells["A11"].Value = "BH6";
+                            departmentWorksheet.Cells["B11"].Value = "BẢO HIỂM SỐ 6";
+
+                            departmentWorksheet.Cells["A12"].Value = "BH8";
+                            departmentWorksheet.Cells["B12"].Value = "BẢO HIỂM SỐ 8";
+
+                            departmentWorksheet.Hidden = eWorkSheetHidden.VeryHidden;
+
+                            //Sheet đối chiếu công nợ
+                            ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Doi chieu cong no");
+
+                            worksheet.Column(1).Width = GetTrueColumnWidth(12.14);
+                            worksheet.Column(2).Width = GetTrueColumnWidth(7.57);
+                            worksheet.Column(3).Width = GetTrueColumnWidth(6.86);
+                            worksheet.Column(4).Width = GetTrueColumnWidth(80.00);
+                            worksheet.Column(5).Width = GetTrueColumnWidth(15.00);
+                            worksheet.Column(6).Width = GetTrueColumnWidth(15.00);
+                            worksheet.Column(7).Width = GetTrueColumnWidth(15.00);
+                            worksheet.Column(8).Width = GetTrueColumnWidth(15.00);
+                            worksheet.Column(9).Width = GetTrueColumnWidth(10.00);
+
+                            for (i = 10; i <= 45; i++)
                             {
-                                worksheet.Cells["X" + invoices[paidID]].Value = rs.Fields["tongtra1"].Value;
-                                worksheet.Cells["Y" + invoices[paidID]].Value = rs.Fields["tongtra2"].Value;
-                                worksheet.Cells["Z" + invoices[paidID]].Value = rs.Fields["tongtra3"].Value;
-                                worksheet.Cells["AA" + invoices[paidID]].Value = rs.Fields["tongtra4"].Value;
-                                worksheet.Cells["AB" + invoices[paidID]].Value = rs.Fields["tongtra5"].Value;
-                                worksheet.Cells["AC" + invoices[paidID]].Value = rs.Fields["tongtra6"].Value;
-                                worksheet.Cells["AD" + invoices[paidID]].Value = rs.Fields["tongtra7"].Value;
-                                worksheet.Cells["AE" + invoices[paidID]].Value = rs.Fields["tongtra8"].Value;
-                                worksheet.Cells["AF" + invoices[paidID]].Value = rs.Fields["tongtra9"].Value;
-                                worksheet.Cells["AG" + invoices[paidID]].Value = rs.Fields["tongtra10"].Value;
-                                worksheet.Cells["AH" + invoices[paidID]].Value = rs.Fields["tongtra11"].Value;
-                                worksheet.Cells["AI" + invoices[paidID]].Value = rs.Fields["tongtra12"].Value;
+                                worksheet.Column(i).Width = GetTrueColumnWidth(20.00);
                             }
-                            rs.MoveNext();
+
+                            worksheet.Cells["A:AS"].Style.Font.Name = "Times New Roman ";
+                            worksheet.Cells["A:AS"].Style.Font.Size = 11;
+                            worksheet.Cells["A:AS"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            worksheet.Row(1).Height = 35.25;
+                            worksheet.Row(2).Height = 9.75;
+                            worksheet.Row(3).Height = 35.25;
+                            worksheet.Row(4).Height = 35.25;
+                            worksheet.Row(5).Height = 25.5;
+                            worksheet.Row(6).Height = 35.25;
+                            worksheet.Row(7).Height = 38.25;
+                            worksheet.Row(8).Height = 15.75;
+
+                            //Cell ngày đối chiếu
+                            worksheet.Cells["E1"].Style.Font.Bold = true;
+                            worksheet.Cells["E1"].Style.Font.Size = 12;
+                            worksheet.Cells["E1"].Style.Border.BorderAround(ExcelBorderStyle.Double);
+                            worksheet.Cells["E1"].Style.Numberformat.Format = "dd/MM/yyyy";
+                            worksheet.Cells["E1"].Value = DateTime.Today;
+                            worksheet.Cells["E1"].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            worksheet.Cells["E1"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(255, 192, 0));
+                            worksheet.Cells["E1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                            //Cell tên phòng
+                            worksheet.Cells["F1"].Style.Font.Bold = true;
+                            worksheet.Cells["F1"].Style.Font.Size = 14;
+                            worksheet.Cells["F1"].Style.Border.BorderAround(ExcelBorderStyle.Double);
+                            worksheet.Cells["F1"].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            worksheet.Cells["F1"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(250, 192, 144));
+                            worksheet.Cells["F1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            var val = worksheet.Cells["F1"].DataValidation.AddListDataValidation();
+                            foreach (String department in departments)
+                                val.Formula.Values.Add(department);
+                            worksheet.Cells["F1"].Value = "TT";
+
+                            //Cell Phòng
+                            worksheet.Cells["D3"].Formula = @"= ""PHÒNG "" & VLOOKUP(F1,'List Phong'!A1:B12,2,FALSE)";
+                            worksheet.Cells["D3"].Style.Font.Bold = true;
+                            worksheet.Cells["D3"].Style.Font.Size = 12;
+
+                            //Cell Title
+                            worksheet.Cells["C4"].Value = "BẢNG ĐỐI CHIẾU NỢ PHẢI THU CHI TIẾT THEO TỪNG KHÁCH HÀNG";
+                            worksheet.Cells["C4:AS4"].Merge = true;
+                            worksheet.Cells["C4:AS4"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            worksheet.Cells["C4:AS4"].Style.Font.Bold = true;
+                            worksheet.Cells["C4:AS4"].Style.Font.Size = 14;
+
+                            worksheet.Cells["C5"].Formula = @"= ""Tháng "" & MONTH(E1) & "" năm "" & YEAR(E1)";
+                            worksheet.Cells["C5:AS5"].Merge = true;
+                            worksheet.Cells["C5:AS5"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            worksheet.Cells["C5:AS5"].Style.Font.Bold = true;
+                            worksheet.Cells["C5:AS5"].Style.Font.Size = 14;
+
+                            //Tạo đề mục các bảng
+                            worksheet.Cells["A6:AS8"].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            worksheet.Cells["A6:B8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(255, 255, 0));
+                            worksheet.Cells["C6:D8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(221, 217, 195));
+                            worksheet.Cells["E6:H8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(204, 192, 218));
+                            worksheet.Cells["I6:J8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(221, 217, 195));
+                            worksheet.Cells["K6:W8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(230, 185, 184));
+                            worksheet.Cells["X6:AJ8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(197, 217, 241));
+                            worksheet.Cells["AK6:AS8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(221, 217, 195));
+
+                            worksheet.Cells["A6:A7"].Merge = true;
+                            worksheet.Cells["A6:A7"].Value = "Ngày hóa đơn";
+
+                            worksheet.Cells["B6:B7"].Merge = true;
+                            worksheet.Cells["B6:B7"].Value = "Phòng";
+
+                            worksheet.Cells["C6:C7"].Merge = true;
+                            worksheet.Cells["C6:C7"].Value = "STT";
+
+                            worksheet.Cells["D6:D7"].Merge = true;
+                            worksheet.Cells["D6:D7"].Value = "Tên đơn vị";
+
+                            worksheet.Cells["E6:H6"].Merge = true;
+                            worksheet.Cells["E6:H6"].Value = "Thông tin";
+                            worksheet.Cells["E7"].Value = "Mã hóa đơn";
+                            worksheet.Cells["F7"].Value = "Hóa đơn";
+                            worksheet.Cells["G7"].Value = "Hạn thanh toán";
+                            worksheet.Cells["H7"].Value = "Nghiệp vụ";
+
+                            worksheet.Cells["I6:I7"].Merge = true;
+                            worksheet.Cells["I6:I7"].Value = "Số ngày quá hạn";
+
+                            worksheet.Cells["J6:J7"].Merge = true;
+                            worksheet.Cells["J6:J7"].Value = "Dư đầu kỳ";
+
+                            worksheet.Cells["K6:W6"].Merge = true;
+                            worksheet.Cells["K6:W6"].Value = "Phát sinh tháng nợ";
+                            worksheet.Cells["K7"].Value = "Tháng 01";
+                            worksheet.Cells["L7"].Value = "Tháng 02";
+                            worksheet.Cells["M7"].Value = "Tháng 03";
+                            worksheet.Cells["N7"].Value = "Tháng 04";
+                            worksheet.Cells["O7"].Value = "Tháng 05";
+                            worksheet.Cells["P7"].Value = "Tháng 06";
+                            worksheet.Cells["Q7"].Value = "Tháng 07";
+                            worksheet.Cells["R7"].Value = "Tháng 08";
+                            worksheet.Cells["S7"].Value = "Tháng 09";
+                            worksheet.Cells["T7"].Value = "Tháng 10";
+                            worksheet.Cells["U7"].Value = "Tháng 11";
+                            worksheet.Cells["V7"].Value = "Tháng 12";
+                            worksheet.Cells["W7"].Value = "Cộng phát sinh";
+
+                            worksheet.Cells["X6:AJ6"].Merge = true;
+                            worksheet.Cells["X6:AJ6"].Value = "Theo dõi thu nợ";
+                            worksheet.Cells["X7"].Value = "Tháng 01";
+                            worksheet.Cells["Y7"].Value = "Tháng 02";
+                            worksheet.Cells["Z7"].Value = "Tháng 03";
+                            worksheet.Cells["AA7"].Value = "Tháng 04";
+                            worksheet.Cells["AB7"].Value = "Tháng 05";
+                            worksheet.Cells["AC7"].Value = "Tháng 06";
+                            worksheet.Cells["AD7"].Value = "Tháng 07";
+                            worksheet.Cells["AE7"].Value = "Tháng 08";
+                            worksheet.Cells["AF7"].Value = "Tháng 09";
+                            worksheet.Cells["AG7"].Value = "Tháng 10";
+                            worksheet.Cells["AH7"].Value = "Tháng 11";
+                            worksheet.Cells["AI7"].Value = "Tháng 12";
+                            worksheet.Cells["AJ7"].Value = "Cộng thanh toán";
+
+                            worksheet.Cells["AK6:AK7"].Merge = true;
+                            worksheet.Cells["AK6:AK7"].Value = "Cuối kì";
+
+                            worksheet.Cells["AL6:AL7"].Merge = true;
+                            worksheet.Cells["AL6:AL7"].Value = "Trong hạn thanh toán";
+
+                            worksheet.Cells["AM6:AM7"].Merge = true;
+                            worksheet.Cells["AM6:AM7"].Value = "Quá hạn thanh toán dưới 1 tháng";
+
+                            worksheet.Cells["AN6:AN7"].Merge = true;
+                            worksheet.Cells["AN6:AN7"].Value = "Quá hạn thanh toán dưới 3 tháng";
+
+                            worksheet.Cells["AO6:AO7"].Merge = true;
+                            worksheet.Cells["AO6:AO7"].Value = "Quá hạn thanh toán từ 3 - 6 tháng";
+
+                            worksheet.Cells["AP6:AP7"].Merge = true;
+                            worksheet.Cells["AP6:AP7"].Value = "Quá hạn thanh toán từ 6 tháng - dưới 1 năm";
+
+                            worksheet.Cells["AQ6:AQ7"].Merge = true;
+                            worksheet.Cells["AQ6:AQ7"].Value = "Quá hạn thanh toán từ 1 - 2 năm";
+
+                            worksheet.Cells["AR6:AR7"].Merge = true;
+                            worksheet.Cells["AR6:AR7"].Value = "Quá hạn thanh toán từ 2 - 3 năm";
+
+                            worksheet.Cells["AS6:AS7"].Merge = true;
+                            worksheet.Cells["AS6:AS7"].Value = "Quá hạn thanh toán trên 3 năm";
+
+                            worksheet.Cells["A6:AS8"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AS8"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AS8"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AS8"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AS8"].Style.Font.Bold = true;
+                            worksheet.Cells["A6:AS8"].Style.WrapText = true;
+                            worksheet.Cells["A6:AS8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+
+                            //Pull dữ liệu phát sinh nợ từ Database vào bảng
+                            rs = db.OpenRecordset("cong_no");
+                            const byte ROW_BEFORE_START_EXCEL = 8;
+                            int maxPhatSinh = rs.RecordCount;
+                            int maxRowExcel = maxPhatSinh + ROW_BEFORE_START_EXCEL;
+                            int currentRow = 0;
+                            int rowTong = maxRowExcel + 1;
+
+                            //Format dữ liệu (bao gồm cột tổng)
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":A" + rowTong].Style.Numberformat.Format = "dd/MM/yyyy";
+                            worksheet.Cells["B" + ROW_BEFORE_START_EXCEL + ":B" + rowTong].Style.Numberformat.Format = "@";
+                            worksheet.Cells["C" + ROW_BEFORE_START_EXCEL + ":C" + rowTong].Style.Numberformat.Format = "#";
+                            worksheet.Cells["D" + ROW_BEFORE_START_EXCEL + ":D" + rowTong].Style.Numberformat.Format = "@";
+                            worksheet.Cells["E" + ROW_BEFORE_START_EXCEL + ":F" + rowTong].Style.Numberformat.Format = "@";
+                            worksheet.Cells["G" + ROW_BEFORE_START_EXCEL + ":G" + rowTong].Style.Numberformat.Format = "dd/MM/yyyy";
+                            worksheet.Cells["H" + ROW_BEFORE_START_EXCEL + ":H" + rowTong].Style.Numberformat.Format = "@";
+                            worksheet.Cells["I" + ROW_BEFORE_START_EXCEL + ":I" + rowTong].Style.Numberformat.Format = "#";
+                            worksheet.Cells["J" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Numberformat.Format = "_(* #,##0_);_(* (#,##0);_(* \" - \"_);_(@_)";
+
+                            Dictionary<String, int> invoices = new Dictionary<string, int>();
+                            String invoiceID = String.Empty;
+                            int invoiceRow = 0;
+
+                            for (i = 1; i <= maxPhatSinh; i++)
+                            {
+                                currentRow = i + ROW_BEFORE_START_EXCEL;
+                                worksheet.Cells["A" + currentRow].Value = rs.Fields["ngay_hoa_don"].Value;
+                                worksheet.Cells["B" + currentRow].Value = rs.Fields["ten_phong"].Value;
+
+                                String fSTT = String.Format("=(SUBTOTAL(3,$D${0}:D{1}))", ROW_BEFORE_START_EXCEL + 1, currentRow);
+                                worksheet.Cells["C" + currentRow].Formula = fSTT;
+
+                                worksheet.Cells["D" + currentRow].Value = rs.Fields["cong_ty"].Value;
+                                worksheet.Cells["E" + currentRow].Value = rs.Fields["ki_hieu_hoa_don"].Value;
+                                worksheet.Cells["F" + currentRow].Value = rs.Fields["so_hoa_don"].Value;
+                                worksheet.Cells["G" + currentRow].Value = rs.Fields["han_thanh_toan"].Value;
+                                worksheet.Cells["H" + currentRow].Value = rs.Fields["ma_nv"].Value;
+
+                                String fNgayQuaHan = String.Format("=IF(AND(AK{0} > 0, $E$1 > G{0}), $E$1 - G{0}, 0)", currentRow);
+                                worksheet.Cells["I" + currentRow].Formula = fNgayQuaHan;
+
+                                if (rs.Fields["tong_dau_ky"].Value is DBNull)
+                                    worksheet.Cells["J" + currentRow].Value = 0;
+                                else
+                                    worksheet.Cells["J" + currentRow].Value = rs.Fields["tong_dau_ky"].Value;
+
+                                worksheet.Cells["K" + currentRow].Value = rs.Fields["tongno1"].Value;
+                                worksheet.Cells["L" + currentRow].Value = rs.Fields["tongno2"].Value;
+                                worksheet.Cells["M" + currentRow].Value = rs.Fields["tongno3"].Value;
+                                worksheet.Cells["N" + currentRow].Value = rs.Fields["tongno4"].Value;
+                                worksheet.Cells["O" + currentRow].Value = rs.Fields["tongno5"].Value;
+                                worksheet.Cells["P" + currentRow].Value = rs.Fields["tongno6"].Value;
+                                worksheet.Cells["Q" + currentRow].Value = rs.Fields["tongno7"].Value;
+                                worksheet.Cells["R" + currentRow].Value = rs.Fields["tongno8"].Value;
+                                worksheet.Cells["S" + currentRow].Value = rs.Fields["tongno9"].Value;
+                                worksheet.Cells["T" + currentRow].Value = rs.Fields["tongno10"].Value;
+                                worksheet.Cells["U" + currentRow].Value = rs.Fields["tongno11"].Value;
+                                worksheet.Cells["V" + currentRow].Value = rs.Fields["tongno12"].Value;
+
+                                String fCongPhatSinh = String.Format("=(Subtotal(109,K{0}:V{0}))", currentRow);
+                                worksheet.Cells["W" + currentRow].Formula = fCongPhatSinh;
+
+                                String fCongThanhToan = String.Format("=(Subtotal(109,X{0}:AI{0}))", currentRow);
+                                worksheet.Cells["AJ" + currentRow].Formula = fCongThanhToan;
+
+                                String fCuoiKy = String.Format("=J{0}+W{0}-AJ{0}", currentRow);
+                                worksheet.Cells["AK" + currentRow].Formula = fCuoiKy;
+
+                                String fTrongHan = String.Format("=IF(I{0}=0,AK{0},0)", currentRow);
+                                worksheet.Cells["AL" + currentRow].Formula = fTrongHan;
+
+                                String fDuoi1Thang = String.Format("=IF(AND(I{0}>=1,I{0}<=30),AK{0},0)", currentRow);
+                                worksheet.Cells["AM" + currentRow].Formula = fDuoi1Thang;
+
+                                String fDuoi3Thang = String.Format("=IF(AND(I{0}>=31,I{0}<=90),AK{0},0)", currentRow);
+                                worksheet.Cells["AN" + currentRow].Formula = fDuoi3Thang;
+
+                                String f3Den6Thang = String.Format("=IF(AND(I{0}>=91,I{0}<=180),AK{0},0)", currentRow);
+                                worksheet.Cells["AO" + currentRow].Formula = f3Den6Thang;
+
+                                String f6ThangDen1Nam = String.Format("=IF(AND(I{0}>=181,I{0}<=365),AK{0},0)", currentRow);
+                                worksheet.Cells["AP" + currentRow].Formula = f6ThangDen1Nam;
+
+                                String f1Den2Nam = String.Format("=IF(AND(I{0}>=366,I{0}<=730),AK{0},0)", currentRow);
+                                worksheet.Cells["AQ" + currentRow].Formula = f1Den2Nam;
+
+                                String f2Den3Nam = String.Format("=IF(AND(I{0}>=366,I{0}<=730),AK{0},0)", currentRow);
+                                worksheet.Cells["AQ" + currentRow].Formula = f2Den3Nam;
+
+
+                                //Lấy thông tin phát sinh để matching với thu nợ
+                                invoiceID = String.Format("{0};{1}", rs.Fields["ki_hieu_hoa_don"].Value, rs.Fields["so_hoa_don"].Value);
+                                invoiceRow = currentRow;
+
+                                if (!invoices.ContainsKey(invoiceID))
+                                    invoices.Add(invoiceID, invoiceRow);
+
+                                rs.MoveNext();
+                            }
+
+                            //Chạy số liệu tiền về
+                            rs = db.OpenRecordset("tra_tien");
+                            int maxTraTien = rs.RecordCount;
+                            String paidID = String.Empty;
+                            short month = 0;
+
+                            for (i = 1; i <= maxTraTien; i++)
+                            {
+                                paidID = String.Format("{0};{1}", rs.Fields["ki_hieu_hoa_don"].Value, rs.Fields["so_hoa_don"].Value);
+
+                                if (invoices.ContainsKey(paidID))
+                                {
+                                    month = rs.Fields["thang_thanh_toan"].Value;
+                                    switch (month)
+                                    {
+                                        case 1:
+                                            worksheet.Cells["X" + invoices[paidID]].Value = rs.Fields["tong_thanh_toan"].Value;
+                                            break;
+                                        case 2:
+                                            worksheet.Cells["Y" + invoices[paidID]].Value = rs.Fields["tong_thanh_toan"].Value;
+                                            break;
+                                        case 3:
+                                            worksheet.Cells["Z" + invoices[paidID]].Value = rs.Fields["tong_thanh_toan"].Value;
+                                            break;
+                                        case 4:
+                                            worksheet.Cells["AA" + invoices[paidID]].Value = rs.Fields["tong_thanh_toan"].Value;
+                                            break;
+                                        case 5:
+                                            worksheet.Cells["AB" + invoices[paidID]].Value = rs.Fields["tong_thanh_toan"].Value;
+                                            break;
+                                        case 6:
+                                            worksheet.Cells["AC" + invoices[paidID]].Value = rs.Fields["tong_thanh_toan"].Value;
+                                            break;
+                                        case 7:
+                                            worksheet.Cells["AD" + invoices[paidID]].Value = rs.Fields["tong_thanh_toan"].Value;
+                                            break;
+                                        case 8:
+                                            worksheet.Cells["AE" + invoices[paidID]].Value = rs.Fields["tong_thanh_toan"].Value;
+                                            break;
+                                        case 9:
+                                            worksheet.Cells["AF" + invoices[paidID]].Value = rs.Fields["tong_thanh_toan"].Value;
+                                            break;
+                                        case 10:
+                                            worksheet.Cells["AG" + invoices[paidID]].Value = rs.Fields["tong_thanh_toan"].Value;
+                                            break;
+                                        case 11:
+                                            worksheet.Cells["AH" + invoices[paidID]].Value = rs.Fields["tong_thanh_toan"].Value;
+                                            break;
+                                        case 12:
+                                            worksheet.Cells["AI" + invoices[paidID]].Value = rs.Fields["tong_thanh_toan"].Value;
+                                            break;
+                                    }
+                                }
+                                rs.MoveNext();
+                            }
+
+                            //Thêm các ô tổng
+                            worksheet.Cells["D" + rowTong].Value = "Tổng cộng";
+
+                            String fDuDauKy = String.Format("=(Subtotal(109,J{0}:J{1}))", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
+                            worksheet.Cells["J" + rowTong].Formula = fDuDauKy;
+
+                            String fTongCongPhatSinh = String.Format("=Sum(W{0}:W{1})", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
+                            worksheet.Cells["W" + rowTong].Formula = fTongCongPhatSinh;
+
+                            String fTongCongThanhToan = String.Format("=Sum(AJ{0}:AJ{1})", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
+                            worksheet.Cells["AJ" + rowTong].Formula = fTongCongThanhToan;
+
+                            //Copy công thức
+                            for (i = 10; i <= 22; i++) //Column K:V
+                                worksheet.Cells["J" + rowTong].Copy(worksheet.Cells[rowTong, i]);
+                            for (i = 24; i <= 35; i++) //Column X:AI
+                                worksheet.Cells["J" + rowTong].Copy(worksheet.Cells[rowTong, i]);
+                            for (i = 37; i <= 45; i++) //Column AK:AS
+                                worksheet.Cells["J" + rowTong].Copy(worksheet.Cells[rowTong, i]);
+
+                            //Kẻ bảng
+                            worksheet.Cells["A" + rowTong + ":AS" + rowTong].Style.Font.Bold = true;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+
+                            //Xác nhận cuối báo cáo
+                            int rowXacNhan = rowTong + 3;
+                            worksheet.Row(rowXacNhan).Style.Numberformat.Format = "General";
+                            worksheet.Cells["D" + rowXacNhan].Formula = "=D3";
+
+                            String fPhongXacNhan = String.Format("= \"Xác nhận đối chiếu đến hết ngày \" & DAY(E1) & \" tháng \" & MONTH(E1) & \" năm \" & YEAR(E1)");
+                            worksheet.Cells["D" + rowXacNhan + 1].Formula = fPhongXacNhan;
+
+                            String fNgayThangNam = String.Format("= \"Hải Phòng, ngày \" & DAY(E1) & \" tháng \" & MONTH(E1) & \" năm \" & YEAR(E1)");
+                            worksheet.Cells["AQ" + (rowXacNhan - 1)].Formula = fNgayThangNam;
+
+                            worksheet.Cells["AJ" + rowXacNhan].Value = "PHÒNG TÀI CHÍNH KẾ TOÁN";
+                            worksheet.Cells["AQ" + rowXacNhan].Value = "LÃNH ĐẠO CÔNG TY";
+                            worksheet.Cells["D" + rowXacNhan + ":AS" + rowXacNhan].Style.Font.Bold = true;
+
+                            worksheet.View.ZoomScale = 85;
+                            package.SaveAs(newFile);
+
+                            MessageBox.Show("Đã lập đối chiếu công nợ", "Chúc mừng", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
-
-                        worksheet.View.ZoomScale = 85;
-                        package.SaveAs(newFile);
-
-                        MessageBox.Show("Đã lập đối chiếu công nợ", "Chúc mừng", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        rs.Close();
+                        db.Close();
                     }
-                    rs.Close();
-                    db.Close();
                 }
-
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Không thể lập báo cáo.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -632,7 +781,7 @@ namespace CongNo
             CurrentInfoRefresh(RefreshOption.All);
             String searchWhat = tbSearch.Text.Trim();
 
-            String db_name = "2019.mdb";
+            String db_name = DbYear;
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
@@ -765,7 +914,7 @@ namespace CongNo
         {
             CurrentInfoRefresh(RefreshOption.InfoOnly);
 
-            String db_name = "2019.mdb";
+            String db_name = DbYear;
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
@@ -945,7 +1094,7 @@ namespace CongNo
 
         private void Delete_Click(object sender, EventArgs e)
         {
-            String db_name = "2019.mdb";
+            String db_name = DbYear;
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
@@ -1025,7 +1174,7 @@ namespace CongNo
             }
             else
             {
-                String db_name = "2019.mdb";
+                String db_name = DbYear;
                 String db_path = Environment.CurrentDirectory + @"\Database\";
                 String db_file = db_path + db_name;
 
@@ -1220,9 +1369,6 @@ namespace CongNo
 
         private void NextYear_Click(object sender, EventArgs e)
         {
-            DateTime dateTime = DateTime.Parse("05/01/2020");
-            int a = DateToColumnTienVe(dateTime);
-            MessageBox.Show(a.ToString());
             MessageBox.Show("Chưa được đâu, ahihi");
         }
     }

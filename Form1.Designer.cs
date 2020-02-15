@@ -484,6 +484,7 @@
             this.currentKhachHang.ReadOnly = true;
             this.currentKhachHang.Size = new System.Drawing.Size(121, 140);
             this.currentKhachHang.TabIndex = 11;
+            this.currentKhachHang.TabStop = false;
             // 
             // recNo
             // 
@@ -511,6 +512,7 @@
             this.currentNgayHoaDon.ReadOnly = true;
             this.currentNgayHoaDon.Size = new System.Drawing.Size(100, 20);
             this.currentNgayHoaDon.TabIndex = 11;
+            this.currentNgayHoaDon.TabStop = false;
             // 
             // currentNgayPhatSinh
             // 
@@ -520,6 +522,7 @@
             this.currentNgayPhatSinh.ReadOnly = true;
             this.currentNgayPhatSinh.Size = new System.Drawing.Size(100, 20);
             this.currentNgayPhatSinh.TabIndex = 11;
+            this.currentNgayPhatSinh.TabStop = false;
             // 
             // currentSoTienTra
             // 
@@ -529,6 +532,7 @@
             this.currentSoTienTra.ReadOnly = true;
             this.currentSoTienTra.Size = new System.Drawing.Size(100, 20);
             this.currentSoTienTra.TabIndex = 11;
+            this.currentSoTienTra.TabStop = false;
             // 
             // currentSoTienNo
             // 
@@ -538,6 +542,7 @@
             this.currentSoTienNo.ReadOnly = true;
             this.currentSoTienNo.Size = new System.Drawing.Size(100, 20);
             this.currentSoTienNo.TabIndex = 11;
+            this.currentSoTienNo.TabStop = false;
             // 
             // currentNgayTra
             // 
@@ -547,6 +552,7 @@
             this.currentNgayTra.ReadOnly = true;
             this.currentNgayTra.Size = new System.Drawing.Size(100, 20);
             this.currentNgayTra.TabIndex = 11;
+            this.currentNgayTra.TabStop = false;
             // 
             // currentHanTra
             // 
@@ -556,6 +562,7 @@
             this.currentHanTra.ReadOnly = true;
             this.currentHanTra.Size = new System.Drawing.Size(100, 20);
             this.currentHanTra.TabIndex = 11;
+            this.currentHanTra.TabStop = false;
             // 
             // currentSoHoaDon
             // 
@@ -565,6 +572,7 @@
             this.currentSoHoaDon.ReadOnly = true;
             this.currentSoHoaDon.Size = new System.Drawing.Size(100, 20);
             this.currentSoHoaDon.TabIndex = 11;
+            this.currentSoHoaDon.TabStop = false;
             // 
             // label9
             // 
@@ -637,6 +645,7 @@
             this.currentMaHoaDon.ReadOnly = true;
             this.currentMaHoaDon.Size = new System.Drawing.Size(100, 20);
             this.currentMaHoaDon.TabIndex = 11;
+            this.currentMaHoaDon.TabStop = false;
             // 
             // label4
             // 
@@ -655,6 +664,7 @@
             this.currentMST.ReadOnly = true;
             this.currentMST.Size = new System.Drawing.Size(121, 20);
             this.currentMST.TabIndex = 11;
+            this.currentMST.TabStop = false;
             // 
             // label2
             // 
