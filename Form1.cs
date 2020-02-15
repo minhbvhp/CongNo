@@ -82,8 +82,8 @@ namespace CongNo
 
                 String db_file = fileInfo.ToString();
 
-                dao.DBEngine dBEngine = new dao.DBEngine();
-                dao.Database db;
+                DAO.DBEngine dBEngine = new DAO.DBEngine();
+                DAO.Database db;
                 db = dBEngine.OpenDatabase(db_file);
                 String queryName = "cong_no_draft";
                 String querySql = String.Format("SELECT invoice.ngay_ct, invoice.ngay_hoa_don, department.ten_phong, customers.cong_ty," +
@@ -105,7 +105,7 @@ namespace CongNo
                     " AND(revenue.so_hoa_don = invoice.so_hoa_don)) INNER JOIN customers ON invoice.mst = customers.mst)" +
                     " ON department.ma_phong = revenue.ma_phong ORDER BY invoice.ki_hieu_hoa_don, invoice.so_hoa_don;", DbYear);
 
-                dao.QueryDef cong_no_draft = new dao.QueryDef();
+                DAO.QueryDef cong_no_draft = new DAO.QueryDef();
                 cong_no_draft.Name = queryName;
                 cong_no_draft.SQL = querySql;
 
@@ -162,9 +162,9 @@ namespace CongNo
                     String db_path = Environment.CurrentDirectory + @"\Database\";
                     String db_file = db_path + db_name;
 
-                    dao.DBEngine dBEngine = new dao.DBEngine();
-                    dao.Database db;
-                    dao.Recordset rs;
+                    DAO.DBEngine dBEngine = new DAO.DBEngine();
+                    DAO.Database db;
+                    DAO.Recordset rs;
 
                     //Đổ dữ liệu vào Database
                     try
@@ -322,9 +322,9 @@ namespace CongNo
                         String db_path = Environment.CurrentDirectory + @"\Database\";
                         String db_file = db_path + db_name;
 
-                        dao.DBEngine dBEngine = new dao.DBEngine();
-                        dao.Database db;
-                        dao.Recordset rs;
+                        DAO.DBEngine dBEngine = new DAO.DBEngine();
+                        DAO.Database db;
+                        DAO.Recordset rs;
 
                         db = dBEngine.OpenDatabase(db_file);
 
@@ -785,9 +785,9 @@ namespace CongNo
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
-            dao.DBEngine dBEngine = new dao.DBEngine();
-            dao.Database db;
-            dao.Recordset rs = null;
+            DAO.DBEngine dBEngine = new DAO.DBEngine();
+            DAO.Database db;
+            DAO.Recordset rs = null;
 
             /*
              * Toxic ways to avoid SQL injection
@@ -918,9 +918,9 @@ namespace CongNo
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
-            dao.DBEngine dBEngine = new dao.DBEngine();
-            dao.Database db;
-            dao.Recordset rs = null;
+            DAO.DBEngine dBEngine = new DAO.DBEngine();
+            DAO.Database db;
+            DAO.Recordset rs = null;
 
             int recordNumber = 0;
 
@@ -964,7 +964,7 @@ namespace CongNo
                         rs.Move(recordNumber);
 
                         currentMST.Text = rs.Fields["mst"].Value;
-                        dao.Recordset rsKhachHang = db.OpenRecordset("SELECT cong_ty FROM customers WHERE mst = '" + currentMST.Text + "'");
+                        DAO.Recordset rsKhachHang = db.OpenRecordset("SELECT cong_ty FROM customers WHERE mst = '" + currentMST.Text + "'");
                         if (rsKhachHang.RecordCount > 0)
                             currentKhachHang.Text = rsKhachHang.Fields["cong_ty"].Value;
 
@@ -1098,9 +1098,9 @@ namespace CongNo
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
-            dao.DBEngine dBEngine = new dao.DBEngine();
-            dao.Database db;
-            dao.Recordset rs = null;
+            DAO.DBEngine dBEngine = new DAO.DBEngine();
+            DAO.Database db;
+            DAO.Recordset rs = null;
             int recordNumber = Convert.ToInt32(recNo.Text) - 1;
 
             try
@@ -1178,9 +1178,9 @@ namespace CongNo
                 String db_path = Environment.CurrentDirectory + @"\Database\";
                 String db_file = db_path + db_name;
 
-                dao.DBEngine dBEngine = new dao.DBEngine();
-                dao.Database db;
-                dao.Recordset rs = null;
+                DAO.DBEngine dBEngine = new DAO.DBEngine();
+                DAO.Database db;
+                DAO.Recordset rs = null;
                 int recordNumber = Convert.ToInt32(recNo.Text) - 1;
 
                 try
