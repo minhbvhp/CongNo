@@ -67,52 +67,7 @@ namespace CongNo
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            String DBFileName = Program.DbYear + ".mdb";
-            FileInfo fileInfo = new FileInfo(Environment.CurrentDirectory + @"\Database\" + DBFileName);
-            
-            if (!fileInfo.Exists)
-            {
-                Directory.CreateDirectory(Environment.CurrentDirectory + @"\Database");
-                using (Stream s = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("CongNo.DB.mdb"))
-                {
-                    using (FileStream ResourceFile = new FileStream(fileInfo.ToString(), FileMode.Create, FileAccess.Write))
-                    {
-                        s.CopyTo(ResourceFile);
-                    }
-                }
-
-                String db_file = fileInfo.ToString();
-
-                DAO.DBEngine dBEngine = new DAO.DBEngine();
-                DAO.Database db;
-                db = dBEngine.OpenDatabase(db_file);
-                String queryName = "cong_no_draft";
-                String querySql = String.Format("SELECT invoice.ngay_ct, invoice.ngay_hoa_don, department.ten_phong, customers.cong_ty," +
-                    "invoice.ki_hieu_hoa_don, invoice.so_hoa_don, invoice.han_thanh_toan, revenue.ma_nv," +
-                    "IIf(Year(invoice.ngay_ct)<{0},invoice.so_tien_phat_sinh) AS du_dau_ky, IIf(Year(invoice.ngay_ct)={0} " +
-                    "And Month(invoice.ngay_ct)=1,invoice.so_tien_phat_sinh) AS no1, IIf(Year(invoice.ngay_ct)={0} And " +
-                    "Month(invoice.ngay_ct)=2,invoice.so_tien_phat_sinh) AS no2, IIf(Year(invoice.ngay_ct)={0} And " +
-                    "Month(invoice.ngay_ct)=3,invoice.so_tien_phat_sinh) AS no3, IIf(Year(invoice.ngay_ct)={0} And " +
-                    "Month(invoice.ngay_ct)=4,invoice.so_tien_phat_sinh) AS no4, IIf(Year(invoice.ngay_ct)={0} And " +
-                    "Month(invoice.ngay_ct)=5,invoice.so_tien_phat_sinh) AS no5, IIf(Year(invoice.ngay_ct)={0} And " +
-                    "Month(invoice.ngay_ct)=6,invoice.so_tien_phat_sinh) AS no6, IIf(Year(invoice.ngay_ct)={0} And " +
-                    "Month(invoice.ngay_ct)=7,invoice.so_tien_phat_sinh) AS no7, IIf(Year(invoice.ngay_ct)={0} And " +
-                    "Month(invoice.ngay_ct)=8,invoice.so_tien_phat_sinh) AS no8, IIf(Year(invoice.ngay_ct)={0} And " +
-                    "Month(invoice.ngay_ct)=9,invoice.so_tien_phat_sinh) AS no9, IIf(Year(invoice.ngay_ct)={0} And " +
-                    "Month(invoice.ngay_ct)=10,invoice.so_tien_phat_sinh) AS no10, IIf(Year(invoice.ngay_ct)={0} And " +
-                    "Month(invoice.ngay_ct)=11,invoice.so_tien_phat_sinh) AS no11, IIf(Year(invoice.ngay_ct)={0} And " +
-                    "Month(invoice.ngay_ct)=12,invoice.so_tien_phat_sinh) AS no12 FROM department " +
-                    "INNER JOIN((revenue INNER JOIN invoice ON (revenue.ki_hieu_hoa_don = invoice.ki_hieu_hoa_don)" +
-                    " AND(revenue.so_hoa_don = invoice.so_hoa_don)) INNER JOIN customers ON invoice.mst = customers.mst)" +
-                    " ON department.ma_phong = revenue.ma_phong ORDER BY invoice.ki_hieu_hoa_don, invoice.so_hoa_don;", Program.DbYear);
-
-                DAO.QueryDef cong_no_draft = new DAO.QueryDef();
-                cong_no_draft.Name = queryName;
-                cong_no_draft.SQL = querySql;
-
-                db.QueryDefs.Append(cong_no_draft);
-                db.Close();
-            }
+            this.Text = "Số liệu năm " + Program.DbYear;
 
             searchBy["Khách hàng"] = new string[] { "Mã số thuế", "Tên đơn vị" };
             searchBy["Phát sinh"] = new string[] { "Số hóa đơn", "Số tiền" };
@@ -159,22 +114,21 @@ namespace CongNo
                     //Tạo connection
                     int row;
 
-                    String db_name = Program.DbYear;
+                    String db_name = Program.DbYear + ".mdb";
                     String db_path = Environment.CurrentDirectory + @"\Database\";
                     String db_file = db_path + db_name;
 
                     DAO.DBEngine dBEngine = new DAO.DBEngine();
-                    DAO.Database db;
+                    DAO.Database db = null;
                     DAO.Recordset rs;
 
                     //Đổ dữ liệu vào Database
                     try
                     {
                         db = dBEngine.OpenDatabase(db_file);
+                        db.BeginTrans();
                         db.Execute("draft_clear");
                         rs = db.OpenRecordset("draft");
-                        dBEngine.BeginTrans();
-
                         for (row = 2; row <= lastRow; row++)
                         {
                             rs.AddNew();
@@ -182,17 +136,17 @@ namespace CongNo
                             rs.Fields["loai_ct"].Value = NullToString(worksheet.Cells["A" + row].Value);
                             rs.Fields["no_co"].Value = NullToString(worksheet.Cells["D" + row].Value);
                             rs.Fields["so_bk"].Value = NullToString(worksheet.Cells["E" + row].Value);
-                            rs.Fields["mst"].Value = NullToString(worksheet.Cells["K" + row].Value);
+                            rs.Fields["mst_draft"].Value = NullToString(worksheet.Cells["K" + row].Value);
                             rs.Fields["cong_ty1"].Value = NullToString(worksheet.Cells["F" + row].Value);
                             rs.Fields["cong_ty2"].Value = NullToString(worksheet.Cells["G" + row].Value);
                             rs.Fields["ky_hieu_hd"].Value = NullToString(worksheet.Cells["L" + row].Value);
                             rs.Fields["so_hoa_don"].Value = NullToString(worksheet.Cells["M" + row].Value);
-                            rs.Fields["ngay_hoa_don"].Value = NullToString(worksheet.Cells["N" + row].Value);
+                            rs.Fields["ngay_hoa_don_draft"].Value = NullToString(worksheet.Cells["N" + row].Value);
                             rs.Fields["ma_nv"].Value = NullToString(worksheet.Cells["I" + row].Value);
                             rs.Fields["ma_phong"].Value = NullToString(worksheet.Cells["J" + row].Value);
                             rs.Fields["so_tien"].Value = NullToString(worksheet.Cells["C" + row].Value);
-                            rs.Fields["han_tt"].Value = NullToString(worksheet.Cells["H" + row].Value);
-                            rs.Fields["ngay_ct"].Value = NullToString(worksheet.Cells["B" + row].Value);
+                            rs.Fields["han_tt_draft"].Value = NullToString(worksheet.Cells["H" + row].Value);
+                            rs.Fields["ngay_ct_draft"].Value = NullToString(worksheet.Cells["B" + row].Value);
                             rs.Fields["user"].Value = NullToString(worksheet.Cells["O" + row].Value);
                             rs.Update();
 
@@ -203,12 +157,13 @@ namespace CongNo
 
                         db.Execute("update_mst");
                         db.Execute("add_mst_to_customers");
+
                         db.Execute("invoice_filter");
-                        db.Execute("update_invoice");
                         db.Execute("add_invoice");
+
                         db.Execute("paid_filter");
-                        db.Execute("update_paid");
                         db.Execute("add_paid");
+
                         db.Execute("update_revenue");
                         db.Execute("add_revenue");
 
@@ -253,12 +208,13 @@ namespace CongNo
                         db.Execute("draft_clear");
                         db.Execute("invoice_draft_clear");
                         db.Execute("paid_draft_clear");
-                        dBEngine.CommitTrans();
+                        db.CommitTrans();
+
                         rs.Close();
                         db.Close();
 
                         String compactDbTemp = db_path + "temp.mdb";
-                        String compactDbName = db_path + Program.DbYear;
+                        String compactDbName = db_path + Program.DbYear + ".mdb";
                         dBEngine.CompactDatabase(db_file, compactDbTemp);
                         File.Delete(db_file);
                         File.Move(compactDbTemp, compactDbName);
@@ -268,7 +224,8 @@ namespace CongNo
                     catch (Exception ex)
                     {
                         MessageBox.Show("Không ghi được dữ liệu.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        dBEngine.Rollback();
+                        db.Rollback();
+                        db.Close();
                     }
                 }
             }
@@ -319,7 +276,7 @@ namespace CongNo
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
                         int i;
-                        String db_name = Program.DbYear;
+                        String db_name = Program.DbYear + ".mdb";
                         String db_path = Environment.CurrentDirectory + @"\Database\";
                         String db_file = db_path + db_name;
 
@@ -782,7 +739,7 @@ namespace CongNo
             CurrentInfoRefresh(RefreshOption.All);
             String searchWhat = tbSearch.Text.Trim();
 
-            String db_name = Program.DbYear;
+            String db_name = Program.DbYear + ".mdb";
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
@@ -915,7 +872,7 @@ namespace CongNo
         {
             CurrentInfoRefresh(RefreshOption.InfoOnly);
 
-            String db_name = Program.DbYear;
+            String db_name = Program.DbYear + ".mdb";
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
@@ -1095,7 +1052,7 @@ namespace CongNo
 
         private void Delete_Click(object sender, EventArgs e)
         {
-            String db_name = Program.DbYear;
+            String db_name = Program.DbYear + ".mdb";
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
@@ -1175,7 +1132,7 @@ namespace CongNo
             }
             else
             {
-                String db_name = Program.DbYear;
+                String db_name = Program.DbYear + ".mdb";
                 String db_path = Environment.CurrentDirectory + @"\Database\";
                 String db_file = db_path + db_name;
 
