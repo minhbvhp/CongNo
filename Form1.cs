@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using OfficeOpenXml;
 using System.IO;
 using OfficeOpenXml.Style;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 
 namespace CongNo
@@ -1366,7 +1368,45 @@ namespace CongNo
 
         private void NextYear_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Chưa được đâu, ahihi");
+            //Write to Json
+            StringBuilder sb = new StringBuilder();
+            StringWriter sw = new StringWriter(sb);
+
+            using (JsonWriter writer = new JsonTextWriter(sw))
+            {
+                writer.Formatting = Formatting.Indented;
+                writer.WriteStartObject();
+                writer.WritePropertyName("KiHieuHoaDon");
+                writer.WriteValue("HP/18E");
+                writer.WritePropertyName("SoHoaDon");
+                writer.WriteValue("12345");
+                writer.WriteEndObject();
+            }
+            
+            String json = sw.ToString();
+            String path = Environment.CurrentDirectory + @"\test.json";
+            if (File.Exists(path))
+                File.Delete(path);
+
+            using (StreamWriter test = new StreamWriter(path))
+            {
+                test.WriteLine(json);
+            }
+
+
+            //Read Json
+            using (StreamReader r = new StreamReader(path))
+            {
+                string jsonRead = r.ReadToEnd();
+
+                JObject o = JObject.Parse(jsonRead);
+                String abc = String.Format("Hóa đơn số {0} có kí hiệu là {1}", o["SoHoaDon"].ToString(), o["KiHieuHoaDon"].ToString());
+                MessageBox.Show(abc);
+            }
+            
+            
+
+
         }
     }
 }
