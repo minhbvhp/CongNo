@@ -398,7 +398,7 @@ namespace CongNo
                             worksheet.Cells["F1"].Value = "TT";
 
                             //Cell Phòng
-                            worksheet.Cells["D3"].Formula = @"= ""PHÒNG "" & VLOOKUP(F1,'List Phong'!A1:B12,2,FALSE)";
+                            worksheet.Cells["D3"].Formula = @"""PHÒNG "" & VLOOKUP(F1,'List Phong'!A1:B12,2,FALSE)";
                             worksheet.Cells["D3"].Style.Font.Bold = true;
                             worksheet.Cells["D3"].Style.Font.Size = 12;
 
@@ -409,7 +409,7 @@ namespace CongNo
                             worksheet.Cells["C4:AS4"].Style.Font.Bold = true;
                             worksheet.Cells["C4:AS4"].Style.Font.Size = 14;
 
-                            worksheet.Cells["C5"].Formula = @"= ""Tháng "" & MONTH(E1) & "" năm "" & YEAR(E1)";
+                            worksheet.Cells["C5"].Formula = @"""Tháng "" & MONTH(E1) & "" năm "" & YEAR(E1)";
                             worksheet.Cells["C5:AS5"].Merge = true;
                             worksheet.Cells["C5:AS5"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                             worksheet.Cells["C5:AS5"].Style.Font.Bold = true;
@@ -547,7 +547,7 @@ namespace CongNo
                                 worksheet.Cells["A" + currentRow].Value = rs.Fields["ngay_hoa_don"].Value;
                                 worksheet.Cells["B" + currentRow].Value = rs.Fields["ten_phong"].Value;
 
-                                String fSTT = String.Format("=(SUBTOTAL(3,$D${0}:D{1}))", ROW_BEFORE_START_EXCEL + 1, currentRow);
+                                String fSTT = String.Format("(SUBTOTAL(3,$D${0}:D{1}))", ROW_BEFORE_START_EXCEL + 1, currentRow);
                                 worksheet.Cells["C" + currentRow].Formula = fSTT;
 
                                 worksheet.Cells["D" + currentRow].Value = rs.Fields["cong_ty"].Value;
@@ -556,7 +556,7 @@ namespace CongNo
                                 worksheet.Cells["G" + currentRow].Value = rs.Fields["han_thanh_toan"].Value;
                                 worksheet.Cells["H" + currentRow].Value = rs.Fields["ma_nv"].Value;
 
-                                String fNgayQuaHan = String.Format("=IF(AND(AK{0} > 0, $E$1 > G{0}), $E$1 - G{0}, 0)", currentRow);
+                                String fNgayQuaHan = String.Format("IF(AND(AK{0} > 0, $E$1 > G{0}), $E$1 - G{0}, 0)", currentRow);
                                 worksheet.Cells["I" + currentRow].Formula = fNgayQuaHan;
 
                                 if (rs.Fields["tong_dau_ky"].Value is DBNull)
@@ -577,37 +577,37 @@ namespace CongNo
                                 worksheet.Cells["U" + currentRow].Value = rs.Fields["tongno11"].Value;
                                 worksheet.Cells["V" + currentRow].Value = rs.Fields["tongno12"].Value;
 
-                                String fCongPhatSinh = String.Format("=(Subtotal(109,K{0}:V{0}))", currentRow);
+                                String fCongPhatSinh = String.Format("(Subtotal(109,K{0}:V{0}))", currentRow);
                                 worksheet.Cells["W" + currentRow].Formula = fCongPhatSinh;
 
-                                String fCongThanhToan = String.Format("=(Subtotal(109,X{0}:AI{0}))", currentRow);
+                                String fCongThanhToan = String.Format("(Subtotal(109,X{0}:AI{0}))", currentRow);
                                 worksheet.Cells["AJ" + currentRow].Formula = fCongThanhToan;
 
-                                String fCuoiKy = String.Format("=J{0}+W{0}-AJ{0}", currentRow);
+                                String fCuoiKy = String.Format("J{0}+W{0}-AJ{0}", currentRow);
                                 worksheet.Cells["AK" + currentRow].Formula = fCuoiKy;
 
-                                String fTrongHan = String.Format("=IF(I{0}=0,AK{0},0)", currentRow);
+                                String fTrongHan = String.Format("IF(I{0}=0,AK{0},0)", currentRow);
                                 worksheet.Cells["AL" + currentRow].Formula = fTrongHan;
 
-                                String fDuoi1Thang = String.Format("=IF(AND(I{0}>=1,I{0}<=30),AK{0},0)", currentRow);
+                                String fDuoi1Thang = String.Format("IF(AND(I{0}>=1,I{0}<=30),AK{0},0)", currentRow);
                                 worksheet.Cells["AM" + currentRow].Formula = fDuoi1Thang;
 
-                                String fDuoi3Thang = String.Format("=IF(AND(I{0}>=31,I{0}<=90),AK{0},0)", currentRow);
+                                String fDuoi3Thang = String.Format("IF(AND(I{0}>=31,I{0}<=90),AK{0},0)", currentRow);
                                 worksheet.Cells["AN" + currentRow].Formula = fDuoi3Thang;
 
-                                String f3Den6Thang = String.Format("=IF(AND(I{0}>=91,I{0}<=180),AK{0},0)", currentRow);
+                                String f3Den6Thang = String.Format("IF(AND(I{0}>=91,I{0}<=180),AK{0},0)", currentRow);
                                 worksheet.Cells["AO" + currentRow].Formula = f3Den6Thang;
 
-                                String f6ThangDen1Nam = String.Format("=IF(AND(I{0}>=181,I{0}<=365),AK{0},0)", currentRow);
+                                String f6ThangDen1Nam = String.Format("IF(AND(I{0}>=181,I{0}<=365),AK{0},0)", currentRow);
                                 worksheet.Cells["AP" + currentRow].Formula = f6ThangDen1Nam;
 
-                                String f1Den2Nam = String.Format("=IF(AND(I{0}>=366,I{0}<=730),AK{0},0)", currentRow);
+                                String f1Den2Nam = String.Format("IF(AND(I{0}>=366,I{0}<=730),AK{0},0)", currentRow);
                                 worksheet.Cells["AQ" + currentRow].Formula = f1Den2Nam;
 
-                                String f2Den3Nam = String.Format("=IF(AND(I{0}>=731,I{0}<=1095),AK{0},0)", currentRow);
+                                String f2Den3Nam = String.Format("IF(AND(I{0}>=731,I{0}<=1095),AK{0},0)", currentRow);
                                 worksheet.Cells["AR" + currentRow].Formula = f2Den3Nam;
 
-                                String fTren3Nam = String.Format("=IF(I{0}>=1096,AK{0},0)", currentRow);
+                                String fTren3Nam = String.Format("IF(I{0}>=1096,AK{0},0)", currentRow);
                                 worksheet.Cells["AS" + currentRow].Formula = fTren3Nam;
 
                                 //Lấy thông tin phát sinh để matching với thu nợ
@@ -683,13 +683,13 @@ namespace CongNo
 
                             worksheet.Cells["D" + rowTong].Value = "Tổng cộng";
 
-                            String fDuDauKy = String.Format("=(Subtotal(109,J{0}:J{1}))", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
+                            String fDuDauKy = String.Format("(Subtotal(109,J{0}:J{1}))", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
                             worksheet.Cells["J" + rowTong].Formula = fDuDauKy;
 
-                            String fTongCongPhatSinh = String.Format("=Sum(W{0}:W{1})", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
+                            String fTongCongPhatSinh = String.Format("Sum(W{0}:W{1})", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
                             worksheet.Cells["W" + rowTong].Formula = fTongCongPhatSinh;
 
-                            String fTongCongThanhToan = String.Format("=Sum(AJ{0}:AJ{1})", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
+                            String fTongCongThanhToan = String.Format("Sum(AJ{0}:AJ{1})", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
                             worksheet.Cells["AJ" + rowTong].Formula = fTongCongThanhToan;
 
                             //Copy công thức
@@ -709,12 +709,12 @@ namespace CongNo
                             //Xác nhận cuối báo cáo
                             int rowXacNhan = rowTong + 3;
                             worksheet.Row(rowXacNhan).Style.Numberformat.Format = "General";
-                            worksheet.Cells["D" + rowXacNhan].Formula = "=D3";
+                            worksheet.Cells["D" + rowXacNhan].Formula = "D3";
 
-                            String fPhongXacNhan = String.Format("= \"Xác nhận đối chiếu đến hết ngày \" & DAY(E1) & \" tháng \" & MONTH(E1) & \" năm \" & YEAR(E1)");
+                            String fPhongXacNhan = String.Format("\"Xác nhận đối chiếu đến hết ngày \" & DAY(E1) & \" tháng \" & MONTH(E1) & \" năm \" & YEAR(E1)");
                             worksheet.Cells["D" + rowXacNhan + 1].Formula = fPhongXacNhan;
 
-                            String fNgayThangNam = String.Format("= \"Hải Phòng, ngày \" & DAY(E1) & \" tháng \" & MONTH(E1) & \" năm \" & YEAR(E1)");
+                            String fNgayThangNam = String.Format("\"Hải Phòng, ngày \" & DAY(E1) & \" tháng \" & MONTH(E1) & \" năm \" & YEAR(E1)");
                             worksheet.Cells["AQ" + (rowXacNhan - 1)].Formula = fNgayThangNam;
 
                             worksheet.Cells["AJ" + rowXacNhan].Value = "PHÒNG TÀI CHÍNH KẾ TOÁN";
@@ -729,6 +729,36 @@ namespace CongNo
                             package.SaveAs(newFile);
 
                             MessageBox.Show("Đã lập đối chiếu công nợ", "Chúc mừng", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                            //Lấy số phát sinh chưa thanh toán hết
+                            rs = db.OpenRecordset("cong_no");
+                            if (!rs.BOF)
+                                rs.MoveFirst();
+
+                            double debt = 0;
+                            
+                            String invoiceToText = String.Empty;
+                            String textFileName = Environment.CurrentDirectory + @"\test.txt";
+                            if (File.Exists(textFileName))
+                                File.Delete(textFileName);
+
+                            worksheet.Cells["AK" + ROW_BEFORE_START_EXCEL + ":AK" + maxRowExcel].Calculate();
+
+                            using (StreamWriter sw = new StreamWriter(textFileName))
+                            {
+                                for (i = ROW_BEFORE_START_EXCEL + 1; i <= maxRowExcel; i++)
+                                {
+                                    debt = Convert.ToDouble(worksheet.Cells["AK" + i].Value);
+
+                                    if (debt > 0)
+                                    {
+                                        invoiceToText = rs.Fields["ki_hieu_hoa_don"].Value + rs.Fields["so_hoa_don"].Value
+                                            + rs.Fields["ngay_hoa_don"].Value;
+                                        sw.WriteLine(invoiceToText);
+                                    }
+                                    rs.MoveNext();
+                                }
+                            }
                         }
                         rs.Close();
                         db.Close();
