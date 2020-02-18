@@ -604,9 +604,11 @@ namespace CongNo
                                 String f1Den2Nam = String.Format("=IF(AND(I{0}>=366,I{0}<=730),AK{0},0)", currentRow);
                                 worksheet.Cells["AQ" + currentRow].Formula = f1Den2Nam;
 
-                                String f2Den3Nam = String.Format("=IF(AND(I{0}>=366,I{0}<=730),AK{0},0)", currentRow);
-                                worksheet.Cells["AQ" + currentRow].Formula = f2Den3Nam;
+                                String f2Den3Nam = String.Format("=IF(AND(I{0}>=731,I{0}<=1095),AK{0},0)", currentRow);
+                                worksheet.Cells["AR" + currentRow].Formula = f2Den3Nam;
 
+                                String fTren3Nam = String.Format("=IF(I{0}>=1096,AK{0},0)", currentRow);
+                                worksheet.Cells["AS" + currentRow].Formula = fTren3Nam;
 
                                 //Lấy thông tin phát sinh để matching với thu nợ
                                 invoiceID = String.Format("{0};{1}", rs.Fields["ki_hieu_hoa_don"].Value, rs.Fields["so_hoa_don"].Value);
@@ -675,6 +677,10 @@ namespace CongNo
                             }
 
                             //Thêm các ô tổng
+                            worksheet.Row(rowTong).Height = 40;
+                            worksheet.Row(rowTong).Style.Font.Size = 13;
+                            worksheet.Cells["A" + rowTong + ":AS" + rowTong].Style.Font.Bold = true;
+
                             worksheet.Cells["D" + rowTong].Value = "Tổng cộng";
 
                             String fDuDauKy = String.Format("=(Subtotal(109,J{0}:J{1}))", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
@@ -695,7 +701,6 @@ namespace CongNo
                                 worksheet.Cells["J" + rowTong].Copy(worksheet.Cells[rowTong, i]);
 
                             //Kẻ bảng
-                            worksheet.Cells["A" + rowTong + ":AS" + rowTong].Style.Font.Bold = true;
                             worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Top.Style = ExcelBorderStyle.Thin;
                             worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
                             worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Left.Style = ExcelBorderStyle.Thin;
@@ -716,7 +721,11 @@ namespace CongNo
                             worksheet.Cells["AQ" + rowXacNhan].Value = "LÃNH ĐẠO CÔNG TY";
                             worksheet.Cells["D" + rowXacNhan + ":AS" + rowXacNhan].Style.Font.Bold = true;
 
+                            //Lọc,Scale và Freeze
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + ROW_BEFORE_START_EXCEL].AutoFilter = true;
+                            worksheet.View.FreezePanes(ROW_BEFORE_START_EXCEL + 1, 8);
                             worksheet.View.ZoomScale = 85;
+
                             package.SaveAs(newFile);
 
                             MessageBox.Show("Đã lập đối chiếu công nợ", "Chúc mừng", MessageBoxButtons.OK, MessageBoxIcon.Information);
