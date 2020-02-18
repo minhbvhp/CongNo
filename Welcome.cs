@@ -73,7 +73,7 @@ namespace CongNo
                 String queryName = "cong_no_draft";
                 String querySql = String.Format("SELECT invoice.ngay_ct, invoice.ngay_hoa_don, department.ma_phong," +
                     " department.ten_phong, customers.mst, customers.cong_ty, " +
-                    "invoice.ki_hieu_hoa_don, invoice.so_hoa_don, invoice.han_thanh_toan, revenue.ma_nv," +
+                    "invoice.ki_hieu_hoa_don, invoice.so_hoa_don, invoice.han_thanh_toan, revenue.ma_nv, revenue.user_nhap, " +
                     "IIf(Year(invoice.ngay_ct)<{0},invoice.so_tien_phat_sinh) AS du_dau_ky, IIf(Year(invoice.ngay_ct)={0} " +
                     "And Month(invoice.ngay_ct)=1,invoice.so_tien_phat_sinh) AS no1, IIf(Year(invoice.ngay_ct)={0} And " +
                     "Month(invoice.ngay_ct)=2,invoice.so_tien_phat_sinh) AS no2, IIf(Year(invoice.ngay_ct)={0} And " +

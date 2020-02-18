@@ -137,19 +137,18 @@ namespace CongNo
                             rs.Fields["dong"].Value = row;
                             rs.Fields["loai_ct"].Value = NullToString(worksheet.Cells["A" + row].Value);
                             rs.Fields["no_co"].Value = NullToString(worksheet.Cells["D" + row].Value);
-                            rs.Fields["so_bk"].Value = NullToString(worksheet.Cells["E" + row].Value);
-                            rs.Fields["mst_draft"].Value = NullToString(worksheet.Cells["K" + row].Value);
-                            rs.Fields["cong_ty1"].Value = NullToString(worksheet.Cells["F" + row].Value);
-                            rs.Fields["cong_ty2"].Value = NullToString(worksheet.Cells["G" + row].Value);
-                            rs.Fields["ky_hieu_hd"].Value = NullToString(worksheet.Cells["L" + row].Value);
-                            rs.Fields["so_hoa_don"].Value = NullToString(worksheet.Cells["M" + row].Value);
-                            rs.Fields["ngay_hoa_don_draft"].Value = NullToString(worksheet.Cells["N" + row].Value);
-                            rs.Fields["ma_nv"].Value = NullToString(worksheet.Cells["I" + row].Value);
-                            rs.Fields["ma_phong"].Value = NullToString(worksheet.Cells["J" + row].Value);
+                            rs.Fields["mst_draft"].Value = NullToString(worksheet.Cells["J" + row].Value);
+                            rs.Fields["cong_ty1"].Value = NullToString(worksheet.Cells["E" + row].Value);
+                            rs.Fields["cong_ty2"].Value = NullToString(worksheet.Cells["F" + row].Value);
+                            rs.Fields["ky_hieu_hd"].Value = NullToString(worksheet.Cells["K" + row].Value);
+                            rs.Fields["so_hoa_don"].Value = NullToString(worksheet.Cells["L" + row].Value);
+                            rs.Fields["ngay_hoa_don_draft"].Value = NullToString(worksheet.Cells["M" + row].Value);
+                            rs.Fields["ma_nv"].Value = NullToString(worksheet.Cells["H" + row].Value);
+                            rs.Fields["ma_phong"].Value = NullToString(worksheet.Cells["I" + row].Value);
                             rs.Fields["so_tien"].Value = NullToString(worksheet.Cells["C" + row].Value);
-                            rs.Fields["han_tt_draft"].Value = NullToString(worksheet.Cells["H" + row].Value);
+                            rs.Fields["han_tt_draft"].Value = NullToString(worksheet.Cells["G" + row].Value);
                             rs.Fields["ngay_ct_draft"].Value = NullToString(worksheet.Cells["B" + row].Value);
-                            rs.Fields["user"].Value = NullToString(worksheet.Cells["O" + row].Value);
+                            rs.Fields["user"].Value = NullToString(worksheet.Cells["N" + row].Value);
                             rs.Update();
 
                             uploadProgress.Value = (row - 1) * 100 / lastRow;
@@ -273,7 +272,7 @@ namespace CongNo
                 {
                     saveFileDialog.DefaultExt = "xlsx";
                     saveFileDialog.Filter = "Excel Workbook(*.xlsx)|*.xlsx";
-                    saveFileDialog.FileName = "Doi chieu cong no";
+                    saveFileDialog.FileName = "Doi chieu cong no - " + Program.DbYear;
 
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
@@ -307,6 +306,10 @@ namespace CongNo
 
                         using (var package = new ExcelPackage(newFile))
                         {
+                            package.Workbook.Properties.Title = "Doi chieu cong no - " + Program.DbYear;
+                            package.Workbook.Properties.Author = "Trần Khoa Minh";
+                            package.Workbook.Properties.Company = "Bảo Việt Hải Phòng";
+
                             //Sheet danh sách phòng
                             ExcelWorksheet departmentWorksheet = package.Workbook.Worksheets.Add("List Phong");
                             departmentWorksheet.Cells["A1"].Value = "TT";
@@ -733,33 +736,92 @@ namespace CongNo
                             MessageBox.Show("Đã lập đối chiếu công nợ", "Chúc mừng", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                             //Lấy số phát sinh chưa thanh toán hết
+                            worksheet.Cells["AK" + ROW_BEFORE_START_EXCEL + ":AK" + maxRowExcel].Calculate();
                             rs = db.OpenRecordset("cong_no");
                             if (!rs.BOF)
                                 rs.MoveFirst();
 
                             double debt = 0;
-                            
-                            String invoiceToText = String.Empty;
-                            String textFileName = Environment.CurrentDirectory + @"\test.txt";
-                            if (File.Exists(textFileName))
-                                File.Delete(textFileName);
 
-                            worksheet.Cells["AK" + ROW_BEFORE_START_EXCEL + ":AK" + maxRowExcel].Calculate();
+                            //Write to Json
+                            StringBuilder sbInvoice = new StringBuilder();
+                            StringWriter swInvoice = new StringWriter(sbInvoice);
 
-                            using (StreamWriter sw = new StreamWriter(textFileName))
+                            StringBuilder sbRevenue = new StringBuilder();
+                            StringWriter swRevenue = new StringWriter(sbRevenue);
+
+                            using (JsonWriter writerInvoice = new JsonTextWriter(swInvoice))
                             {
-                                for (i = ROW_BEFORE_START_EXCEL + 1; i <= maxRowExcel; i++)
+                                using (JsonWriter writerRevenue = new JsonTextWriter(swRevenue))
                                 {
-                                    debt = Convert.ToDouble(worksheet.Cells["AK" + i].Value);
-
-                                    if (debt > 0)
+                                    for (i = ROW_BEFORE_START_EXCEL + 1; i <= maxRowExcel; i++)
                                     {
-                                        invoiceToText = rs.Fields["ki_hieu_hoa_don"].Value + rs.Fields["so_hoa_don"].Value
-                                            + rs.Fields["ngay_hoa_don"].Value;
-                                        sw.WriteLine(invoiceToText);
+                                        debt = Convert.ToDouble(worksheet.Cells["AK" + i].Value);
+
+                                        if (debt > 0)
+                                        {
+                                            writerInvoice.Formatting = Formatting.Indented;
+                                            writerInvoice.WriteStartObject();
+                                            writerInvoice.WritePropertyName("KiHieuHoaDon");
+                                            writerInvoice.WriteValue(rs.Fields["ki_hieu_hoa_don"].Value);
+                                            writerInvoice.WritePropertyName("SoHoaDon");
+                                            writerInvoice.WriteValue(rs.Fields["so_hoa_don"].Value);
+                                            writerInvoice.WritePropertyName("MST");
+                                            writerInvoice.WriteValue(rs.Fields["mst"].Value);
+                                            writerInvoice.WritePropertyName("HanThanhToan");
+                                            writerInvoice.WriteValue(rs.Fields["han_thanh_toan"].Value);
+                                            writerInvoice.WritePropertyName("SoTienPhatSinh");
+                                            writerInvoice.WriteValue(worksheet.Cells["AK" + i].Value);
+                                            writerInvoice.WritePropertyName("NgayChungTu");
+                                            writerInvoice.WriteValue(rs.Fields["ngay_ct"].Value);
+                                            writerInvoice.WritePropertyName("NgayHoaDon");
+                                            writerInvoice.WriteValue(rs.Fields["ngay_hoa_don"].Value);
+                                            writerInvoice.WriteEndObject();
+
+                                            writerRevenue.Formatting = Formatting.Indented;
+                                            writerRevenue.WriteStartObject();
+                                            writerRevenue.WritePropertyName("KiHieuHoaDon");
+                                            writerRevenue.WriteValue(rs.Fields["ki_hieu_hoa_don"].Value);
+                                            writerRevenue.WritePropertyName("SoHoaDon");
+                                            writerRevenue.WriteValue(rs.Fields["so_hoa_don"].Value);
+                                            writerRevenue.WritePropertyName("MaPhong");
+                                            writerRevenue.WriteValue(rs.Fields["ma_phong"].Value);
+                                            writerRevenue.WritePropertyName("MaNghiepVu");
+                                            writerRevenue.WriteValue(rs.Fields["ma_nv"].Value);
+                                            writerRevenue.WritePropertyName("User");
+                                            writerRevenue.WriteValue(rs.Fields["user_nhap"].Value);
+                                            writerRevenue.WriteEndObject();
+
+                                        }
                                     }
                                     rs.MoveNext();
                                 }
+                            }
+
+                            String ToJsonInvoice = swInvoice.ToString();
+                            String ToJsonRevenue = swRevenue.ToString();
+
+                            DirectoryInfo directoryInfo = new DirectoryInfo(Environment.CurrentDirectory + @"\json");
+
+                            if (!directoryInfo.Exists)
+                                Directory.CreateDirectory(Environment.CurrentDirectory + @"\json");
+
+                            String invoiceToObject = Environment.CurrentDirectory + @"\json\invoice.json";
+                            if (File.Exists(invoiceToObject))
+                                File.Delete(invoiceToObject);
+
+                            String revenueToObject = Environment.CurrentDirectory + @"\json\revenue.json";
+                            if (File.Exists(revenueToObject))
+                                File.Delete(revenueToObject);
+
+                            using (StreamWriter invoiceToJson = new StreamWriter(invoiceToObject))
+                            {
+                                invoiceToJson.WriteLine(ToJsonInvoice);
+                            }
+
+                            using (StreamWriter revenueToJson = new StreamWriter(revenueToObject))
+                            {
+                                revenueToJson.WriteLine(ToJsonRevenue);
                             }
                         }
                         rs.Close();
@@ -1015,6 +1077,10 @@ namespace CongNo
                 {
                     using (var package = new ExcelPackage(newFile))
                     {
+                        package.Workbook.Properties.Title = "Mau lay du lieu Sunweb";
+                        package.Workbook.Properties.Author = "Trần Khoa Minh";
+                        package.Workbook.Properties.Company = "Bảo Việt Hải Phòng";
+
                         ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Du lieu Sunweb");
                         worksheet.Cells["A:O"].Style.Font.Name = "Calibri";
                         worksheet.Cells["A1:O1"].Style.Font.Bold = true;
@@ -1045,17 +1111,16 @@ namespace CongNo
                         worksheet.Cells["B1"].Value = "NGAYCT";
                         worksheet.Cells["C1"].Value = "SOTIENQUYDOI";
                         worksheet.Cells["D1"].Value = "NOCO";
-                        worksheet.Cells["E1"].Value = "SOTHAMCHIEU";
-                        worksheet.Cells["F1"].Value = "GNRL_DESCR_01";
-                        worksheet.Cells["G1"].Value = "GNRL_DESCR_02";
-                        worksheet.Cells["H1"].Value = "NGAYDAOHAN";
-                        worksheet.Cells["I1"].Value = "T2";
-                        worksheet.Cells["J1"].Value = "T3";
-                        worksheet.Cells["K1"].Value = "MASOTHUE";
-                        worksheet.Cells["L1"].Value = "KYHIEUHOADON";
-                        worksheet.Cells["M1"].Value = "SOHOADON";
-                        worksheet.Cells["N1"].Value = "NGAYHOADONGOC";
-                        worksheet.Cells["O1"].Value = "USERNHAP";
+                        worksheet.Cells["E1"].Value = "GNRL_DESCR_01";
+                        worksheet.Cells["F1"].Value = "GNRL_DESCR_02";
+                        worksheet.Cells["G1"].Value = "NGAYDAOHAN";
+                        worksheet.Cells["H1"].Value = "T2";
+                        worksheet.Cells["I1"].Value = "T3";
+                        worksheet.Cells["J1"].Value = "MASOTHUE";
+                        worksheet.Cells["K1"].Value = "KYHIEUHOADON";
+                        worksheet.Cells["L1"].Value = "SOHOADON";
+                        worksheet.Cells["M1"].Value = "NGAYHOADONGOC";
+                        worksheet.Cells["N1"].Value = "USERNHAP";
 
                         package.Save();
                     }
