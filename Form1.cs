@@ -99,7 +99,7 @@ namespace CongNo
             notUploadList.Rows.Clear();
             searchList.Rows.Clear();
 
-            //Đọc file Sunweb
+            //Read Sunweb excel form
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "File mẫu|*.xlsx";
             openFileDialog.FileName = "Mau lay du lieu Sunweb";
@@ -109,11 +109,11 @@ namespace CongNo
                 var importExcel = new FileInfo(inputPath);
                 using (var package = new ExcelPackage(importExcel))
                 {
-                    //Lấy tổng số bản ghi
+                    //Get total of records
                     ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault();
                     int lastRow = (int)worksheet.Dimension.End.Row;
 
-                    //Tạo connection
+                    //Create connection
                     int row;
 
                     String db_name = Program.DbYear + ".mdb";
@@ -124,7 +124,7 @@ namespace CongNo
                     DAO.Database db = null;
                     DAO.Recordset rs;
 
-                    //Đổ dữ liệu vào Database
+                    //Export to .mdb file
                     try
                     {
                         db = dBEngine.OpenDatabase(db_file);
@@ -171,7 +171,7 @@ namespace CongNo
                         uploadProgress.Value += 1;
                         uploadProgress.Refresh();
 
-                        //Liệt kê dữ liệu chưa được Upload
+                        //Show not_upload to DataGridView
                         rs = db.OpenRecordset("not_upload");
                         if (!rs.EOF)
                             rs.MoveLast();
@@ -214,13 +214,14 @@ namespace CongNo
                         rs.Close();
                         db.Close();
 
+                        //Compact Database
                         String compactDbTemp = db_path + "temp.mdb";
                         String compactDbName = db_path + Program.DbYear + ".mdb";
                         dBEngine.CompactDatabase(db_file, compactDbTemp);
                         File.Delete(db_file);
                         File.Move(compactDbTemp, compactDbName);
 
-                        MessageBox.Show("Đã upload dữ liệu xong.", "Chúc mừng", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Đã upload dữ liệu xong.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     catch (Exception ex)
                     {
@@ -287,7 +288,7 @@ namespace CongNo
 
                         db = dBEngine.OpenDatabase(db_file);
 
-                        //Lấy list các phòng
+                        //Get department list from Database
                         List<String> departments = new List<string>();
                         rs = db.OpenRecordset("department");
                         if (!rs.BOF)
@@ -298,7 +299,7 @@ namespace CongNo
                             rs.MoveNext();
                         }
 
-                        //Tạo mẫu báo cáo
+                        //Create "Doi chieu cong no" form
                         var newFile = new FileInfo(saveFileDialog.FileName);
 
                         if (newFile.Exists)
@@ -310,7 +311,7 @@ namespace CongNo
                             package.Workbook.Properties.Author = "Trần Khoa Minh";
                             package.Workbook.Properties.Company = "Bảo Việt Hải Phòng";
 
-                            //Sheet danh sách phòng
+                            //Sheet department list
                             ExcelWorksheet departmentWorksheet = package.Workbook.Worksheets.Add("List Phong");
                             departmentWorksheet.Cells["A1"].Value = "TT";
                             departmentWorksheet.Cells["B1"].Value = "BẢO HIỂM TÀU THỦY";
@@ -350,7 +351,7 @@ namespace CongNo
 
                             departmentWorksheet.Hidden = eWorkSheetHidden.VeryHidden;
 
-                            //Sheet đối chiếu công nợ
+                            //Sheet "Doi chieu cong no"
                             ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Doi chieu cong no");
 
                             worksheet.Column(1).Width = GetTrueColumnWidth(12.14);
@@ -420,7 +421,7 @@ namespace CongNo
                             worksheet.Cells["C5:AS5"].Style.Font.Bold = true;
                             worksheet.Cells["C5:AS5"].Style.Font.Size = 14;
 
-                            //Tạo đề mục các bảng
+                            //Column name
                             worksheet.Cells["A6:AS8"].Style.Fill.PatternType = ExcelFillStyle.Solid;
                             worksheet.Cells["A6:B8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(255, 255, 0));
                             worksheet.Cells["C6:D8"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(221, 217, 195));
@@ -523,7 +524,7 @@ namespace CongNo
                             worksheet.Cells["A6:AS8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
 
-                            //Pull dữ liệu phát sinh nợ từ Database vào bảng
+                            //Export "cong_no" to "Doi chieu cong no" excel file
                             rs = db.OpenRecordset("cong_no");
                             const byte ROW_BEFORE_START_EXCEL = 8;
                             int maxPhatSinh = rs.RecordCount;
@@ -531,7 +532,7 @@ namespace CongNo
                             int currentRow = 0;
                             int rowTong = maxRowExcel + 1;
 
-                            //Format dữ liệu (bao gồm cột tổng)
+                            //Format cells (inclue total rows)
                             worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":A" + rowTong].Style.Numberformat.Format = "dd/MM/yyyy";
                             worksheet.Cells["B" + ROW_BEFORE_START_EXCEL + ":B" + rowTong].Style.Numberformat.Format = "@";
                             worksheet.Cells["C" + ROW_BEFORE_START_EXCEL + ":C" + rowTong].Style.Numberformat.Format = "#";
@@ -615,7 +616,7 @@ namespace CongNo
                                 String fTren3Nam = String.Format("IF(I{0}>=1096,AK{0},0)", currentRow);
                                 worksheet.Cells["AS" + currentRow].Formula = fTren3Nam;
 
-                                //Lấy thông tin phát sinh để matching với thu nợ
+                                //Get "ki_hieu_hoa_don" and "so_hoa_don" from "cong_no" to Dictionary
                                 invoiceID = String.Format("{0};{1}", rs.Fields["ki_hieu_hoa_don"].Value, rs.Fields["so_hoa_don"].Value);
                                 invoiceRow = currentRow;
 
@@ -625,7 +626,7 @@ namespace CongNo
                                 rs.MoveNext();
                             }
 
-                            //Chạy số liệu tiền về
+                            //Get "ki_hieu_hoa_don" and "so_hoa_don" from "tra_tien", match with "cong_no"
                             rs = db.OpenRecordset("tra_tien");
                             int maxTraTien = rs.RecordCount;
                             String paidID = String.Empty;
@@ -681,7 +682,7 @@ namespace CongNo
                                 rs.MoveNext();
                             }
 
-                            //Thêm các ô tổng
+                            //Add total cells
                             worksheet.Row(rowTong).Height = 40;
                             worksheet.Row(rowTong).Style.Font.Size = 13;
                             worksheet.Cells["A" + rowTong + ":AS" + rowTong].Style.Font.Bold = true;
@@ -697,7 +698,7 @@ namespace CongNo
                             String fTongCongThanhToan = String.Format("Sum(AJ{0}:AJ{1})", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
                             worksheet.Cells["AJ" + rowTong].Formula = fTongCongThanhToan;
 
-                            //Copy công thức
+                            //Copy formula
                             for (i = 10; i <= 22; i++) //Column K:V
                                 worksheet.Cells["J" + rowTong].Copy(worksheet.Cells[rowTong, i]);
                             for (i = 24; i <= 35; i++) //Column X:AI
@@ -705,13 +706,13 @@ namespace CongNo
                             for (i = 37; i <= 45; i++) //Column AK:AS
                                 worksheet.Cells["J" + rowTong].Copy(worksheet.Cells[rowTong, i]);
 
-                            //Kẻ bảng
+                            //Add border
                             worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Top.Style = ExcelBorderStyle.Thin;
                             worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
                             worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Left.Style = ExcelBorderStyle.Thin;
                             worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Right.Style = ExcelBorderStyle.Thin;
 
-                            //Xác nhận cuối báo cáo
+                            //Content at end of report
                             int rowXacNhan = rowTong + 3;
                             worksheet.Row(rowXacNhan).Style.Numberformat.Format = "General";
                             worksheet.Cells["D" + rowXacNhan].Formula = "D3";
@@ -726,16 +727,16 @@ namespace CongNo
                             worksheet.Cells["AQ" + rowXacNhan].Value = "LÃNH ĐẠO CÔNG TY";
                             worksheet.Cells["D" + rowXacNhan + ":AS" + rowXacNhan].Style.Font.Bold = true;
 
-                            //Lọc,Scale và Freeze
+                            //Filter, Scale, Freeze view
                             worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + ROW_BEFORE_START_EXCEL].AutoFilter = true;
                             worksheet.View.FreezePanes(ROW_BEFORE_START_EXCEL + 1, 8);
                             worksheet.View.ZoomScale = 85;
 
                             package.SaveAs(newFile);
 
-                            MessageBox.Show("Đã lập đối chiếu công nợ", "Chúc mừng", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show("Đã lập đối chiếu công nợ", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                            //Lấy số phát sinh chưa thanh toán hết
+                            //Get outstanding from "cong_no", write to json file
                             worksheet.Cells["AK" + ROW_BEFORE_START_EXCEL + ":AK" + maxRowExcel].Calculate();
                             rs = db.OpenRecordset("cong_no");
                             if (!rs.BOF)
@@ -744,84 +745,75 @@ namespace CongNo
                             double debt = 0;
 
                             //Write to Json
-                            StringBuilder sbInvoice = new StringBuilder();
-                            StringWriter swInvoice = new StringWriter(sbInvoice);
+                            StringBuilder sbOutstanding = new StringBuilder();
+                            StringWriter swOutstanding = new StringWriter(sbOutstanding);
 
-                            StringBuilder sbRevenue = new StringBuilder();
-                            StringWriter swRevenue = new StringWriter(sbRevenue);
-
-                            using (JsonWriter writerInvoice = new JsonTextWriter(swInvoice))
+                            using (JsonWriter writerOutstanding = new JsonTextWriter(swOutstanding))
                             {
-                                using (JsonWriter writerRevenue = new JsonTextWriter(swRevenue))
+                                writerOutstanding.Formatting = Formatting.Indented;
+                                writerOutstanding.WriteStartArray();
+
+                                for (i = ROW_BEFORE_START_EXCEL + 1; i <= maxRowExcel; i++)
                                 {
-                                    for (i = ROW_BEFORE_START_EXCEL + 1; i <= maxRowExcel; i++)
+                                    debt = Convert.ToDouble(worksheet.Cells["AK" + i].Value);
+
+                                    if (debt > 0)
                                     {
-                                        debt = Convert.ToDouble(worksheet.Cells["AK" + i].Value);
+                                        writerOutstanding.WriteStartObject();
 
-                                        if (debt > 0)
-                                        {
-                                            writerInvoice.Formatting = Formatting.Indented;
-                                            writerInvoice.WriteStartObject();
-                                            writerInvoice.WritePropertyName("KiHieuHoaDon");
-                                            writerInvoice.WriteValue(rs.Fields["ki_hieu_hoa_don"].Value);
-                                            writerInvoice.WritePropertyName("SoHoaDon");
-                                            writerInvoice.WriteValue(rs.Fields["so_hoa_don"].Value);
-                                            writerInvoice.WritePropertyName("MST");
-                                            writerInvoice.WriteValue(rs.Fields["mst"].Value);
-                                            writerInvoice.WritePropertyName("HanThanhToan");
-                                            writerInvoice.WriteValue(rs.Fields["han_thanh_toan"].Value);
-                                            writerInvoice.WritePropertyName("SoTienPhatSinh");
-                                            writerInvoice.WriteValue(worksheet.Cells["AK" + i].Value);
-                                            writerInvoice.WritePropertyName("NgayChungTu");
-                                            writerInvoice.WriteValue(rs.Fields["ngay_ct"].Value);
-                                            writerInvoice.WritePropertyName("NgayHoaDon");
-                                            writerInvoice.WriteValue(rs.Fields["ngay_hoa_don"].Value);
-                                            writerInvoice.WriteEndObject();
+                                        writerOutstanding.WritePropertyName("KiHieuHoaDon");
+                                        writerOutstanding.WriteValue(rs.Fields["ki_hieu_hoa_don"].Value);
 
-                                            writerRevenue.Formatting = Formatting.Indented;
-                                            writerRevenue.WriteStartObject();
-                                            writerRevenue.WritePropertyName("KiHieuHoaDon");
-                                            writerRevenue.WriteValue(rs.Fields["ki_hieu_hoa_don"].Value);
-                                            writerRevenue.WritePropertyName("SoHoaDon");
-                                            writerRevenue.WriteValue(rs.Fields["so_hoa_don"].Value);
-                                            writerRevenue.WritePropertyName("MaPhong");
-                                            writerRevenue.WriteValue(rs.Fields["ma_phong"].Value);
-                                            writerRevenue.WritePropertyName("MaNghiepVu");
-                                            writerRevenue.WriteValue(rs.Fields["ma_nv"].Value);
-                                            writerRevenue.WritePropertyName("User");
-                                            writerRevenue.WriteValue(rs.Fields["user_nhap"].Value);
-                                            writerRevenue.WriteEndObject();
+                                        writerOutstanding.WritePropertyName("SoHoaDon");
+                                        writerOutstanding.WriteValue(rs.Fields["so_hoa_don"].Value);
 
-                                        }
+                                        writerOutstanding.WritePropertyName("MST");
+                                        writerOutstanding.WriteValue(rs.Fields["mst"].Value);
+
+                                        writerOutstanding.WritePropertyName("KhachHang");
+                                        writerOutstanding.WriteValue(rs.Fields["cong_ty"].Value);
+
+                                        writerOutstanding.WritePropertyName("HanThanhToan");
+                                        writerOutstanding.WriteValue(rs.Fields["han_thanh_toan"].Value);
+
+                                        writerOutstanding.WritePropertyName("SoTienPhatSinh");
+                                        writerOutstanding.WriteValue(worksheet.Cells["AK" + i].Value);
+
+                                        writerOutstanding.WritePropertyName("NgayChungTu");
+                                        writerOutstanding.WriteValue(rs.Fields["ngay_ct"].Value);
+
+                                        writerOutstanding.WritePropertyName("NgayHoaDon");
+                                        writerOutstanding.WriteValue(rs.Fields["ngay_hoa_don"].Value);
+
+                                        writerOutstanding.WritePropertyName("MaPhong");
+                                        writerOutstanding.WriteValue(rs.Fields["ma_phong"].Value);
+
+                                        writerOutstanding.WritePropertyName("MaNghiepVu");
+                                        writerOutstanding.WriteValue(rs.Fields["ma_nv"].Value);
+
+                                        writerOutstanding.WritePropertyName("User");
+                                        writerOutstanding.WriteValue(rs.Fields["user_nhap"].Value);
+
+                                        writerOutstanding.WriteEndObject();
                                     }
                                     rs.MoveNext();
                                 }
+                                writerOutstanding.WriteEndArray();
                             }
 
-                            String ToJsonInvoice = swInvoice.ToString();
-                            String ToJsonRevenue = swRevenue.ToString();
+                            String ToJsonOutstanding = swOutstanding.ToString();
 
                             DirectoryInfo directoryInfo = new DirectoryInfo(Environment.CurrentDirectory + @"\json");
-
                             if (!directoryInfo.Exists)
                                 Directory.CreateDirectory(Environment.CurrentDirectory + @"\json");
+                            int NextYear = Convert.ToInt32(Program.DbYear) + 1;
+                            String outstandingToObject = Environment.CurrentDirectory + @"\json\outstanding - " + NextYear.ToString() + ".json";
+                            if (File.Exists(outstandingToObject))
+                                File.Delete(outstandingToObject);
 
-                            String invoiceToObject = Environment.CurrentDirectory + @"\json\invoice.json";
-                            if (File.Exists(invoiceToObject))
-                                File.Delete(invoiceToObject);
-
-                            String revenueToObject = Environment.CurrentDirectory + @"\json\revenue.json";
-                            if (File.Exists(revenueToObject))
-                                File.Delete(revenueToObject);
-
-                            using (StreamWriter invoiceToJson = new StreamWriter(invoiceToObject))
+                            using (StreamWriter outstandingToJson = new StreamWriter(outstandingToObject))
                             {
-                                invoiceToJson.WriteLine(ToJsonInvoice);
-                            }
-
-                            using (StreamWriter revenueToJson = new StreamWriter(revenueToObject))
-                            {
-                                revenueToJson.WriteLine(ToJsonRevenue);
+                                outstandingToJson.WriteLine(ToJsonOutstanding);
                             }
                         }
                         rs.Close();
@@ -1072,7 +1064,7 @@ namespace CongNo
 
                 var newFile = new FileInfo(selectedFolder + "\\" + fileName);
 
-                //Tạo mẫu
+                //Create "Mau lay du lieu Sunweb" form
                 if (!File.Exists(newFile.ToString()))
                 {
                     using (var package = new ExcelPackage(newFile))
@@ -1433,45 +1425,127 @@ namespace CongNo
 
         private void NextYear_Click(object sender, EventArgs e)
         {
-            //Write to Json
-            StringBuilder sb = new StringBuilder();
-            StringWriter sw = new StringWriter(sb);
-
-            using (JsonWriter writer = new JsonTextWriter(sw))
+            try
             {
-                writer.Formatting = Formatting.Indented;
-                writer.WriteStartObject();
-                writer.WritePropertyName("KiHieuHoaDon");
-                writer.WriteValue("HP/18E");
-                writer.WritePropertyName("SoHoaDon");
-                writer.WriteValue("12345");
-                writer.WriteEndObject();
-            }
-            
-            String json = sw.ToString();
-            String path = Environment.CurrentDirectory + @"\test.json";
-            if (File.Exists(path))
-                File.Delete(path);
+                int NextYear = Convert.ToInt32(Program.DbYear) + 1;
+                String DBFileName = NextYear.ToString() + ".mdb";
 
-            using (StreamWriter test = new StreamWriter(path))
+                DialogResult dialogResult = MessageBox.Show("Bạn chắc chắn muốn tổng kết số liệu năm " + Program.DbYear +
+                    " và lập dữ liệu mới của năm " + NextYear.ToString() + " ?", "Tổng kết năm", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (dialogResult == DialogResult.Yes)
+                {
+                    DAO.DBEngine dBEngine = new DAO.DBEngine();
+                    DAO.Database db = null;
+                    DAO.Recordset rsInvoice = null;
+                    DAO.Recordset rsRevenue = null;
+                    DAO.Recordset rsCustomers = null;
+
+                    //Read Json
+                    String outstandingReaderPath = Environment.CurrentDirectory + @"\json\outstanding - " + NextYear.ToString() + ".json";
+
+                    if (File.Exists(outstandingReaderPath))
+                    {
+                        FileInfo fileInfo = new FileInfo(Environment.CurrentDirectory + @"\Database\" + DBFileName);
+                        String db_file = fileInfo.ToString();
+
+                        //Create new DB of next year
+                        if (File.Exists(db_file))
+                            File.Delete(db_file);
+
+                        using (Stream s = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("CongNo.DB.mdb"))
+                        {
+                            using (FileStream ResourceFile = new FileStream(fileInfo.ToString(), FileMode.Create, FileAccess.Write))
+                            {
+                                s.CopyTo(ResourceFile);
+                            }
+                        }
+
+                        db = dBEngine.OpenDatabase(db_file);
+                        String queryName = "cong_no_draft";
+                        String querySql = String.Format("SELECT invoice.ngay_ct, invoice.ngay_hoa_don, department.ma_phong," +
+                            " department.ten_phong, customers.mst, customers.cong_ty, " +
+                            "invoice.ki_hieu_hoa_don, invoice.so_hoa_don, invoice.han_thanh_toan, revenue.ma_nv, revenue.user_nhap, " +
+                            "IIf(Year(invoice.ngay_ct)<{0},invoice.so_tien_phat_sinh) AS du_dau_ky, IIf(Year(invoice.ngay_ct)={0} " +
+                            "And Month(invoice.ngay_ct)=1,invoice.so_tien_phat_sinh) AS no1, IIf(Year(invoice.ngay_ct)={0} And " +
+                            "Month(invoice.ngay_ct)=2,invoice.so_tien_phat_sinh) AS no2, IIf(Year(invoice.ngay_ct)={0} And " +
+                            "Month(invoice.ngay_ct)=3,invoice.so_tien_phat_sinh) AS no3, IIf(Year(invoice.ngay_ct)={0} And " +
+                            "Month(invoice.ngay_ct)=4,invoice.so_tien_phat_sinh) AS no4, IIf(Year(invoice.ngay_ct)={0} And " +
+                            "Month(invoice.ngay_ct)=5,invoice.so_tien_phat_sinh) AS no5, IIf(Year(invoice.ngay_ct)={0} And " +
+                            "Month(invoice.ngay_ct)=6,invoice.so_tien_phat_sinh) AS no6, IIf(Year(invoice.ngay_ct)={0} And " +
+                            "Month(invoice.ngay_ct)=7,invoice.so_tien_phat_sinh) AS no7, IIf(Year(invoice.ngay_ct)={0} And " +
+                            "Month(invoice.ngay_ct)=8,invoice.so_tien_phat_sinh) AS no8, IIf(Year(invoice.ngay_ct)={0} And " +
+                            "Month(invoice.ngay_ct)=9,invoice.so_tien_phat_sinh) AS no9, IIf(Year(invoice.ngay_ct)={0} And " +
+                            "Month(invoice.ngay_ct)=10,invoice.so_tien_phat_sinh) AS no10, IIf(Year(invoice.ngay_ct)={0} And " +
+                            "Month(invoice.ngay_ct)=11,invoice.so_tien_phat_sinh) AS no11, IIf(Year(invoice.ngay_ct)={0} And " +
+                            "Month(invoice.ngay_ct)=12,invoice.so_tien_phat_sinh) AS no12 FROM department " +
+                            "INNER JOIN((revenue INNER JOIN invoice ON (revenue.ki_hieu_hoa_don = invoice.ki_hieu_hoa_don)" +
+                            " AND(revenue.so_hoa_don = invoice.so_hoa_don)) INNER JOIN customers ON invoice.mst = customers.mst)" +
+                            " ON department.ma_phong = revenue.ma_phong ORDER BY invoice.ki_hieu_hoa_don, invoice.so_hoa_don;", NextYear.ToString());
+
+                        DAO.QueryDef cong_no_draft = new DAO.QueryDef();
+                        cong_no_draft.Name = queryName;
+                        cong_no_draft.SQL = querySql;
+
+                        db.QueryDefs.Append(cong_no_draft);
+
+                        rsInvoice = db.OpenRecordset("invoice");
+                        rsRevenue = db.OpenRecordset("revenue");
+                        rsCustomers = db.OpenRecordset("customers");
+
+                        //Export data from "outstanding.json" to "invoice" and "revenue" table
+                        using (StreamReader rOutstanding = new StreamReader(outstandingReaderPath))
+                        {
+                            String jsonOutstandingRead = rOutstanding.ReadToEnd();
+                            dynamic jObjectOutstandings = JsonConvert.DeserializeObject(jsonOutstandingRead);
+
+                            foreach (var outstanding in jObjectOutstandings)
+                            {
+                                rsInvoice.AddNew();
+                                rsInvoice.Fields["ki_hieu_hoa_don"].Value = outstanding.KiHieuHoaDon;
+                                rsInvoice.Fields["so_hoa_don"].Value = outstanding.SoHoaDon;
+                                rsInvoice.Fields["mst"].Value = outstanding.MST;
+                                rsInvoice.Fields["han_thanh_toan"].Value = outstanding.HanThanhToan;
+                                rsInvoice.Fields["so_tien_phat_sinh"].Value = outstanding.SoTienPhatSinh;
+                                rsInvoice.Fields["ngay_ct"].Value = outstanding.NgayChungTu;
+                                rsInvoice.Fields["ngay_hoa_don"].Value = outstanding.NgayHoaDon;
+                                rsInvoice.Update();
+
+                                rsRevenue.AddNew();
+                                rsRevenue.Fields["ki_hieu_hoa_don"].Value = outstanding.KiHieuHoaDon;
+                                rsRevenue.Fields["so_hoa_don"].Value = outstanding.SoHoaDon;
+                                rsRevenue.Fields["ma_phong"].Value = outstanding.MaPhong;
+                                rsRevenue.Fields["ma_nv"].Value = outstanding.MaNghiepVu;
+                                rsRevenue.Fields["user_nhap"].Value = outstanding.User;
+                                rsRevenue.Update();
+
+                                try
+                                {
+                                    rsCustomers.AddNew();
+                                    rsCustomers.Fields["mst"].Value = outstanding.MST;
+                                    rsCustomers.Fields["cong_ty"].Value = outstanding.KhachHang;
+                                    rsCustomers.Update();
+                                }
+                                catch { }
+                            }
+                        }
+                        rsInvoice.Close();
+                        rsRevenue.Close();
+                        rsCustomers.Close();
+                        db.Close();
+
+                        MessageBox.Show("Đã lập dữ liệu năm mới", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Không có dữ liệu, hãy kết xuất lại dữ liệu", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
             {
-                test.WriteLine(json);
+                MessageBox.Show("Không thể lập dữ liệu năm mới.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-
-            //Read Json
-            using (StreamReader r = new StreamReader(path))
-            {
-                string jsonRead = r.ReadToEnd();
-
-                JObject o = JObject.Parse(jsonRead);
-                String abc = String.Format("Hóa đơn số {0} có kí hiệu là {1}", o["SoHoaDon"].ToString(), o["KiHieuHoaDon"].ToString());
-                MessageBox.Show(abc);
-            }
-            
-            
-
-
         }
     }
 }
