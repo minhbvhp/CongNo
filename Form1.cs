@@ -20,7 +20,7 @@ namespace CongNo
     public partial class Form1 : Form
     {
         
-        public TextBox[] textBoxes = new TextBox[5];
+        public TextBox[] textBoxes = new TextBox[6];
         public DateTimePicker[] dateTimePickers = new DateTimePicker[4];
 
         Dictionary<string, string[]> searchBy = new Dictionary<string, string[]>();
@@ -83,6 +83,7 @@ namespace CongNo
             textBoxes[2] = afterSoHoaDon;
             textBoxes[3] = afterSoTienNo;
             textBoxes[4] = afterSoTienTra;
+            textBoxes[5] = afterMST;
 
             dateTimePickers[0] = afterHanTra;
             dateTimePickers[1] = afterNgayPhatSinh;
@@ -231,6 +232,7 @@ namespace CongNo
                     }
                 }
             }
+            CurrentInfoRefresh(RefreshOption.All);
         }
         private void CategorySearch_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -267,8 +269,8 @@ namespace CongNo
 
         private void Report_Click(object sender, EventArgs e)
         {
-            try
-            {
+            //try
+            //{
                 using (SaveFileDialog saveFileDialog = new SaveFileDialog())
                 {
                     saveFileDialog.DefaultExt = "xlsx";
@@ -718,7 +720,8 @@ namespace CongNo
                             worksheet.Cells["D" + rowXacNhan].Formula = "D3";
 
                             String fPhongXacNhan = String.Format("\"Xác nhận đối chiếu đến hết ngày \" & DAY(E1) & \" tháng \" & MONTH(E1) & \" năm \" & YEAR(E1)");
-                            worksheet.Cells["D" + rowXacNhan + 1].Formula = fPhongXacNhan;
+                            int rowDoiChieu = rowXacNhan + 1;
+                            worksheet.Cells["D" + rowDoiChieu].Formula = fPhongXacNhan;
 
                             String fNgayThangNam = String.Format("\"Hải Phòng, ngày \" & DAY(E1) & \" tháng \" & MONTH(E1) & \" năm \" & YEAR(E1)");
                             worksheet.Cells["AQ" + (rowXacNhan - 1)].Formula = fNgayThangNam;
@@ -820,11 +823,11 @@ namespace CongNo
                         db.Close();
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Không thể lập báo cáo.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show("Không thể lập báo cáo.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //}
         }
 
         private void Search_Click(object sender, EventArgs e)
@@ -1137,6 +1140,7 @@ namespace CongNo
             modifyGroup.Visible = true;
             searchList.Enabled = false;
 
+            afterMST.Text = currentMST.Text;
             afterKhachHang.Text = currentKhachHang.Text;
             afterMaHoaDon.Text = currentMaHoaDon.Text;
             afterSoHoaDon.Text = currentSoHoaDon.Text;
@@ -1268,6 +1272,7 @@ namespace CongNo
 
                             rs.Move(recordNumber);
                             rs.Edit();
+                            rs.Fields["mst"].Value = afterMST.Text;
                             rs.Fields["ki_hieu_hoa_don"].Value = afterMaHoaDon.Text;
                             rs.Fields["so_hoa_don"].Value = afterSoHoaDon.Text;
                             rs.Fields["han_thanh_toan"].Value = afterHanTra.Text;
@@ -1320,6 +1325,7 @@ namespace CongNo
 
         private void ModifyGroup_VisibleChanged(object sender, EventArgs e)
         {
+            afterMST.Clear();
             afterKhachHang.Clear();
             afterMaHoaDon.Clear();
             afterSoHoaDon.Clear();
@@ -1352,6 +1358,9 @@ namespace CongNo
                         break;
                     case "Số hóa đơn":
                     case "Số tiền":
+                        afterMST.Enabled = true;
+                        afterMST.BackColor = SystemColors.Window;
+
                         afterMaHoaDon.Enabled = true;
                         afterMaHoaDon.BackColor = SystemColors.Window;
 
