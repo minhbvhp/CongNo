@@ -368,7 +368,7 @@ namespace CongNo
                                 worksheet.Column(i).Width = GetTrueColumnWidth(20.00);
                             }
 
-                            worksheet.Cells["A:AS"].Style.Font.Name = "Times New Roman ";
+                            worksheet.Cells["A:AS"].Style.Font.Name = "Times New Roman";
                             worksheet.Cells["A:AS"].Style.Font.Size = 11;
                             worksheet.Cells["A:AS"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                             worksheet.Row(1).Height = 35.25;
@@ -631,6 +631,36 @@ namespace CongNo
                             String paidID = String.Empty;
                             short month = 0;
 
+                            //Liệt kê những khoản khách hàng trả thừa
+                            ExcelWorksheet notMatchPaidWorksheet = package.Workbook.Worksheets.Add("Khach hang tra thua");
+                            notMatchPaidWorksheet.Cells["A:E"].Style.Font.Name = "Times New Roman";
+                            notMatchPaidWorksheet.Cells["A:E"].Style.Font.Size = 11;
+                            notMatchPaidWorksheet.Cells["A:E"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            notMatchPaidWorksheet.View.FreezePanes(2, 1);
+
+                            notMatchPaidWorksheet.Column(1).Width = GetTrueColumnWidth(8);
+                            notMatchPaidWorksheet.Column(2).Width = GetTrueColumnWidth(11);
+                            notMatchPaidWorksheet.Column(3).Width = GetTrueColumnWidth(12);
+                            notMatchPaidWorksheet.Column(4).Width = GetTrueColumnWidth(15);
+                            notMatchPaidWorksheet.Column(5).Width = GetTrueColumnWidth(18);
+
+                            notMatchPaidWorksheet.Cells["E:E"].Style.Numberformat.Format = "_(* #,##0_);_(* (#,##0);_(* \" - \"_);_(@_)";
+
+                            notMatchPaidWorksheet.Cells["A:D"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            notMatchPaidWorksheet.Cells["E1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            notMatchPaidWorksheet.Cells["A1:E1"].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            notMatchPaidWorksheet.Cells["A1:E1"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(247, 150, 70));
+                            notMatchPaidWorksheet.Cells["A1:E1"].Style.Font.Bold = true;
+                            notMatchPaidWorksheet.Cells["A1:E1"].Style.WrapText = true;
+
+                            notMatchPaidWorksheet.Cells["A1"].Value = "STT";
+                            notMatchPaidWorksheet.Cells["B1"].Value = "KÍ HIỆU HÓA ĐƠN";
+                            notMatchPaidWorksheet.Cells["C1"].Value = "SỐ HÓA ĐƠN";
+                            notMatchPaidWorksheet.Cells["D1"].Value = "THÁNG THANH TOÁN";
+                            notMatchPaidWorksheet.Cells["E1"].Value = "TỔNG SỐ TIỀN THANH TOÁN";
+
+                            int notMatchPaidCurrentRow = 1;
+
                             for (i = 1; i <= maxTraTien; i++)
                             {
                                 paidID = String.Format("{0};{1}", rs.Fields["ki_hieu_hoa_don"].Value, rs.Fields["so_hoa_don"].Value);
@@ -678,6 +708,16 @@ namespace CongNo
                                             break;
                                     }
                                 }
+                                else
+                                {
+                                    notMatchPaidCurrentRow++;
+                                    notMatchPaidWorksheet.Cells["A" + notMatchPaidCurrentRow].Value = notMatchPaidCurrentRow - 1;
+                                    notMatchPaidWorksheet.Cells["B" + notMatchPaidCurrentRow].Value = rs.Fields["ki_hieu_hoa_don"].Value;
+                                    notMatchPaidWorksheet.Cells["C" + notMatchPaidCurrentRow].Value = rs.Fields["so_hoa_don"].Value;
+                                    notMatchPaidWorksheet.Cells["D" + notMatchPaidCurrentRow].Value = rs.Fields["thang_thanh_toan"].Value;
+                                    notMatchPaidWorksheet.Cells["E" + notMatchPaidCurrentRow].Value = rs.Fields["tong_thanh_toan"].Value;
+                                }
+
                                 rs.MoveNext();
                             }
 
