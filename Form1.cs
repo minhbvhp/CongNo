@@ -269,12 +269,12 @@ namespace CongNo
 
         private void Report_Click(object sender, EventArgs e)
         {
-            //try
-            //{
+            try
+            {
                 using (SaveFileDialog saveFileDialog = new SaveFileDialog())
                 {
-                    saveFileDialog.DefaultExt = "xlsx";
-                    saveFileDialog.Filter = "Excel Workbook(*.xlsx)|*.xlsx";
+                    saveFileDialog.DefaultExt = "xlsm";
+                    saveFileDialog.Filter = "Excel Workbook(*.xlsm)|*.xlsm";
                     saveFileDialog.FileName = "Doi chieu cong no - " + Program.DbYear;
 
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
@@ -585,10 +585,10 @@ namespace CongNo
                                 worksheet.Cells["U" + currentRow].Value = rs.Fields["tongno11"].Value;
                                 worksheet.Cells["V" + currentRow].Value = rs.Fields["tongno12"].Value;
 
-                                String fCongPhatSinh = String.Format("(Subtotal(109,K{0}:V{0}))", currentRow);
+                                String fCongPhatSinh = String.Format("SUM(K{0}:V{0})", currentRow);
                                 worksheet.Cells["W" + currentRow].Formula = fCongPhatSinh;
 
-                                String fCongThanhToan = String.Format("(Subtotal(109,X{0}:AI{0}))", currentRow);
+                                String fCongThanhToan = String.Format("SUM(X{0}:AI{0})", currentRow);
                                 worksheet.Cells["AJ" + currentRow].Formula = fCongThanhToan;
 
                                 String fCuoiKy = String.Format("J{0}+W{0}-AJ{0}", currentRow);
@@ -731,21 +731,11 @@ namespace CongNo
 
                             worksheet.Cells["D" + rowTong].Value = "Tổng cộng";
 
-                            String fDuDauKy = String.Format("(Subtotal(109,J{0}:J{1}))", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
+                            String fDuDauKy = String.Format("IF($F$1=\"\",SUM(J{0}:J{1}),SUMIF($B${0}:$B${1},$F$1,J{0}:J{1}))", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
                             worksheet.Cells["J" + rowTong].Formula = fDuDauKy;
 
-                            String fTongCongPhatSinh = String.Format("Sum(W{0}:W{1})", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
-                            worksheet.Cells["W" + rowTong].Formula = fTongCongPhatSinh;
-
-                            String fTongCongThanhToan = String.Format("Sum(AJ{0}:AJ{1})", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
-                            worksheet.Cells["AJ" + rowTong].Formula = fTongCongThanhToan;
-
                             //Copy formula
-                            for (i = 10; i <= 22; i++) //Column K:V
-                                worksheet.Cells["J" + rowTong].Copy(worksheet.Cells[rowTong, i]);
-                            for (i = 24; i <= 35; i++) //Column X:AI
-                                worksheet.Cells["J" + rowTong].Copy(worksheet.Cells[rowTong, i]);
-                            for (i = 37; i <= 45; i++) //Column AK:AS
+                            for (i = 10; i <= 45; i++)
                                 worksheet.Cells["J" + rowTong].Copy(worksheet.Cells[rowTong, i]);
 
                             //Add border
@@ -769,6 +759,48 @@ namespace CongNo
                             worksheet.Cells["AJ" + rowXacNhan].Value = "PHÒNG TÀI CHÍNH KẾ TOÁN";
                             worksheet.Cells["AQ" + rowXacNhan].Value = "LÃNH ĐẠO CÔNG TY";
                             worksheet.Cells["D" + rowXacNhan + ":AS" + rowXacNhan].Style.Font.Bold = true;
+
+                            //Add CustomFilter VBA Project
+                            package.Workbook.CreateVBAProject();
+                            var sb = new StringBuilder();
+
+                            sb.AppendLine("Private Sub Worksheet_SelectionChange(ByVal Target As Range)");
+                            sb.AppendLine(" If Range(\"B1\") = \"ON\" Then");
+                            sb.AppendLine("     If Range(\"F1\") = \"\" Then");
+                            sb.AppendLine("         If Sheets(2).AutoFilterMode Then");
+                            sb.AppendLine("             Sheets(2).AutoFilter.ShowAllData");
+                            sb.AppendLine("         Else");
+                            sb.AppendLine("             Range(\"A9:AS9\").AutoFilter");
+                            sb.AppendLine("         End If");
+                            sb.AppendLine("     Else");
+                            sb.AppendLine("         Range(\"A9: AS9\").AutoFilter Field:=2, Criteria1:=Range(\"F1\").Value, Operator:=xlOr, Criteria2:=\"=\"");
+                            sb.AppendLine("         Range(\"A9: AS9\").AutoFilter Field:=37, Criteria1:=\"<>0\"");
+                            sb.AppendLine("     End If");
+                            sb.AppendLine(" End If");
+                            sb.AppendLine("End Sub");
+
+                            worksheet.CodeModule.Code = sb.ToString();
+
+                            //Add ON/OFF CustomFilter
+                            worksheet.Cells["B1"].Style.Font.Bold = true;
+                            worksheet.Cells["B1"].Style.Font.Size = 14;
+                            worksheet.Cells["B1"].Style.Border.BorderAround(ExcelBorderStyle.Double);
+                            worksheet.Cells["B1"].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            worksheet.Cells["B1"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(192, 80, 77));
+                            worksheet.Cells["B1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            
+                            var CustomFilterMode = worksheet.Cells["B1"].DataValidation.AddListDataValidation();
+                            CustomFilterMode.Formula.Values.Add("ON");
+                            CustomFilterMode.Formula.Values.Add("OFF");
+                            worksheet.Cells["B1"].Value = "OFF";
+
+                            //Conditional formatting Cell B1
+                            ExcelAddress excelAddress = new ExcelAddress("B1");
+                            String statement = "B1 = \"ON\"";
+                            var condition = worksheet.ConditionalFormatting.AddExpression(excelAddress);
+                            condition.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            condition.Style.Fill.BackgroundColor.Color = Color.FromArgb(155, 187, 89);
+                            condition.Formula = statement;
 
                             //Filter, Scale, Freeze view
                             worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + ROW_BEFORE_START_EXCEL].AutoFilter = true;
@@ -863,11 +895,11 @@ namespace CongNo
                         db.Close();
                     }
                 }
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show("Không thể lập báo cáo.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //}
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Không thể lập báo cáo.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void Search_Click(object sender, EventArgs e)
