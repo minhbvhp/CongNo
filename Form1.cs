@@ -291,13 +291,13 @@ namespace CongNo
                         db = dBEngine.OpenDatabase(db_file);
 
                         //Get department list from Database
-                        List<String> departments = new List<string>();
+                        Dictionary<String, String> departments = new Dictionary<String, String>();
                         rs = db.OpenRecordset("department");
                         if (!rs.BOF)
                             rs.MoveFirst();
                         for (i = 1; i <= rs.RecordCount; i++)
                         {
-                            departments.Add(rs.Fields["ten_phong"].Value);
+                            departments.Add(rs.Fields["ten_phong"].Value, rs.Fields["ten_day_du"].Value);
                             rs.MoveNext();
                         }
 
@@ -315,41 +315,14 @@ namespace CongNo
 
                             //Sheet department list
                             ExcelWorksheet departmentWorksheet = package.Workbook.Worksheets.Add("List Phong");
-                            departmentWorksheet.Cells["A1"].Value = "TT";
-                            departmentWorksheet.Cells["B1"].Value = "BẢO HIỂM TÀU THỦY";
+                            int rowOfDepartmentWorksheet = 1;
 
-                            departmentWorksheet.Cells["A2"].Value = "CKT";
-                            departmentWorksheet.Cells["B2"].Value = "BẢO HIỂM CHÁY KỸ THUẬT";
-
-                            departmentWorksheet.Cells["A3"].Value = "HH";
-                            departmentWorksheet.Cells["B3"].Value = "BẢO HIỂM HÀNG HÓA";
-
-                            departmentWorksheet.Cells["A4"].Value = "CN";
-                            departmentWorksheet.Cells["B4"].Value = "BẢO HIỂM CON NGƯỜI";
-
-                            departmentWorksheet.Cells["A5"].Value = "XCG";
-                            departmentWorksheet.Cells["B5"].Value = "BẢO HIỂM XE CƠ GIỚI";
-
-                            departmentWorksheet.Cells["A6"].Value = "BH1";
-                            departmentWorksheet.Cells["B6"].Value = "BẢO HIỂM SỐ 1";
-
-                            departmentWorksheet.Cells["A7"].Value = "BH2";
-                            departmentWorksheet.Cells["B7"].Value = "BẢO HIỂM SỐ 2";
-
-                            departmentWorksheet.Cells["A8"].Value = "BH3";
-                            departmentWorksheet.Cells["B8"].Value = "BẢO HIỂM SỐ 3";
-
-                            departmentWorksheet.Cells["A9"].Value = "BH4";
-                            departmentWorksheet.Cells["B9"].Value = "BẢO HIỂM SỐ 4";
-
-                            departmentWorksheet.Cells["A10"].Value = "BH5";
-                            departmentWorksheet.Cells["B10"].Value = "BẢO HIỂM SỐ 5";
-
-                            departmentWorksheet.Cells["A11"].Value = "BH6";
-                            departmentWorksheet.Cells["B11"].Value = "BẢO HIỂM SỐ 6";
-
-                            departmentWorksheet.Cells["A12"].Value = "BH8";
-                            departmentWorksheet.Cells["B12"].Value = "BẢO HIỂM SỐ 8";
+                            foreach (KeyValuePair<String, String> department in departments)
+                            {
+                                departmentWorksheet.Cells["A" + rowOfDepartmentWorksheet.ToString()].Value = department.Key;
+                                departmentWorksheet.Cells["B" + rowOfDepartmentWorksheet.ToString()].Value = department.Value;
+                                rowOfDepartmentWorksheet++;
+                            }
 
                             departmentWorksheet.Hidden = eWorkSheetHidden.VeryHidden;
 
@@ -401,7 +374,7 @@ namespace CongNo
                             worksheet.Cells["F1"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(250, 192, 144));
                             worksheet.Cells["F1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                             var val = worksheet.Cells["F1"].DataValidation.AddListDataValidation();
-                            foreach (String department in departments)
+                            foreach (String department in departments.Keys)
                                 val.Formula.Values.Add(department);
                             worksheet.Cells["F1"].Value = "TT";
 
@@ -552,17 +525,17 @@ namespace CongNo
                             for (i = 1; i <= maxPhatSinh; i++)
                             {
                                 currentRow = i + ROW_BEFORE_START_EXCEL;
-                                worksheet.Cells["A" + currentRow].Value = rs.Fields["ngay_hoa_don"].Value;
-                                worksheet.Cells["B" + currentRow].Value = rs.Fields["ten_phong"].Value;
+                                worksheet.Cells["A" + currentRow].Value = rs.Fields["m_ngay_hoa_don"].Value;
+                                worksheet.Cells["B" + currentRow].Value = rs.Fields["m_ten_phong"].Value;
 
                                 String fSTT = String.Format("(SUBTOTAL(3,$D${0}:D{1}))", ROW_BEFORE_START_EXCEL + 1, currentRow);
                                 worksheet.Cells["C" + currentRow].Formula = fSTT;
 
-                                worksheet.Cells["D" + currentRow].Value = rs.Fields["cong_ty"].Value;
+                                worksheet.Cells["D" + currentRow].Value = rs.Fields["m_cong_ty"].Value;
                                 worksheet.Cells["E" + currentRow].Value = rs.Fields["ki_hieu_hoa_don"].Value;
                                 worksheet.Cells["F" + currentRow].Value = rs.Fields["so_hoa_don"].Value;
-                                worksheet.Cells["G" + currentRow].Value = rs.Fields["han_thanh_toan"].Value;
-                                worksheet.Cells["H" + currentRow].Value = rs.Fields["ma_nv"].Value;
+                                worksheet.Cells["G" + currentRow].Value = rs.Fields["m_han_thanh_toan"].Value;
+                                worksheet.Cells["H" + currentRow].Value = rs.Fields["m_ma_nv"].Value;
 
                                 String fNgayQuaHan = String.Format("IF(AND(AK{0} > 0, $E$1 > G{0}), $E$1 - G{0}, 0)", currentRow);
                                 worksheet.Cells["I" + currentRow].Formula = fNgayQuaHan;
@@ -807,6 +780,128 @@ namespace CongNo
                             worksheet.View.FreezePanes(ROW_BEFORE_START_EXCEL + 1, 8);
                             worksheet.View.ZoomScale = 85;
 
+                            //Sheet "Tong hop"
+                            ExcelWorksheet worksheetTongHop = package.Workbook.Worksheets.Add("Tong hop");
+
+                            worksheetTongHop.Column(1).Width = GetTrueColumnWidth(30);
+                            for (i = 2; i <= 33; i++)
+                            {
+                                worksheetTongHop.Column(i).Width = GetTrueColumnWidth(25);
+                            }
+
+                            worksheetTongHop.Cells["A:AG"].Style.Font.Name = "Times New Roman";
+                            worksheetTongHop.Cells["A:AG"].Style.Font.Size = 11;
+                            worksheetTongHop.Cells["A:AG"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+
+                            worksheetTongHop.Cells["A1:AG4"].Style.Font.Bold = true;
+                            worksheetTongHop.Cells["A1:AG4"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+
+                            worksheetTongHop.Row(1).Height = 60;
+                            worksheetTongHop.Row(2).Height = 60;
+                            worksheetTongHop.Row(3).Height = 40;
+
+                            worksheetTongHop.Cells["A1:AG1"].Merge = true;
+                            String fBaoCaoTongHop = String.Format("\"BÁO CÁO NỢ PHẢI THU KHÁCH HÀNG ĐẾN NGÀY \" & DAY('Doi chieu cong no'!E1) & \" THÁNG \" & MONTH('Doi chieu cong no'!E1) & \" NĂM \" & YEAR('Doi chieu cong no'!E1)");
+                            worksheetTongHop.Cells["A1:AG1"].Formula = fBaoCaoTongHop;
+
+                            worksheetTongHop.Cells["A2:A4"].Merge = true;
+                            worksheetTongHop.Cells["A2:A4"].Value = "TÊN PHÒNG";
+
+                            worksheetTongHop.Cells["B2:B3"].Merge = true;
+                            worksheetTongHop.Cells["B2:B3"].Value = "NỢ ĐẦU NĂM";
+
+                            worksheetTongHop.Cells["C2:O2"].Merge = true;
+                            worksheetTongHop.Cells["C2:O2"].Value = "NỢ PHÁT SINH";
+
+                            worksheetTongHop.Cells["P2:AB2"].Merge = true;
+                            worksheetTongHop.Cells["P2:AB2"].Value = "THU NỢ";
+
+                            worksheetTongHop.Cells["AC2:AF2"].Merge = true;
+                            worksheetTongHop.Cells["AC2:AF2"].Value = "CHI TIẾT TUỔI NỢ";
+
+                            worksheetTongHop.Cells["AG2:AG3"].Merge = true;
+                            worksheetTongHop.Cells["AG2:AG3"].Value = "TỔNG NỢ CUỐI KỲ";
+                        
+                            int monthTongHop = 1;
+                            for (i = 3; i <= 14; i++)
+                            {
+                                worksheetTongHop.Cells[3, i].Value = "THÁNG " + monthTongHop.ToString();
+                                monthTongHop++;
+                            }
+
+                            monthTongHop = 1;
+                            for (i = 16; i <= 27; i++)
+                            {
+                                worksheetTongHop.Cells[3, i].Value = "THÁNG " + monthTongHop.ToString();
+                                monthTongHop++;
+                            }
+
+                            worksheetTongHop.Cells["O3"].Value = "TỔNG CỘNG";
+                            worksheetTongHop.Cells["AB3"].Value = "TỔNG CỘNG";
+                            worksheetTongHop.Cells["AC3"].Value = "NỢ QHTT ĐẾN HẠN";
+                            worksheetTongHop.Cells["AD3"].Value = "NỢ QHTT DƯỚI 1 NĂM";
+                            worksheetTongHop.Cells["AE3"].Value = "NỢ QHTT TỪ 1-2 NĂM";
+                            worksheetTongHop.Cells["AF3"].Value = "NỢ QHTT TRÊN 2 NĂM";
+                            worksheetTongHop.Cells[4, 2, 4, 33].Value = "VND";
+
+                            int rowOfTongHopWorksheet = 5;
+
+                            String tenPhongVietTat;
+                            String tenPhongDayDu;
+                            String fSumIf;
+                            String fSumNo;
+
+                            foreach (KeyValuePair<String, String> department in departments)
+                            {
+                                worksheetTongHop.Row(rowOfTongHopWorksheet).Height = 45;
+                                tenPhongVietTat = department.Key;
+                                tenPhongDayDu = department.Value;
+
+                                worksheetTongHop.Cells["A" + rowOfTongHopWorksheet.ToString()].Value = tenPhongDayDu;
+                                worksheetTongHop.Cells["A" + rowOfTongHopWorksheet].Style.Font.Bold = true;
+
+                                fSumIf = String.Format("SUMIF('Doi chieu cong no'!$B${0}:$B${1}, \"{2}\",'Doi chieu cong no'!J{0}:J{1})", ROW_BEFORE_START_EXCEL + 1, maxRowExcel, tenPhongVietTat);
+                                worksheetTongHop.Cells["B" + rowOfTongHopWorksheet.ToString()].Formula = fSumIf;
+                                for (int j = 3; j <= 28; j++)
+                                    worksheetTongHop.Cells["B" + rowOfTongHopWorksheet.ToString()].Copy(worksheetTongHop.Cells[rowOfTongHopWorksheet, j]);
+
+                                fSumIf = String.Format("SUMIF('Doi chieu cong no'!$B${0}:$B${1}, \"{2}\",'Doi chieu cong no'!AL{0}:AL{1})", ROW_BEFORE_START_EXCEL + 1, maxRowExcel, tenPhongVietTat);
+                                worksheetTongHop.Cells["AC" + rowOfTongHopWorksheet.ToString()].Formula = fSumIf;
+                                for (int j = 29; j <= 32; j++)
+                                    worksheetTongHop.Cells["AC" + rowOfTongHopWorksheet.ToString()].Copy(worksheetTongHop.Cells[rowOfTongHopWorksheet, j]);
+
+                                fSumNo = String.Format("B{0} + O{0} - AB{0}", rowOfTongHopWorksheet);
+                                worksheetTongHop.Cells["AG" + rowOfTongHopWorksheet.ToString()].Formula = fSumNo;
+
+                                rowOfTongHopWorksheet++;
+                            }
+
+                            int rowTotalOfTongHop = rowOfTongHopWorksheet;
+                            worksheetTongHop.Row(rowTotalOfTongHop).Height = 55;
+                            worksheetTongHop.Cells[rowTotalOfTongHop, 1, rowTotalOfTongHop, 33].Style.Font.Bold = true;
+                            worksheetTongHop.Cells[rowTotalOfTongHop, 1, rowTotalOfTongHop, 33].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            worksheetTongHop.Cells[rowTotalOfTongHop, 1, rowTotalOfTongHop, 33].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(255, 204, 153));
+
+                            worksheetTongHop.Cells["A" + rowTotalOfTongHop].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            worksheetTongHop.Cells["A" + rowTotalOfTongHop].Value = "CỘNG";
+
+                            String fSumTongHop;
+                            fSumTongHop = String.Format("SUM(B5:B{0})", rowOfTongHopWorksheet - 1);
+                            worksheetTongHop.Cells["B" + rowTotalOfTongHop].Formula = fSumTongHop;
+
+                            for (i = 3; i <= 33; i++)
+                                worksheetTongHop.Cells["B" + rowTotalOfTongHop].Copy(worksheetTongHop.Cells[rowTotalOfTongHop, i]);
+
+                            worksheetTongHop.Cells[5, 2, rowTotalOfTongHop, 33].Style.Numberformat.Format = "_(* #,##0_);_(* (#,##0);_(* \" - \"_);_(@_)";
+                            worksheetTongHop.Cells[2, 1, rowTotalOfTongHop, 33].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            worksheetTongHop.Cells[2, 1, rowTotalOfTongHop, 33].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            worksheetTongHop.Cells[2, 1, rowTotalOfTongHop, 33].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            worksheetTongHop.Cells[2, 1, rowTotalOfTongHop, 33].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            worksheetTongHop.Cells[2, 1, rowTotalOfTongHop, 33].Style.Border.BorderAround(ExcelBorderStyle.Double);
+                            
+
+                            //Save and message Done
                             package.SaveAs(newFile);
 
                             MessageBox.Show("Đã lập đối chiếu công nợ", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -843,31 +938,31 @@ namespace CongNo
                                         writerOutstanding.WriteValue(rs.Fields["so_hoa_don"].Value);
 
                                         writerOutstanding.WritePropertyName("MST");
-                                        writerOutstanding.WriteValue(rs.Fields["mst"].Value);
+                                        writerOutstanding.WriteValue(rs.Fields["m_mst"].Value);
 
                                         writerOutstanding.WritePropertyName("KhachHang");
-                                        writerOutstanding.WriteValue(rs.Fields["cong_ty"].Value);
+                                        writerOutstanding.WriteValue(rs.Fields["m_cong_ty"].Value);
 
                                         writerOutstanding.WritePropertyName("HanThanhToan");
-                                        writerOutstanding.WriteValue(rs.Fields["han_thanh_toan"].Value);
+                                        writerOutstanding.WriteValue(rs.Fields["m_han_thanh_toan"].Value);
 
                                         writerOutstanding.WritePropertyName("SoTienPhatSinh");
                                         writerOutstanding.WriteValue(worksheet.Cells["AK" + i].Value);
 
                                         writerOutstanding.WritePropertyName("NgayChungTu");
-                                        writerOutstanding.WriteValue(rs.Fields["ngay_ct"].Value);
+                                        writerOutstanding.WriteValue(rs.Fields["m_ngay_ct"].Value);
 
                                         writerOutstanding.WritePropertyName("NgayHoaDon");
-                                        writerOutstanding.WriteValue(rs.Fields["ngay_hoa_don"].Value);
+                                        writerOutstanding.WriteValue(rs.Fields["m_ngay_hoa_don"].Value);
 
                                         writerOutstanding.WritePropertyName("MaPhong");
-                                        writerOutstanding.WriteValue(rs.Fields["ma_phong"].Value);
+                                        writerOutstanding.WriteValue(rs.Fields["m_ma_phong"].Value);
 
                                         writerOutstanding.WritePropertyName("MaNghiepVu");
-                                        writerOutstanding.WriteValue(rs.Fields["ma_nv"].Value);
+                                        writerOutstanding.WriteValue(rs.Fields["m_ma_nv"].Value);
 
                                         writerOutstanding.WritePropertyName("User");
-                                        writerOutstanding.WriteValue(rs.Fields["user_nhap"].Value);
+                                        writerOutstanding.WriteValue(rs.Fields["m_user_nhap"].Value);
 
                                         writerOutstanding.WriteEndObject();
                                     }
