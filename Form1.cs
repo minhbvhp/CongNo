@@ -783,7 +783,7 @@ namespace CongNo
                             //Sheet "Tong hop"
                             ExcelWorksheet worksheetTongHop = package.Workbook.Worksheets.Add("Tong hop");
 
-                            worksheetTongHop.Column(1).Width = GetTrueColumnWidth(30);
+                            worksheetTongHop.Column(1).Width = GetTrueColumnWidth(32);
                             for (i = 2; i <= 33; i++)
                             {
                                 worksheetTongHop.Column(i).Width = GetTrueColumnWidth(25);
@@ -839,7 +839,7 @@ namespace CongNo
 
                             worksheetTongHop.Cells["O3"].Value = "TỔNG CỘNG";
                             worksheetTongHop.Cells["AB3"].Value = "TỔNG CỘNG";
-                            worksheetTongHop.Cells["AC3"].Value = "NỢ QHTT ĐẾN HẠN";
+                            worksheetTongHop.Cells["AC3"].Value = "NỢ ĐẾN HẠN TT";
                             worksheetTongHop.Cells["AD3"].Value = "NỢ QHTT DƯỚI 1 NĂM";
                             worksheetTongHop.Cells["AE3"].Value = "NỢ QHTT TỪ 1-2 NĂM";
                             worksheetTongHop.Cells["AF3"].Value = "NỢ QHTT TRÊN 2 NĂM";
@@ -868,9 +868,26 @@ namespace CongNo
 
                                 fSumIf = String.Format("SUMIF('Doi chieu cong no'!$B${0}:$B${1}, \"{2}\",'Doi chieu cong no'!AL{0}:AL{1})", ROW_BEFORE_START_EXCEL + 1, maxRowExcel, tenPhongVietTat);
                                 worksheetTongHop.Cells["AC" + rowOfTongHopWorksheet.ToString()].Formula = fSumIf;
-                                for (int j = 29; j <= 32; j++)
-                                    worksheetTongHop.Cells["AC" + rowOfTongHopWorksheet.ToString()].Copy(worksheetTongHop.Cells[rowOfTongHopWorksheet, j]);
 
+                                //Duoi 1 nam
+                                fSumIf = String.Format("SUMIF('Doi chieu cong no'!$B${0}:$B${1}, \"{2}\",'Doi chieu cong no'!AM{0}:AM{1}) " +
+                                                    "+ SUMIF('Doi chieu cong no'!$B${0}:$B${1}, \"{2}\",'Doi chieu cong no'!AN{0}:AN{1}) " +
+                                                    "+ SUMIF('Doi chieu cong no'!$B${0}:$B${1}, \"{2}\",'Doi chieu cong no'!AO{0}:AO{1}) " +
+                                                    "+ SUMIF('Doi chieu cong no'!$B${0}:$B${1}, \"{2}\",'Doi chieu cong no'!AP{0}:AP{1})"
+                                                        , ROW_BEFORE_START_EXCEL + 1, maxRowExcel, tenPhongVietTat);
+                                worksheetTongHop.Cells["AD" + rowOfTongHopWorksheet.ToString()].Formula = fSumIf;
+
+                                //Tu 1-2 nam
+                                fSumIf = String.Format("SUMIF('Doi chieu cong no'!$B${0}:$B${1}, \"{2}\",'Doi chieu cong no'!AQ{0}:AQ{1})", ROW_BEFORE_START_EXCEL + 1, maxRowExcel, tenPhongVietTat);
+                                worksheetTongHop.Cells["AE" + rowOfTongHopWorksheet.ToString()].Formula = fSumIf;
+
+                                //Tren 2 nam
+                                fSumIf = String.Format("SUMIF('Doi chieu cong no'!$B${0}:$B${1}, \"{2}\",'Doi chieu cong no'!AR{0}:AR{1}) " +
+                                                    "+ SUMIF('Doi chieu cong no'!$B${0}:$B${1}, \"{2}\",'Doi chieu cong no'!AS{0}:AS{1}) "
+                                                        , ROW_BEFORE_START_EXCEL + 1, maxRowExcel, tenPhongVietTat);
+                                worksheetTongHop.Cells["AF" + rowOfTongHopWorksheet.ToString()].Formula = fSumIf;
+
+                                //Tong no cuoi ky
                                 fSumNo = String.Format("B{0} + O{0} - AB{0}", rowOfTongHopWorksheet);
                                 worksheetTongHop.Cells["AG" + rowOfTongHopWorksheet.ToString()].Formula = fSumNo;
 
