@@ -126,8 +126,8 @@ namespace CongNo
                     DAO.Recordset rs;
 
                     //Export to .mdb file
-                    try
-                    {
+                    //try
+                    //{
                         db = dBEngine.OpenDatabase(db_file);
                         db.BeginTrans();
                         db.Execute("draft_clear");
@@ -138,18 +138,19 @@ namespace CongNo
                             rs.Fields["dong"].Value = row;
                             rs.Fields["loai_ct"].Value = NullToString(worksheet.Cells["A" + row].Value);
                             rs.Fields["no_co"].Value = NullToString(worksheet.Cells["D" + row].Value);
-                            rs.Fields["mst_draft"].Value = NullToString(worksheet.Cells["J" + row].Value);
+                            rs.Fields["mst_draft"].Value = NullToString(worksheet.Cells["K" + row].Value);
                             rs.Fields["cong_ty1"].Value = NullToString(worksheet.Cells["E" + row].Value);
                             rs.Fields["cong_ty2"].Value = NullToString(worksheet.Cells["F" + row].Value);
-                            rs.Fields["ky_hieu_hd"].Value = NullToString(worksheet.Cells["K" + row].Value);
-                            rs.Fields["so_hoa_don"].Value = NullToString(worksheet.Cells["L" + row].Value);
-                            rs.Fields["ngay_hoa_don_draft"].Value = NullToString(worksheet.Cells["M" + row].Value);
+                            rs.Fields["ky_hieu_hd"].Value = NullToString(worksheet.Cells["L" + row].Value);
+                            rs.Fields["so_hoa_don"].Value = NullToString(worksheet.Cells["M" + row].Value);
+                            rs.Fields["ngay_hoa_don_draft"].Value = NullToString(worksheet.Cells["N" + row].Value);
                             rs.Fields["ma_nv"].Value = NullToString(worksheet.Cells["H" + row].Value);
                             rs.Fields["ma_phong"].Value = NullToString(worksheet.Cells["I" + row].Value);
                             rs.Fields["so_tien"].Value = NullToString(worksheet.Cells["C" + row].Value);
                             rs.Fields["han_tt_draft"].Value = NullToString(worksheet.Cells["G" + row].Value);
                             rs.Fields["ngay_ct_draft"].Value = NullToString(worksheet.Cells["B" + row].Value);
-                            rs.Fields["user"].Value = NullToString(worksheet.Cells["N" + row].Value);
+                            rs.Fields["user"].Value = NullToString(worksheet.Cells["O" + row].Value);
+                            rs.Fields["kenh_kt"].Value = NullToString(worksheet.Cells["J" + row].Value);
                             rs.Update();
 
                             uploadProgress.Value = (row - 1) * 100 / lastRow;
@@ -181,7 +182,6 @@ namespace CongNo
                         {
                             String dong;
                             String ten_cong_ty;
-                            String so_bk;
                             String ky_hieu_hd;
                             String so_hoa_don;
                             double so_tien;
@@ -195,14 +195,13 @@ namespace CongNo
                             {
                                 dong = Convert.ToString(rs.Fields["dong"].Value);
                                 ten_cong_ty = Convert.ToString(rs.Fields["ten_cong_ty"].Value);
-                                so_bk = Convert.ToString(rs.Fields["so_bk"].Value);
                                 ky_hieu_hd = Convert.ToString(rs.Fields["ky_hieu_hd"].Value);
                                 so_hoa_don = Convert.ToString(rs.Fields["so_hoa_don"].Value);
                                 so_tien = rs.Fields["so_tien"].Value;
                                 user = Convert.ToString(rs.Fields["user"].Value);
                                 ghiChu = GhiChu(so_hoa_don, ten_cong_ty, ky_hieu_hd);
 
-                                notUploadList.Rows.Add(dong, ten_cong_ty, so_bk, ky_hieu_hd, so_hoa_don, so_tien, user, ghiChu);
+                                notUploadList.Rows.Add(dong, ten_cong_ty, ky_hieu_hd, so_hoa_don, so_tien, user, ghiChu);
                                 rs.MoveNext();
                             }
                         }
@@ -223,13 +222,13 @@ namespace CongNo
                         File.Move(compactDbTemp, compactDbName);
 
                         MessageBox.Show("Đã upload dữ liệu xong.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Không ghi được dữ liệu.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        db.Rollback();
-                        db.Close();
-                    }
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    MessageBox.Show("Không ghi được dữ liệu.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //    db.Rollback();
+                    //    db.Close();
+                    //}
                 }
             }
             CurrentInfoRefresh(RefreshOption.All);
@@ -339,14 +338,14 @@ namespace CongNo
                             worksheet.Column(8).Width = GetTrueColumnWidth(15.00);
                             worksheet.Column(9).Width = GetTrueColumnWidth(10.00);
 
-                            for (i = 10; i <= 45; i++)
+                            for (i = 10; i <= 46; i++)
                             {
                                 worksheet.Column(i).Width = GetTrueColumnWidth(20.00);
                             }
 
-                            worksheet.Cells["A:AS"].Style.Font.Name = "Times New Roman";
-                            worksheet.Cells["A:AS"].Style.Font.Size = 11;
-                            worksheet.Cells["A:AS"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            worksheet.Cells["A:AT"].Style.Font.Name = "Times New Roman";
+                            worksheet.Cells["A:AT"].Style.Font.Size = 11;
+                            worksheet.Cells["A:AT"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                             worksheet.Row(1).Height = 35.25;
                             worksheet.Row(2).Height = 9.75;
                             worksheet.Row(3).Height = 35.25;
@@ -490,13 +489,16 @@ namespace CongNo
                             worksheet.Cells["AS6:AS7"].Merge = true;
                             worksheet.Cells["AS6:AS7"].Value = "Quá hạn thanh toán trên 3 năm";
 
-                            worksheet.Cells["A6:AS8"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A6:AS8"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A6:AS8"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A6:AS8"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A6:AS8"].Style.Font.Bold = true;
-                            worksheet.Cells["A6:AS8"].Style.WrapText = true;
-                            worksheet.Cells["A6:AS8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            worksheet.Cells["AT6:AT7"].Merge = true;
+                            worksheet.Cells["AT6:AT7"].Value = "Kênh khai thác";
+
+                            worksheet.Cells["A6:AT8"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AT8"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AT8"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AT8"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AT8"].Style.Font.Bold = true;
+                            worksheet.Cells["A6:AT8"].Style.WrapText = true;
+                            worksheet.Cells["A6:AT8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
 
                             //Export "cong_no" to "Doi chieu cong no" excel file
@@ -536,6 +538,7 @@ namespace CongNo
                                 worksheet.Cells["F" + currentRow].Value = rs.Fields["so_hoa_don"].Value;
                                 worksheet.Cells["G" + currentRow].Value = rs.Fields["m_han_thanh_toan"].Value;
                                 worksheet.Cells["H" + currentRow].Value = rs.Fields["m_ma_nv"].Value;
+                                worksheet.Cells["AT" + currentRow].Value = rs.Fields["m_kenh_kt"].Value;
 
                                 String fNgayQuaHan = String.Format("IF(AND(AK{0} > 0, $E$1 > G{0}), $E$1 - G{0}, 0)", currentRow);
                                 worksheet.Cells["I" + currentRow].Formula = fNgayQuaHan;
@@ -700,7 +703,7 @@ namespace CongNo
                             //Add total cells
                             worksheet.Row(rowTong).Height = 40;
                             worksheet.Row(rowTong).Style.Font.Size = 13;
-                            worksheet.Cells["A" + rowTong + ":AS" + rowTong].Style.Font.Bold = true;
+                            worksheet.Cells["A" + rowTong + ":AT" + rowTong].Style.Font.Bold = true;
 
                             worksheet.Cells["D" + rowTong].Value = "Tổng cộng";
 
@@ -711,11 +714,15 @@ namespace CongNo
                             for (i = 10; i <= 45; i++)
                                 worksheet.Cells["J" + rowTong].Copy(worksheet.Cells[rowTong, i]);
 
+                            //Count kenh khai thac
+                            String fKenhkt = String.Format("SUBTOTAL(103,AT{0}:AT{1})", ROW_BEFORE_START_EXCEL + 1 , maxRowExcel);
+                            worksheet.Cells["AT" + rowTong].Formula = fKenhkt;
+
                             //Add border
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AT" + rowTong].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AT" + rowTong].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AT" + rowTong].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AT" + rowTong].Style.Border.Right.Style = ExcelBorderStyle.Thin;
 
                             //Content at end of report
                             int rowXacNhan = rowTong + 3;
@@ -743,11 +750,11 @@ namespace CongNo
                             sb.AppendLine("         If Sheets(2).AutoFilterMode Then");
                             sb.AppendLine("             Sheets(2).AutoFilter.ShowAllData");
                             sb.AppendLine("         Else");
-                            sb.AppendLine("             Range(\"A9:AS9\").AutoFilter");
+                            sb.AppendLine("             Range(\"A9:AT9\").AutoFilter");
                             sb.AppendLine("         End If");
                             sb.AppendLine("     Else");
-                            sb.AppendLine("         Range(\"A9: AS9\").AutoFilter Field:=2, Criteria1:=Range(\"F1\").Value, Operator:=xlOr, Criteria2:=\"=\"");
-                            sb.AppendLine("         Range(\"A9: AS9\").AutoFilter Field:=37, Criteria1:=\"<>0\"");
+                            sb.AppendLine("         Range(\"A9: AT9\").AutoFilter Field:=2, Criteria1:=Range(\"F1\").Value, Operator:=xlOr, Criteria2:=\"=\"");
+                            sb.AppendLine("         Range(\"A9: AT9\").AutoFilter Field:=37, Criteria1:=\"<>0\"");
                             sb.AppendLine("     End If");
                             sb.AppendLine(" End If");
                             sb.AppendLine("End Sub");
@@ -776,7 +783,7 @@ namespace CongNo
                             condition.Formula = statement;
 
                             //Filter, Scale, Freeze view
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AS" + ROW_BEFORE_START_EXCEL].AutoFilter = true;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AT" + ROW_BEFORE_START_EXCEL].AutoFilter = true;
                             worksheet.View.FreezePanes(ROW_BEFORE_START_EXCEL + 1, 8);
                             worksheet.View.ZoomScale = 85;
 
@@ -980,6 +987,9 @@ namespace CongNo
 
                                         writerOutstanding.WritePropertyName("User");
                                         writerOutstanding.WriteValue(rs.Fields["m_user_nhap"].Value);
+
+                                        writerOutstanding.WritePropertyName("KenhKT");
+                                        writerOutstanding.WriteValue(rs.Fields["m_kenh_kt"].Value);
 
                                         writerOutstanding.WriteEndObject();
                                     }
@@ -1295,11 +1305,12 @@ namespace CongNo
                         worksheet.Cells["G1"].Value = "NGAYDAOHAN";
                         worksheet.Cells["H1"].Value = "T2";
                         worksheet.Cells["I1"].Value = "T3";
-                        worksheet.Cells["J1"].Value = "MASOTHUE";
-                        worksheet.Cells["K1"].Value = "KYHIEUHOADON";
-                        worksheet.Cells["L1"].Value = "SOHOADON";
-                        worksheet.Cells["M1"].Value = "NGAYHOADONGOC";
-                        worksheet.Cells["N1"].Value = "USERNHAP";
+                        worksheet.Cells["J1"].Value = "T5";
+                        worksheet.Cells["K1"].Value = "MASOTHUE";
+                        worksheet.Cells["L1"].Value = "KYHIEUHOADON";
+                        worksheet.Cells["M1"].Value = "SOHOADON";
+                        worksheet.Cells["N1"].Value = "NGAYHOADONGOC";
+                        worksheet.Cells["O1"].Value = "USERNHAP";
 
                         package.Save();
                     }
@@ -1671,7 +1682,8 @@ namespace CongNo
                             "Month(invoice.ngay_ct)=9,invoice.so_tien_phat_sinh) AS no9, IIf(Year(invoice.ngay_ct)={0} And " +
                             "Month(invoice.ngay_ct)=10,invoice.so_tien_phat_sinh) AS no10, IIf(Year(invoice.ngay_ct)={0} And " +
                             "Month(invoice.ngay_ct)=11,invoice.so_tien_phat_sinh) AS no11, IIf(Year(invoice.ngay_ct)={0} And " +
-                            "Month(invoice.ngay_ct)=12,invoice.so_tien_phat_sinh) AS no12 FROM department " +
+                            "Month(invoice.ngay_ct)=12,invoice.so_tien_phat_sinh) AS no12 FROM department, " +
+                            "invoice.kenh_kt" +
                             "INNER JOIN((revenue INNER JOIN invoice ON (revenue.ki_hieu_hoa_don = invoice.ki_hieu_hoa_don)" +
                             " AND(revenue.so_hoa_don = invoice.so_hoa_don)) INNER JOIN customers ON invoice.mst = customers.mst)" +
                             " ON department.ma_phong = revenue.ma_phong ORDER BY invoice.ki_hieu_hoa_don, invoice.so_hoa_don;", NextYear.ToString());
