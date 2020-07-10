@@ -126,8 +126,8 @@ namespace CongNo
                     DAO.Recordset rs;
 
                     //Export to .mdb file
-                    //try
-                    //{
+                    try
+                    {
                         db = dBEngine.OpenDatabase(db_file);
                         db.BeginTrans();
                         db.Execute("draft_clear");
@@ -222,13 +222,13 @@ namespace CongNo
                         File.Move(compactDbTemp, compactDbName);
 
                         MessageBox.Show("Đã upload dữ liệu xong.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    //}
-                    //catch (Exception ex)
-                    //{
-                    //    MessageBox.Show("Không ghi được dữ liệu.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    //    db.Rollback();
-                    //    db.Close();
-                    //}
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Không ghi được dữ liệu.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        db.Rollback();
+                        db.Close();
+                    }
                 }
             }
             CurrentInfoRefresh(RefreshOption.All);
@@ -1669,7 +1669,7 @@ namespace CongNo
                         String queryName = "cong_no_draft";
                         String querySql = String.Format("SELECT invoice.ngay_ct, invoice.ngay_hoa_don, department.ma_phong," +
                             " department.ten_phong, customers.mst, customers.cong_ty, " +
-                            "invoice.ki_hieu_hoa_don, invoice.so_hoa_don, invoice.han_thanh_toan, revenue.ma_nv, revenue.user_nhap, " +
+                            "invoice.ki_hieu_hoa_don, invoice.so_hoa_don, invoice.han_thanh_toan, revenue.ma_nv, revenue.user_nhap, invoice.kenh_kt, " +
                             "IIf(Year(invoice.ngay_ct)<{0},invoice.so_tien_phat_sinh) AS du_dau_ky, IIf(Year(invoice.ngay_ct)={0} " +
                             "And Month(invoice.ngay_ct)=1,invoice.so_tien_phat_sinh) AS no1, IIf(Year(invoice.ngay_ct)={0} And " +
                             "Month(invoice.ngay_ct)=2,invoice.so_tien_phat_sinh) AS no2, IIf(Year(invoice.ngay_ct)={0} And " +
@@ -1682,8 +1682,7 @@ namespace CongNo
                             "Month(invoice.ngay_ct)=9,invoice.so_tien_phat_sinh) AS no9, IIf(Year(invoice.ngay_ct)={0} And " +
                             "Month(invoice.ngay_ct)=10,invoice.so_tien_phat_sinh) AS no10, IIf(Year(invoice.ngay_ct)={0} And " +
                             "Month(invoice.ngay_ct)=11,invoice.so_tien_phat_sinh) AS no11, IIf(Year(invoice.ngay_ct)={0} And " +
-                            "Month(invoice.ngay_ct)=12,invoice.so_tien_phat_sinh) AS no12 FROM department, " +
-                            "invoice.kenh_kt" +
+                            "Month(invoice.ngay_ct)=12,invoice.so_tien_phat_sinh) AS no12 FROM department " +
                             "INNER JOIN((revenue INNER JOIN invoice ON (revenue.ki_hieu_hoa_don = invoice.ki_hieu_hoa_don)" +
                             " AND(revenue.so_hoa_don = invoice.so_hoa_don)) INNER JOIN customers ON invoice.mst = customers.mst)" +
                             " ON department.ma_phong = revenue.ma_phong ORDER BY invoice.ki_hieu_hoa_don, invoice.so_hoa_don;", NextYear.ToString());
@@ -1714,6 +1713,7 @@ namespace CongNo
                                 rsInvoice.Fields["so_tien_phat_sinh"].Value = outstanding.SoTienPhatSinh;
                                 rsInvoice.Fields["ngay_ct"].Value = outstanding.NgayChungTu;
                                 rsInvoice.Fields["ngay_hoa_don"].Value = outstanding.NgayHoaDon;
+                                rsInvoice.Fields["kenh_kt"].Value = outstanding.KenhKT;
                                 rsInvoice.Update();
 
                                 rsRevenue.AddNew();
