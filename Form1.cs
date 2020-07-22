@@ -70,7 +70,7 @@ namespace CongNo
         private void Form1_Load(object sender, EventArgs e)
         {
             this.Text = "Số liệu năm " + Program.DbYear;
-
+            loaiTk.SelectedItem = "Tổng";
             searchBy["Khách hàng"] = new string[] { "Mã số thuế", "Tên đơn vị" };
             searchBy["Phát sinh"] = new string[] { "Số hóa đơn", "Số tiền" };
             searchBy["Thu nợ"] = new string[] { "Số hóa đơn", "Số tiền" };
@@ -137,20 +137,29 @@ namespace CongNo
                             rs.AddNew();
                             rs.Fields["dong"].Value = row;
                             rs.Fields["loai_ct"].Value = NullToString(worksheet.Cells["A" + row].Value);
-                            rs.Fields["no_co"].Value = NullToString(worksheet.Cells["D" + row].Value);
-                            rs.Fields["mst_draft"].Value = NullToString(worksheet.Cells["K" + row].Value);
-                            rs.Fields["cong_ty1"].Value = NullToString(worksheet.Cells["E" + row].Value);
-                            rs.Fields["cong_ty2"].Value = NullToString(worksheet.Cells["F" + row].Value);
-                            rs.Fields["ky_hieu_hd"].Value = NullToString(worksheet.Cells["L" + row].Value);
-                            rs.Fields["so_hoa_don"].Value = NullToString(worksheet.Cells["M" + row].Value);
-                            rs.Fields["ngay_hoa_don_draft"].Value = NullToString(worksheet.Cells["N" + row].Value);
-                            rs.Fields["ma_nv"].Value = NullToString(worksheet.Cells["H" + row].Value);
-                            rs.Fields["ma_phong"].Value = NullToString(worksheet.Cells["I" + row].Value);
-                            rs.Fields["so_tien"].Value = NullToString(worksheet.Cells["C" + row].Value);
-                            rs.Fields["han_tt_draft"].Value = NullToString(worksheet.Cells["G" + row].Value);
+                            rs.Fields["no_co"].Value = NullToString(worksheet.Cells["E" + row].Value);
+                            rs.Fields["mst_draft"].Value = NullToString(worksheet.Cells["N" + row].Value);
+                            rs.Fields["cong_ty1"].Value = NullToString(worksheet.Cells["G" + row].Value);
+                            rs.Fields["cong_ty2"].Value = NullToString(worksheet.Cells["H" + row].Value);
+                            rs.Fields["ky_hieu_hd"].Value = NullToString(worksheet.Cells["O" + row].Value);
+                            rs.Fields["so_hoa_don"].Value = NullToString(worksheet.Cells["P" + row].Value);
+                            rs.Fields["ngay_hoa_don_draft"].Value = NullToString(worksheet.Cells["Q" + row].Value);
+                            rs.Fields["ma_nv"].Value = NullToString(worksheet.Cells["K" + row].Value);
+                            rs.Fields["ma_phong"].Value = NullToString(worksheet.Cells["L" + row].Value);
+                            rs.Fields["so_tien"].Value = NullToString(worksheet.Cells["D" + row].Value);
+                            rs.Fields["han_tt_draft"].Value = NullToString(worksheet.Cells["I" + row].Value);
                             rs.Fields["ngay_ct_draft"].Value = NullToString(worksheet.Cells["B" + row].Value);
-                            rs.Fields["user"].Value = NullToString(worksheet.Cells["O" + row].Value);
-                            rs.Fields["kenh_kt"].Value = NullToString(worksheet.Cells["J" + row].Value);
+                            rs.Fields["user"].Value = NullToString(worksheet.Cells["R" + row].Value);
+                            rs.Fields["kenh_kt"].Value = NullToString(worksheet.Cells["M" + row].Value);
+                            rs.Fields["so_tai_khoan"].Value = NullToString(worksheet.Cells["C" + row].Value);
+                            rs.Fields["so_tham_chieu"].Value = NullToString(worksheet.Cells["F" + row].Value);
+                            rs.Fields["loai_tien_draft"].Value = NullToString(worksheet.Cells["J" + row].Value);
+
+                            if (rs.Fields["loai_tien_draft"].Value == "USD")
+                            {
+                            rs.Fields["nguyen_te_draft"].Value = NullToString(worksheet.Cells["S" + row].Value);
+                            }
+
                             rs.Update();
 
                             uploadProgress.Value = (row - 1) * 100 / lastRow;
@@ -274,7 +283,7 @@ namespace CongNo
                 {
                     saveFileDialog.DefaultExt = "xlsm";
                     saveFileDialog.Filter = "Excel Workbook(*.xlsm)|*.xlsm";
-                    saveFileDialog.FileName = "Doi chieu cong no - " + Program.DbYear;
+                    saveFileDialog.FileName = "Doi chieu cong no - " + Program.DbYear + " (" + loaiTk.Text + ")";
 
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
@@ -309,7 +318,6 @@ namespace CongNo
                         using (var package = new ExcelPackage(newFile))
                         {
                             package.Workbook.Properties.Title = "Doi chieu cong no - " + Program.DbYear;
-                            package.Workbook.Properties.Author = "Trần Khoa Minh";
                             package.Workbook.Properties.Company = "Bảo Việt Hải Phòng";
 
                             //Sheet department list
@@ -338,14 +346,19 @@ namespace CongNo
                             worksheet.Column(8).Width = GetTrueColumnWidth(15.00);
                             worksheet.Column(9).Width = GetTrueColumnWidth(10.00);
 
-                            for (i = 10; i <= 46; i++)
+                            for (i = 10; i <= 45; i++)
                             {
                                 worksheet.Column(i).Width = GetTrueColumnWidth(20.00);
                             }
 
-                            worksheet.Cells["A:AT"].Style.Font.Name = "Times New Roman";
-                            worksheet.Cells["A:AT"].Style.Font.Size = 11;
-                            worksheet.Cells["A:AT"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            for (i = 46; i <= 50; i++)
+                            {
+                                worksheet.Column(i).Width = GetTrueColumnWidth(10.00);
+                            }
+
+                            worksheet.Cells["A:AX"].Style.Font.Name = "Times New Roman";
+                            worksheet.Cells["A:AX"].Style.Font.Size = 11;
+                            worksheet.Cells["A:AX"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                             worksheet.Row(1).Height = 35.25;
                             worksheet.Row(2).Height = 9.75;
                             worksheet.Row(3).Height = 35.25;
@@ -373,12 +386,13 @@ namespace CongNo
                             worksheet.Cells["F1"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(250, 192, 144));
                             worksheet.Cells["F1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                             var val = worksheet.Cells["F1"].DataValidation.AddListDataValidation();
+                            val.Formula.Values.Add("Công ty");
                             foreach (String department in departments.Keys)
                                 val.Formula.Values.Add(department);
-                            worksheet.Cells["F1"].Value = "TT";
+                            worksheet.Cells["F1"].Value = "Công ty";
 
                             //Cell Phòng
-                            worksheet.Cells["D3"].Formula = @"""PHÒNG "" & VLOOKUP(F1,'List Phong'!A1:B12,2,FALSE)";
+                            worksheet.Cells["D3"].Formula = @"IF(F1<>""Công ty"",""PHÒNG "" & VLOOKUP(F1,'List Phong'!A1:B12,2,FALSE), ""BẢO VIỆT HẢI PHÒNG"")";
                             worksheet.Cells["D3"].Style.Font.Bold = true;
                             worksheet.Cells["D3"].Style.Font.Size = 12;
 
@@ -492,22 +506,48 @@ namespace CongNo
                             worksheet.Cells["AT6:AT7"].Merge = true;
                             worksheet.Cells["AT6:AT7"].Value = "Kênh khai thác";
 
-                            worksheet.Cells["A6:AT8"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A6:AT8"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A6:AT8"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A6:AT8"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A6:AT8"].Style.Font.Bold = true;
-                            worksheet.Cells["A6:AT8"].Style.WrapText = true;
-                            worksheet.Cells["A6:AT8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            worksheet.Cells["AU6:AU7"].Merge = true;
+                            worksheet.Cells["AU6:AU7"].Value = "Số tài khoản";
+
+                            worksheet.Cells["AV6:AV7"].Merge = true;
+                            worksheet.Cells["AV6:AV7"].Value = "Số bảng kê";
+
+                            worksheet.Cells["AW6:AW7"].Merge = true;
+                            worksheet.Cells["AW6:AW7"].Value = "Loại tiền";
+
+                            worksheet.Cells["AX6:AX7"].Merge = true;
+                            worksheet.Cells["AX6:AX7"].Value = "Nguyên tệ";
+
+                            worksheet.Cells["A6:AX8"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AX8"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AX8"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AX8"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AX8"].Style.Font.Bold = true;
+                            worksheet.Cells["A6:AX8"].Style.WrapText = true;
+                            worksheet.Cells["A6:AX8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
 
                             //Export "cong_no" to "Doi chieu cong no" excel file
-                            rs = db.OpenRecordset("cong_no");
+                            switch (loaiTk.Text)
+                            {
+                                case "Tổng":
+                                    rs = db.OpenRecordset("cong_no");
+                                    break;
+                                case "13111":
+                                    rs = db.OpenRecordset("SELECT * FROM cong_no WHERE m_so_tai_khoan='13111'");
+                                    rs.MoveLast();
+                                    break;
+                                case "13161":
+                                    rs = db.OpenRecordset("SELECT * FROM cong_no WHERE m_so_tai_khoan='13161'");
+                                    rs.MoveLast();
+                                    break;
+                            }
                             const byte ROW_BEFORE_START_EXCEL = 8;
                             int maxPhatSinh = rs.RecordCount;
                             int maxRowExcel = maxPhatSinh + ROW_BEFORE_START_EXCEL;
                             int currentRow = 0;
                             int rowTong = maxRowExcel + 1;
+                            rs.MoveFirst();
 
                             //Format cells (inclue total rows)
                             worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":A" + rowTong].Style.Numberformat.Format = "dd/MM/yyyy";
@@ -519,6 +559,7 @@ namespace CongNo
                             worksheet.Cells["H" + ROW_BEFORE_START_EXCEL + ":H" + rowTong].Style.Numberformat.Format = "@";
                             worksheet.Cells["I" + ROW_BEFORE_START_EXCEL + ":I" + rowTong].Style.Numberformat.Format = "#";
                             worksheet.Cells["J" + ROW_BEFORE_START_EXCEL + ":AS" + rowTong].Style.Numberformat.Format = "_(* #,##0_);_(* (#,##0);_(* \" - \"_);_(@_)";
+                            worksheet.Cells["AX" + ROW_BEFORE_START_EXCEL + ":AX" + rowTong].Style.Numberformat.Format = "_(* #,##0.00_);_(* (#,##0.00);_(* \" - \"_);_(@_)";
 
                             Dictionary<String, int> invoices = new Dictionary<string, int>();
                             String invoiceID = String.Empty;
@@ -539,6 +580,10 @@ namespace CongNo
                                 worksheet.Cells["G" + currentRow].Value = rs.Fields["m_han_thanh_toan"].Value;
                                 worksheet.Cells["H" + currentRow].Value = rs.Fields["m_ma_nv"].Value;
                                 worksheet.Cells["AT" + currentRow].Value = rs.Fields["m_kenh_kt"].Value;
+                                worksheet.Cells["AU" + currentRow].Value = rs.Fields["m_so_tai_khoan"].Value;
+                                worksheet.Cells["AV" + currentRow].Value = rs.Fields["m_so_tham_chieu"].Value;
+                                worksheet.Cells["AW" + currentRow].Value = rs.Fields["m_loai_tien"].Value;
+                                worksheet.Cells["AX" + currentRow].Value = rs.Fields["m_tong_nguyen_te"].Value;
 
                                 String fNgayQuaHan = String.Format("IF(AND(AK{0} > 0, $E$1 > G{0}), $E$1 - G{0}, 0)", currentRow);
                                 worksheet.Cells["I" + currentRow].Formula = fNgayQuaHan;
@@ -714,15 +759,11 @@ namespace CongNo
                             for (i = 10; i <= 45; i++)
                                 worksheet.Cells["J" + rowTong].Copy(worksheet.Cells[rowTong, i]);
 
-                            //Count kenh khai thac
-                            String fKenhkt = String.Format("SUBTOTAL(103,AT{0}:AT{1})", ROW_BEFORE_START_EXCEL + 1 , maxRowExcel);
-                            worksheet.Cells["AT" + rowTong].Formula = fKenhkt;
-
                             //Add border
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AT" + rowTong].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AT" + rowTong].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AT" + rowTong].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AT" + rowTong].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AX" + rowTong].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AX" + rowTong].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AX" + rowTong].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AX" + rowTong].Style.Border.Right.Style = ExcelBorderStyle.Thin;
 
                             //Content at end of report
                             int rowXacNhan = rowTong + 3;
@@ -746,15 +787,15 @@ namespace CongNo
 
                             sb.AppendLine("Private Sub Worksheet_SelectionChange(ByVal Target As Range)");
                             sb.AppendLine(" If Range(\"B1\") = \"ON\" Then");
-                            sb.AppendLine("     If Range(\"F1\") = \"\" Then");
+                            sb.AppendLine("     If Range(\"F1\") = \"Công ty\" Then");
                             sb.AppendLine("         If Sheets(2).AutoFilterMode Then");
                             sb.AppendLine("             Sheets(2).AutoFilter.ShowAllData");
                             sb.AppendLine("         Else");
-                            sb.AppendLine("             Range(\"A9:AT9\").AutoFilter");
+                            sb.AppendLine("             Range(\"A9:AX9\").AutoFilter");
                             sb.AppendLine("         End If");
                             sb.AppendLine("     Else");
-                            sb.AppendLine("         Range(\"A9: AT9\").AutoFilter Field:=2, Criteria1:=Range(\"F1\").Value, Operator:=xlOr, Criteria2:=\"=\"");
-                            sb.AppendLine("         Range(\"A9: AT9\").AutoFilter Field:=37, Criteria1:=\"<>0\"");
+                            sb.AppendLine("         Range(\"A9: AX9\").AutoFilter Field:=2, Criteria1:=Range(\"F1\").Value, Operator:=xlOr, Criteria2:=\"=\"");
+                            sb.AppendLine("         Range(\"A9: AX9\").AutoFilter Field:=37, Criteria1:=\"<>0\"");
                             sb.AppendLine("     End If");
                             sb.AppendLine(" End If");
                             sb.AppendLine("End Sub");
@@ -783,7 +824,7 @@ namespace CongNo
                             condition.Formula = statement;
 
                             //Filter, Scale, Freeze view
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AT" + ROW_BEFORE_START_EXCEL].AutoFilter = true;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AX" + ROW_BEFORE_START_EXCEL].AutoFilter = true;
                             worksheet.View.FreezePanes(ROW_BEFORE_START_EXCEL + 1, 8);
                             worksheet.View.ZoomScale = 85;
 
@@ -930,87 +971,102 @@ namespace CongNo
 
                             MessageBox.Show("Đã lập đối chiếu công nợ", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                            //Get outstanding from "cong_no", write to json file
-                            worksheet.Cells["AK" + ROW_BEFORE_START_EXCEL + ":AK" + maxRowExcel].Calculate();
-                            rs = db.OpenRecordset("cong_no");
-                            if (!rs.BOF)
-                                rs.MoveFirst();
-
-                            double debt = 0;
-
-                            //Write to Json
-                            StringBuilder sbOutstanding = new StringBuilder();
-                            StringWriter swOutstanding = new StringWriter(sbOutstanding);
-
-                            using (JsonWriter writerOutstanding = new JsonTextWriter(swOutstanding))
+                            if (loaiTk.Text == "Tổng")
                             {
-                                writerOutstanding.Formatting = Formatting.Indented;
-                                writerOutstanding.WriteStartArray();
+                                //Get outstanding from "cong_no", write to json file
+                                worksheet.Cells["AK" + ROW_BEFORE_START_EXCEL + ":AK" + maxRowExcel].Calculate();
+                                rs = db.OpenRecordset("cong_no");
+                                if (!rs.BOF)
+                                    rs.MoveFirst();
 
-                                for (i = ROW_BEFORE_START_EXCEL + 1; i <= maxRowExcel; i++)
+                                double debt = 0;
+
+                                //Write to Json
+                                StringBuilder sbOutstanding = new StringBuilder();
+                                StringWriter swOutstanding = new StringWriter(sbOutstanding);
+
+                                using (JsonWriter writerOutstanding = new JsonTextWriter(swOutstanding))
                                 {
-                                    debt = Convert.ToDouble(worksheet.Cells["AK" + i].Value);
+                                    writerOutstanding.Formatting = Formatting.Indented;
+                                    writerOutstanding.WriteStartArray();
 
-                                    if (debt > 0)
+                                    for (i = ROW_BEFORE_START_EXCEL + 1; i <= maxRowExcel; i++)
                                     {
-                                        writerOutstanding.WriteStartObject();
+                                        debt = Convert.ToDouble(worksheet.Cells["AK" + i].Value);
 
-                                        writerOutstanding.WritePropertyName("KiHieuHoaDon");
-                                        writerOutstanding.WriteValue(rs.Fields["ki_hieu_hoa_don"].Value);
+                                        if (debt > 0)
+                                        {
+                                            writerOutstanding.WriteStartObject();
 
-                                        writerOutstanding.WritePropertyName("SoHoaDon");
-                                        writerOutstanding.WriteValue(rs.Fields["so_hoa_don"].Value);
+                                            writerOutstanding.WritePropertyName("KiHieuHoaDon");
+                                            writerOutstanding.WriteValue(rs.Fields["ki_hieu_hoa_don"].Value);
 
-                                        writerOutstanding.WritePropertyName("MST");
-                                        writerOutstanding.WriteValue(rs.Fields["m_mst"].Value);
+                                            writerOutstanding.WritePropertyName("SoHoaDon");
+                                            writerOutstanding.WriteValue(rs.Fields["so_hoa_don"].Value);
 
-                                        writerOutstanding.WritePropertyName("KhachHang");
-                                        writerOutstanding.WriteValue(rs.Fields["m_cong_ty"].Value);
+                                            writerOutstanding.WritePropertyName("MST");
+                                            writerOutstanding.WriteValue(rs.Fields["m_mst"].Value);
 
-                                        writerOutstanding.WritePropertyName("HanThanhToan");
-                                        writerOutstanding.WriteValue(rs.Fields["m_han_thanh_toan"].Value);
+                                            writerOutstanding.WritePropertyName("KhachHang");
+                                            writerOutstanding.WriteValue(rs.Fields["m_cong_ty"].Value);
 
-                                        writerOutstanding.WritePropertyName("SoTienPhatSinh");
-                                        writerOutstanding.WriteValue(worksheet.Cells["AK" + i].Value);
+                                            writerOutstanding.WritePropertyName("HanThanhToan");
+                                            writerOutstanding.WriteValue(rs.Fields["m_han_thanh_toan"].Value);
 
-                                        writerOutstanding.WritePropertyName("NgayChungTu");
-                                        writerOutstanding.WriteValue(rs.Fields["m_ngay_ct"].Value);
+                                            writerOutstanding.WritePropertyName("SoTienPhatSinh");
+                                            writerOutstanding.WriteValue(worksheet.Cells["AK" + i].Value);
 
-                                        writerOutstanding.WritePropertyName("NgayHoaDon");
-                                        writerOutstanding.WriteValue(rs.Fields["m_ngay_hoa_don"].Value);
+                                            writerOutstanding.WritePropertyName("NgayChungTu");
+                                            writerOutstanding.WriteValue(rs.Fields["m_ngay_ct"].Value);
 
-                                        writerOutstanding.WritePropertyName("MaPhong");
-                                        writerOutstanding.WriteValue(rs.Fields["m_ma_phong"].Value);
+                                            writerOutstanding.WritePropertyName("NgayHoaDon");
+                                            writerOutstanding.WriteValue(rs.Fields["m_ngay_hoa_don"].Value);
 
-                                        writerOutstanding.WritePropertyName("MaNghiepVu");
-                                        writerOutstanding.WriteValue(rs.Fields["m_ma_nv"].Value);
+                                            writerOutstanding.WritePropertyName("MaPhong");
+                                            writerOutstanding.WriteValue(rs.Fields["m_ma_phong"].Value);
 
-                                        writerOutstanding.WritePropertyName("User");
-                                        writerOutstanding.WriteValue(rs.Fields["m_user_nhap"].Value);
+                                            writerOutstanding.WritePropertyName("MaNghiepVu");
+                                            writerOutstanding.WriteValue(rs.Fields["m_ma_nv"].Value);
 
-                                        writerOutstanding.WritePropertyName("KenhKT");
-                                        writerOutstanding.WriteValue(rs.Fields["m_kenh_kt"].Value);
+                                            writerOutstanding.WritePropertyName("User");
+                                            writerOutstanding.WriteValue(rs.Fields["m_user_nhap"].Value);
 
-                                        writerOutstanding.WriteEndObject();
+                                            writerOutstanding.WritePropertyName("KenhKT");
+                                            writerOutstanding.WriteValue(rs.Fields["m_kenh_kt"].Value);
+
+                                            writerOutstanding.WritePropertyName("SoTk");
+                                            writerOutstanding.WriteValue(rs.Fields["m_so_tai_khoan"].Value);
+
+                                            writerOutstanding.WritePropertyName("SoBk");
+                                            writerOutstanding.WriteValue(rs.Fields["m_so_tham_chieu"].Value);
+
+                                            writerOutstanding.WritePropertyName("LoaiTien");
+                                            writerOutstanding.WriteValue(rs.Fields["m_loai_tien"].Value);
+
+                                            writerOutstanding.WritePropertyName("NguyenTe");
+                                            writerOutstanding.WriteValue(rs.Fields["m_tong_nguyen_te"].Value);
+
+                                            writerOutstanding.WriteEndObject();
+                                        }
+                                        rs.MoveNext();
                                     }
-                                    rs.MoveNext();
+                                    writerOutstanding.WriteEndArray();
                                 }
-                                writerOutstanding.WriteEndArray();
-                            }
 
-                            String ToJsonOutstanding = swOutstanding.ToString();
+                                String ToJsonOutstanding = swOutstanding.ToString();
 
-                            DirectoryInfo directoryInfo = new DirectoryInfo(Environment.CurrentDirectory + @"\json");
-                            if (!directoryInfo.Exists)
-                                Directory.CreateDirectory(Environment.CurrentDirectory + @"\json");
-                            int NextYear = Convert.ToInt32(Program.DbYear) + 1;
-                            String outstandingToObject = Environment.CurrentDirectory + @"\json\outstanding - " + NextYear.ToString() + ".json";
-                            if (File.Exists(outstandingToObject))
-                                File.Delete(outstandingToObject);
+                                DirectoryInfo directoryInfo = new DirectoryInfo(Environment.CurrentDirectory + @"\json");
+                                if (!directoryInfo.Exists)
+                                    Directory.CreateDirectory(Environment.CurrentDirectory + @"\json");
+                                int NextYear = Convert.ToInt32(Program.DbYear) + 1;
+                                String outstandingToObject = Environment.CurrentDirectory + @"\json\outstanding - " + NextYear.ToString() + ".json";
+                                if (File.Exists(outstandingToObject))
+                                    File.Delete(outstandingToObject);
 
-                            using (StreamWriter outstandingToJson = new StreamWriter(outstandingToObject))
-                            {
-                                outstandingToJson.WriteLine(ToJsonOutstanding);
+                                using (StreamWriter outstandingToJson = new StreamWriter(outstandingToObject))
+                                {
+                                    outstandingToJson.WriteLine(ToJsonOutstanding);
+                                }
                             }
                         }
                         rs.Close();
@@ -1267,50 +1323,57 @@ namespace CongNo
                     using (var package = new ExcelPackage(newFile))
                     {
                         package.Workbook.Properties.Title = "Mau lay du lieu Sunweb";
-                        package.Workbook.Properties.Author = "Trần Khoa Minh";
                         package.Workbook.Properties.Company = "Bảo Việt Hải Phòng";
 
                         ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Du lieu Sunweb");
-                        worksheet.Cells["A:O"].Style.Font.Name = "Calibri";
-                        worksheet.Cells["A1:O1"].Style.Font.Bold = true;
+                        worksheet.Cells["A:S"].Style.Font.Name = "Calibri";
+                        worksheet.Cells["A1:S1"].Style.Font.Bold = true;
 
                         worksheet.Column(1).Width = GetTrueColumnWidth(6);
                         worksheet.Column(2).Width = GetTrueColumnWidth(9);
-                        worksheet.Column(3).Width = GetTrueColumnWidth(12);
-                        worksheet.Column(4).Width = GetTrueColumnWidth(5);
-                        worksheet.Column(5).Width = GetTrueColumnWidth(12);
-                        worksheet.Column(6).Width = GetTrueColumnWidth(35);
-                        worksheet.Column(7).Width = GetTrueColumnWidth(30);
-                        worksheet.Column(8).Width = GetTrueColumnWidth(11);
-                        worksheet.Column(9).Width = GetTrueColumnWidth(8);
-                        worksheet.Column(10).Width = GetTrueColumnWidth(8.5);
-                        worksheet.Column(11).Width = GetTrueColumnWidth(13);
-                        worksheet.Column(12).Width = GetTrueColumnWidth(13);
-                        worksheet.Column(13).Width = GetTrueColumnWidth(9);
-                        worksheet.Column(14).Width = GetTrueColumnWidth(15);
-                        worksheet.Column(15).Width = GetTrueColumnWidth(15.20);
+                        worksheet.Column(3).Width = GetTrueColumnWidth(9);
+                        worksheet.Column(4).Width = GetTrueColumnWidth(12);
+                        worksheet.Column(5).Width = GetTrueColumnWidth(5);
+                        worksheet.Column(6).Width = GetTrueColumnWidth(10);
+                        worksheet.Column(7).Width = GetTrueColumnWidth(35);
+                        worksheet.Column(8).Width = GetTrueColumnWidth(35);
+                        worksheet.Column(9).Width = GetTrueColumnWidth(30);
+                        worksheet.Column(10).Width = GetTrueColumnWidth(6);
+                        worksheet.Column(11).Width = GetTrueColumnWidth(11);
+                        worksheet.Column(12).Width = GetTrueColumnWidth(8);
+                        worksheet.Column(13).Width = GetTrueColumnWidth(8.5);
+                        worksheet.Column(14).Width = GetTrueColumnWidth(13);
+                        worksheet.Column(15).Width = GetTrueColumnWidth(13);
+                        worksheet.Column(16).Width = GetTrueColumnWidth(9);
+                        worksheet.Column(17).Width = GetTrueColumnWidth(15);
+                        worksheet.Column(18).Width = GetTrueColumnWidth(15.20);
+                        worksheet.Column(19).Width = GetTrueColumnWidth(12);
 
-                        worksheet.Cells["A:O"].Style.Font.Size = 8;
-                        worksheet.Cells["A:O"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                        worksheet.Cells["A:O"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                        worksheet.Cells["A:O"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                        worksheet.Cells["A:O"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                        worksheet.Cells["A:S"].Style.Font.Size = 8;
+                        worksheet.Cells["A:S"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        worksheet.Cells["A:S"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        worksheet.Cells["A:S"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                        worksheet.Cells["A:S"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
 
                         worksheet.Cells["A1"].Value = "LOAICT";
                         worksheet.Cells["B1"].Value = "NGAYCT";
-                        worksheet.Cells["C1"].Value = "SOTIENQUYDOI";
-                        worksheet.Cells["D1"].Value = "NOCO";
-                        worksheet.Cells["E1"].Value = "GNRL_DESCR_01";
-                        worksheet.Cells["F1"].Value = "GNRL_DESCR_02";
-                        worksheet.Cells["G1"].Value = "NGAYDAOHAN";
-                        worksheet.Cells["H1"].Value = "T2";
-                        worksheet.Cells["I1"].Value = "T3";
-                        worksheet.Cells["J1"].Value = "T5";
-                        worksheet.Cells["K1"].Value = "MASOTHUE";
-                        worksheet.Cells["L1"].Value = "KYHIEUHOADON";
-                        worksheet.Cells["M1"].Value = "SOHOADON";
-                        worksheet.Cells["N1"].Value = "NGAYHOADONGOC";
-                        worksheet.Cells["O1"].Value = "USERNHAP";
+                        worksheet.Cells["C1"].Value = "SOTAIKHOAN";
+                        worksheet.Cells["D1"].Value = "SOTIENQUYDOI";
+                        worksheet.Cells["E1"].Value = "NOCO";
+                        worksheet.Cells["F1"].Value = "SOTHAMCHIEU";
+                        worksheet.Cells["G1"].Value = "GNRL_DESCR_01";
+                        worksheet.Cells["H1"].Value = "GNRL_DESCR_02";
+                        worksheet.Cells["I1"].Value = "NGAYDAOHAN";
+                        worksheet.Cells["J1"].Value = "LOAITIEN";
+                        worksheet.Cells["K1"].Value = "T2";
+                        worksheet.Cells["L1"].Value = "T3";
+                        worksheet.Cells["M1"].Value = "T5";
+                        worksheet.Cells["N1"].Value = "MASOTHUE";
+                        worksheet.Cells["O1"].Value = "KYHIEUHOADON";
+                        worksheet.Cells["P1"].Value = "SOHOADON";
+                        worksheet.Cells["Q1"].Value = "NGAYHOADONGOC";
+                        worksheet.Cells["R1"].Value = "USERNHAP";
+                        worksheet.Cells["S1"].Value = "SOTIEN";
 
                         package.Save();
                     }
@@ -1670,6 +1733,7 @@ namespace CongNo
                         String querySql = String.Format("SELECT invoice.ngay_ct, invoice.ngay_hoa_don, department.ma_phong," +
                             " department.ten_phong, customers.mst, customers.cong_ty, " +
                             "invoice.ki_hieu_hoa_don, invoice.so_hoa_don, invoice.han_thanh_toan, revenue.ma_nv, revenue.user_nhap, invoice.kenh_kt, " +
+                            "revenue.so_tai_khoan, revenue.so_tham_chieu, invoice.loai_tien, invoice.tong_nguyen_te, " +
                             "IIf(Year(invoice.ngay_ct)<{0},invoice.so_tien_phat_sinh) AS du_dau_ky, IIf(Year(invoice.ngay_ct)={0} " +
                             "And Month(invoice.ngay_ct)=1,invoice.so_tien_phat_sinh) AS no1, IIf(Year(invoice.ngay_ct)={0} And " +
                             "Month(invoice.ngay_ct)=2,invoice.so_tien_phat_sinh) AS no2, IIf(Year(invoice.ngay_ct)={0} And " +
@@ -1714,6 +1778,8 @@ namespace CongNo
                                 rsInvoice.Fields["ngay_ct"].Value = outstanding.NgayChungTu;
                                 rsInvoice.Fields["ngay_hoa_don"].Value = outstanding.NgayHoaDon;
                                 rsInvoice.Fields["kenh_kt"].Value = outstanding.KenhKT;
+                                rsInvoice.Fields["loai_tien"].Value = outstanding.LoaiTien;
+                                rsInvoice.Fields["tong_nguyen_te"].Value = outstanding.NguyenTe;
                                 rsInvoice.Update();
 
                                 rsRevenue.AddNew();
@@ -1722,6 +1788,8 @@ namespace CongNo
                                 rsRevenue.Fields["ma_phong"].Value = outstanding.MaPhong;
                                 rsRevenue.Fields["ma_nv"].Value = outstanding.MaNghiepVu;
                                 rsRevenue.Fields["user_nhap"].Value = outstanding.User;
+                                rsRevenue.Fields["so_tai_khoan"].Value = outstanding.SoTk;
+                                rsRevenue.Fields["so_tham_chieu"].Value = outstanding.SoBk;
                                 rsRevenue.Update();
 
                                 try
