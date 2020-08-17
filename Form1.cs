@@ -138,26 +138,26 @@ namespace CongNo
                             rs.Fields["dong"].Value = row;
                             rs.Fields["loai_ct"].Value = NullToString(worksheet.Cells["A" + row].Value);
                             rs.Fields["no_co"].Value = NullToString(worksheet.Cells["E" + row].Value);
-                            rs.Fields["mst_draft"].Value = NullToString(worksheet.Cells["N" + row].Value);
+                            rs.Fields["mst_draft"].Value = NullToString(worksheet.Cells["O" + row].Value);
                             rs.Fields["cong_ty1"].Value = NullToString(worksheet.Cells["G" + row].Value);
                             rs.Fields["cong_ty2"].Value = NullToString(worksheet.Cells["H" + row].Value);
-                            rs.Fields["ky_hieu_hd"].Value = NullToString(worksheet.Cells["O" + row].Value);
-                            rs.Fields["so_hoa_don"].Value = NullToString(worksheet.Cells["P" + row].Value);
-                            rs.Fields["ngay_hoa_don_draft"].Value = NullToString(worksheet.Cells["Q" + row].Value);
-                            rs.Fields["ma_nv"].Value = NullToString(worksheet.Cells["K" + row].Value);
-                            rs.Fields["ma_phong"].Value = NullToString(worksheet.Cells["L" + row].Value);
+                            rs.Fields["ky_hieu_hd"].Value = NullToString(worksheet.Cells["P" + row].Value);
+                            rs.Fields["so_hoa_don"].Value = NullToString(worksheet.Cells["Q" + row].Value);
+                            rs.Fields["ngay_hoa_don_draft"].Value = NullToString(worksheet.Cells["R" + row].Value);
+                            rs.Fields["ma_nv"].Value = NullToString(worksheet.Cells["L" + row].Value);
+                            rs.Fields["ma_phong"].Value = NullToString(worksheet.Cells["M" + row].Value);
                             rs.Fields["so_tien"].Value = NullToString(worksheet.Cells["D" + row].Value);
                             rs.Fields["han_tt_draft"].Value = NullToString(worksheet.Cells["I" + row].Value);
                             rs.Fields["ngay_ct_draft"].Value = NullToString(worksheet.Cells["B" + row].Value);
-                            rs.Fields["user"].Value = NullToString(worksheet.Cells["R" + row].Value);
-                            rs.Fields["kenh_kt"].Value = NullToString(worksheet.Cells["M" + row].Value);
+                            rs.Fields["user"].Value = NullToString(worksheet.Cells["S" + row].Value);
+                            rs.Fields["kenh_kt"].Value = NullToString(worksheet.Cells["N" + row].Value);
                             rs.Fields["so_tai_khoan"].Value = NullToString(worksheet.Cells["C" + row].Value);
                             rs.Fields["so_tham_chieu"].Value = NullToString(worksheet.Cells["F" + row].Value);
                             rs.Fields["loai_tien_draft"].Value = NullToString(worksheet.Cells["J" + row].Value);
 
                             if (rs.Fields["loai_tien_draft"].Value == "USD")
                             {
-                            rs.Fields["nguyen_te_draft"].Value = NullToString(worksheet.Cells["S" + row].Value);
+                            rs.Fields["nguyen_te_draft"].Value = NullToString(worksheet.Cells["K" + row].Value);
                             }
 
                             rs.Update();
@@ -220,7 +220,17 @@ namespace CongNo
                         db.Execute("paid_draft_clear");
                         db.CommitTrans();
 
-                        rs.Close();
+                        rs.Close();                      
+
+                        MessageBox.Show("Đã upload dữ liệu xong.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Không ghi được dữ liệu.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        db.Rollback();
+                    }
+                    finally
+                    {
                         db.Close();
 
                         //Compact Database
@@ -229,14 +239,6 @@ namespace CongNo
                         dBEngine.CompactDatabase(db_file, compactDbTemp);
                         File.Delete(db_file);
                         File.Move(compactDbTemp, compactDbName);
-
-                        MessageBox.Show("Đã upload dữ liệu xong.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Không ghi được dữ liệu.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        db.Rollback();
-                        db.Close();
                     }
                 }
             }
@@ -752,7 +754,7 @@ namespace CongNo
 
                             worksheet.Cells["D" + rowTong].Value = "Tổng cộng";
 
-                            String fDuDauKy = String.Format("IF($F$1=\"\",SUM(J{0}:J{1}),SUMIF($B${0}:$B${1},$F$1,J{0}:J{1}))", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
+                            String fDuDauKy = String.Format("IF($F$1=\"Công ty\",SUM(J{0}:J{1}),SUMIF($B${0}:$B${1},$F$1,J{0}:J{1}))", ROW_BEFORE_START_EXCEL + 1, maxRowExcel);
                             worksheet.Cells["J" + rowTong].Formula = fDuDauKy;
 
                             //Copy formula
@@ -1339,15 +1341,15 @@ namespace CongNo
                         worksheet.Column(8).Width = GetTrueColumnWidth(35);
                         worksheet.Column(9).Width = GetTrueColumnWidth(30);
                         worksheet.Column(10).Width = GetTrueColumnWidth(6);
-                        worksheet.Column(11).Width = GetTrueColumnWidth(11);
-                        worksheet.Column(12).Width = GetTrueColumnWidth(8);
-                        worksheet.Column(13).Width = GetTrueColumnWidth(8.5);
-                        worksheet.Column(14).Width = GetTrueColumnWidth(13);
+                        worksheet.Column(11).Width = GetTrueColumnWidth(12);
+                        worksheet.Column(12).Width = GetTrueColumnWidth(11);
+                        worksheet.Column(13).Width = GetTrueColumnWidth(8);
+                        worksheet.Column(14).Width = GetTrueColumnWidth(8.5);
                         worksheet.Column(15).Width = GetTrueColumnWidth(13);
-                        worksheet.Column(16).Width = GetTrueColumnWidth(9);
-                        worksheet.Column(17).Width = GetTrueColumnWidth(15);
-                        worksheet.Column(18).Width = GetTrueColumnWidth(15.20);
-                        worksheet.Column(19).Width = GetTrueColumnWidth(12);
+                        worksheet.Column(16).Width = GetTrueColumnWidth(13);
+                        worksheet.Column(17).Width = GetTrueColumnWidth(9);
+                        worksheet.Column(18).Width = GetTrueColumnWidth(15);
+                        worksheet.Column(19).Width = GetTrueColumnWidth(15.20);
 
                         worksheet.Cells["A:S"].Style.Font.Size = 8;
                         worksheet.Cells["A:S"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
@@ -1365,15 +1367,15 @@ namespace CongNo
                         worksheet.Cells["H1"].Value = "GNRL_DESCR_02";
                         worksheet.Cells["I1"].Value = "NGAYDAOHAN";
                         worksheet.Cells["J1"].Value = "LOAITIEN";
-                        worksheet.Cells["K1"].Value = "T2";
-                        worksheet.Cells["L1"].Value = "T3";
-                        worksheet.Cells["M1"].Value = "T5";
-                        worksheet.Cells["N1"].Value = "MASOTHUE";
-                        worksheet.Cells["O1"].Value = "KYHIEUHOADON";
-                        worksheet.Cells["P1"].Value = "SOHOADON";
-                        worksheet.Cells["Q1"].Value = "NGAYHOADONGOC";
-                        worksheet.Cells["R1"].Value = "USERNHAP";
-                        worksheet.Cells["S1"].Value = "SOTIEN";
+                        worksheet.Cells["K1"].Value = "SOTIEN";
+                        worksheet.Cells["L1"].Value = "T2";
+                        worksheet.Cells["M1"].Value = "T3";
+                        worksheet.Cells["N1"].Value = "T5";
+                        worksheet.Cells["O1"].Value = "MASOTHUE";
+                        worksheet.Cells["P1"].Value = "KYHIEUHOADON";
+                        worksheet.Cells["Q1"].Value = "SOHOADON";
+                        worksheet.Cells["R1"].Value = "NGAYHOADONGOC";
+                        worksheet.Cells["S1"].Value = "USERNHAP";
 
                         package.Save();
                     }
