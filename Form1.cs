@@ -587,7 +587,7 @@ namespace CongNo
                                 worksheet.Cells["AW" + currentRow].Value = rs.Fields["m_loai_tien"].Value;
                                 worksheet.Cells["AX" + currentRow].Value = rs.Fields["m_tong_nguyen_te"].Value;
 
-                                String fNgayQuaHan = String.Format("IF(AND(AK{0} > 0, $E$1 > G{0}), $E$1 - G{0}, 0)", currentRow);
+                                String fNgayQuaHan = String.Format("IF(AND(AK{0} > 0, $E$1 >= G{0}), ($E$1 - G{0}) + 1, 0)", currentRow);
                                 worksheet.Cells["I" + currentRow].Formula = fNgayQuaHan;
 
                                 if (rs.Fields["tong_dau_ky"].Value is DBNull)
