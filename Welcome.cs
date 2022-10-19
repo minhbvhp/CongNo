@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using Microsoft.Office.Interop.Access.Dao;
 
 namespace CongNo
 {
@@ -67,8 +68,8 @@ namespace CongNo
 
                 String db_file = fileInfo.ToString();
 
-                DAO.DBEngine dBEngine = new DAO.DBEngine();
-                DAO.Database db;
+                DBEngine dBEngine = new DBEngine();
+                Database db;
                 db = dBEngine.OpenDatabase(db_file);
                 String queryName = "cong_no_draft";
                 String querySql = String.Format("SELECT invoice.ngay_ct, invoice.ngay_hoa_don, department.ma_phong," +
@@ -92,7 +93,7 @@ namespace CongNo
                     " AND(revenue.so_hoa_don = invoice.so_hoa_don)) INNER JOIN customers ON invoice.mst = customers.mst)" +
                     " ON department.ma_phong = revenue.ma_phong ORDER BY invoice.ki_hieu_hoa_don, invoice.so_hoa_don;", Program.DbYear);
 
-                DAO.QueryDef cong_no_draft = new DAO.QueryDef();
+                QueryDef cong_no_draft = new QueryDef();
                 cong_no_draft.Name = queryName;
                 cong_no_draft.SQL = querySql;
 

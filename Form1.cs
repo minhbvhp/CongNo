@@ -12,7 +12,7 @@ using System.IO;
 using OfficeOpenXml.Style;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
+using Microsoft.Office.Interop.Access.Dao;
 
 namespace CongNo
 {
@@ -121,9 +121,9 @@ namespace CongNo
                     String db_path = Environment.CurrentDirectory + @"\Database\";
                     String db_file = db_path + db_name;
 
-                    DAO.DBEngine dBEngine = new DAO.DBEngine();
-                    DAO.Database db = null;
-                    DAO.Recordset rs;
+                    DBEngine dBEngine = new DBEngine();
+                    Database db = null;
+                    Recordset rs;
 
                     //Export to .mdb file
                     try
@@ -294,9 +294,9 @@ namespace CongNo
                         String db_path = Environment.CurrentDirectory + @"\Database\";
                         String db_file = db_path + db_name;
 
-                        DAO.DBEngine dBEngine = new DAO.DBEngine();
-                        DAO.Database db;
-                        DAO.Recordset rs;
+                        DBEngine dBEngine = new DBEngine();
+                        Database db;
+                        Recordset rs;
 
                         db = dBEngine.OpenDatabase(db_file);
 
@@ -1093,9 +1093,9 @@ namespace CongNo
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
-            DAO.DBEngine dBEngine = new DAO.DBEngine();
-            DAO.Database db;
-            DAO.Recordset rs = null;
+            DBEngine dBEngine = new DBEngine();
+            Database db;
+            Recordset rs = null;
 
             /*
              * Toxic ways to avoid SQL injection
@@ -1226,9 +1226,9 @@ namespace CongNo
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
-            DAO.DBEngine dBEngine = new DAO.DBEngine();
-            DAO.Database db;
-            DAO.Recordset rs = null;
+            DBEngine dBEngine = new DBEngine();
+            Database db;
+            Recordset rs = null;
 
             int recordNumber = 0;
 
@@ -1272,7 +1272,7 @@ namespace CongNo
                         rs.Move(recordNumber);
 
                         currentMST.Text = rs.Fields["mst"].Value;
-                        DAO.Recordset rsKhachHang = db.OpenRecordset("SELECT cong_ty FROM customers WHERE mst = '" + currentMST.Text + "'");
+                        Recordset rsKhachHang = db.OpenRecordset("SELECT cong_ty FROM customers WHERE mst = '" + currentMST.Text + "'");
                         if (rsKhachHang.RecordCount > 0)
                             currentKhachHang.Text = rsKhachHang.Fields["cong_ty"].Value;
 
@@ -1418,9 +1418,9 @@ namespace CongNo
             String db_path = Environment.CurrentDirectory + @"\Database\";
             String db_file = db_path + db_name;
 
-            DAO.DBEngine dBEngine = new DAO.DBEngine();
-            DAO.Database db;
-            DAO.Recordset rs = null;
+            DBEngine dBEngine = new DBEngine();
+            Database db;
+            Recordset rs = null;
             int recordNumber = Convert.ToInt32(recNo.Text) - 1;
 
             try
@@ -1498,9 +1498,9 @@ namespace CongNo
                 String db_path = Environment.CurrentDirectory + @"\Database\";
                 String db_file = db_path + db_name;
 
-                DAO.DBEngine dBEngine = new DAO.DBEngine();
-                DAO.Database db;
-                DAO.Recordset rs = null;
+                DBEngine dBEngine = new DBEngine();
+                Database db;
+                Recordset rs = null;
                 int recordNumber = Convert.ToInt32(recNo.Text) - 1;
 
                 try
@@ -1704,11 +1704,11 @@ namespace CongNo
 
                 if (dialogResult == DialogResult.Yes)
                 {
-                    DAO.DBEngine dBEngine = new DAO.DBEngine();
-                    DAO.Database db = null;
-                    DAO.Recordset rsInvoice = null;
-                    DAO.Recordset rsRevenue = null;
-                    DAO.Recordset rsCustomers = null;
+                    DBEngine dBEngine = new DBEngine();
+                    Database db = null;
+                    Recordset rsInvoice = null;
+                    Recordset rsRevenue = null;
+                    Recordset rsCustomers = null;
 
                     //Read Json
                     String outstandingReaderPath = Environment.CurrentDirectory + @"\json\outstanding - " + NextYear.ToString() + ".json";
@@ -1753,7 +1753,7 @@ namespace CongNo
                             " AND(revenue.so_hoa_don = invoice.so_hoa_don)) INNER JOIN customers ON invoice.mst = customers.mst)" +
                             " ON department.ma_phong = revenue.ma_phong ORDER BY invoice.ki_hieu_hoa_don, invoice.so_hoa_don;", NextYear.ToString());
 
-                        DAO.QueryDef cong_no_draft = new DAO.QueryDef();
+                        QueryDef cong_no_draft = new QueryDef();
                         cong_no_draft.Name = queryName;
                         cong_no_draft.SQL = querySql;
 
