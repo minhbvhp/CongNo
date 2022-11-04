@@ -220,7 +220,7 @@ namespace CongNo
                         db.Execute("paid_draft_clear");
                         db.CommitTrans();
 
-                        rs.Close();                      
+                        rs.Close();                        
 
                         MessageBox.Show("Đã upload dữ liệu xong.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
@@ -231,15 +231,8 @@ namespace CongNo
                     }
                     finally
                     {
-                        db.Close();
-
-                        //Compact Database
-                        String compactDbTemp = db_path + "temp.mdb";
-                        String compactDbName = db_path + Program.DbYear + ".mdb";
-                        dBEngine.CompactDatabase(db_file, compactDbTemp);
-                        File.Delete(db_file);
-                        File.Move(compactDbTemp, compactDbName);
-                    }
+                        db.Close();                        
+                    }                    
                 }
             }
             CurrentInfoRefresh(RefreshOption.All);
@@ -1821,6 +1814,31 @@ namespace CongNo
             {
                 MessageBox.Show("Không thể lập dữ liệu năm mới.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void compactButton_Click(object sender, EventArgs e)
+        {
+            String db_name = Program.DbYear + ".mdb";
+            String db_path = Environment.CurrentDirectory + @"\Database\";
+            String db_file = db_path + db_name;
+            DBEngine dBEngine = new DBEngine();
+
+            try
+            {
+                //Compact Database
+                String compactDbTemp = db_path + "temp.mdb";
+                String compactDbName = db_path + Program.DbYear + ".mdb";
+                dBEngine.CompactDatabase(db_file, compactDbTemp, null);
+                File.Delete(db_file);
+                File.Move(compactDbTemp, compactDbName);
+
+                MessageBox.Show("Đã nén xong dữ liệu");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Không nén được dữ liệu.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            
         }
     }
 }
