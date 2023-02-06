@@ -772,7 +772,7 @@ namespace CongNo
                             String fNgayThangNam = String.Format("\"Hải Phòng, ngày \" & DAY(E1) & \" tháng \" & MONTH(E1) & \" năm \" & YEAR(E1)");
                             worksheet.Cells["AQ" + (rowXacNhan - 1)].Formula = fNgayThangNam;
 
-                            worksheet.Cells["AJ" + rowXacNhan].Value = "PHÒNG TÀI CHÍNH KẾ TOÁN";
+                            worksheet.Cells["AJ" + rowXacNhan].Value = "PHÒNG KẾ TOÁN";
                             worksheet.Cells["AQ" + rowXacNhan].Value = "LÃNH ĐẠO CÔNG TY";
                             worksheet.Cells["D" + rowXacNhan + ":AS" + rowXacNhan].Style.Font.Bold = true;
 
