@@ -75,7 +75,7 @@ namespace CongNo
                 String querySql = String.Format("SELECT invoice.ngay_ct, invoice.ngay_hoa_don, department.ma_phong," +
                     " department.ten_phong, customers.mst, customers.cong_ty, " +
                     "invoice.ki_hieu_hoa_don, invoice.so_hoa_don, invoice.han_thanh_toan, revenue.ma_nv, revenue.user_nhap, invoice.kenh_kt, " +
-                    "revenue.so_tai_khoan, revenue.so_tham_chieu, invoice.loai_tien, invoice.tong_nguyen_te, " +
+                    "revenue.so_tai_khoan, revenue.so_tham_chieu, invoice.loai_tien, invoice.tong_nguyen_te, can_bo.id, can_bo.full_name " +
                     "IIf(Year(invoice.ngay_ct)<{0},invoice.so_tien_phat_sinh) AS du_dau_ky, IIf(Year(invoice.ngay_ct)={0} " +
                     "And Month(invoice.ngay_ct)=1,invoice.so_tien_phat_sinh) AS no1, IIf(Year(invoice.ngay_ct)={0} And " +
                     "Month(invoice.ngay_ct)=2,invoice.so_tien_phat_sinh) AS no2, IIf(Year(invoice.ngay_ct)={0} And " +
@@ -91,7 +91,8 @@ namespace CongNo
                     "Month(invoice.ngay_ct)=12,invoice.so_tien_phat_sinh) AS no12 FROM department " +
                     "INNER JOIN((revenue INNER JOIN invoice ON (revenue.ki_hieu_hoa_don = invoice.ki_hieu_hoa_don)" +
                     " AND(revenue.so_hoa_don = invoice.so_hoa_don)) INNER JOIN customers ON invoice.mst = customers.mst)" +
-                    " ON department.ma_phong = revenue.ma_phong ORDER BY invoice.ki_hieu_hoa_don, invoice.so_hoa_don;", Program.DbYear);
+                    " ON department.ma_phong = revenue.ma_phong ON can_bo.id = revenue.ma_can_bo" +
+                    " ORDER BY invoice.ki_hieu_hoa_don, invoice.so_hoa_don;", Program.DbYear);
 
                 QueryDef cong_no_draft = new QueryDef();
                 cong_no_draft.Name = queryName;

@@ -305,6 +305,17 @@ namespace CongNo
                             rs.MoveNext();
                         }
 
+                        //Get employee list from Database
+                        Dictionary<String, String> employees = new Dictionary<String, String>();
+                        rs = db.OpenRecordset("can_bo");
+                        if (!rs.BOF)
+                            rs.MoveFirst();
+                        for (i = 1; i <= rs.RecordCount; i++)
+                        {
+                            employees.Add(rs.Fields["ten_phong"].Value, rs.Fields["ten_day_du"].Value);
+                            rs.MoveNext();
+                        }
+
                         //Create "Doi chieu cong no" form
                         var newFile = new FileInfo(saveFileDialog.FileName);
 
@@ -514,16 +525,19 @@ namespace CongNo
                             worksheet.Cells["AX6:AX7"].Merge = true;
                             worksheet.Cells["AX6:AX7"].Value = "Nguyên tệ";
 
-                            worksheet.Cells["A6:AX8"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A6:AX8"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A6:AX8"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A6:AX8"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A6:AX8"].Style.Font.Bold = true;
-                            worksheet.Cells["A6:AX8"].Style.WrapText = true;
-                            worksheet.Cells["A6:AX8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            worksheet.Cells["AY6:AY7"].Merge = true;
+                            worksheet.Cells["AY6:AY7"].Value = "Cán bộ";
+
+                            worksheet.Cells["A6:AY8"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AY8"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AY8"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AY8"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A6:AY8"].Style.Font.Bold = true;
+                            worksheet.Cells["A6:AY8"].Style.WrapText = true;
+                            worksheet.Cells["A6:AY8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
 
-                            //Export "cong_no" to "Doi chieu cong no" excel file
+                            //Export "cong_no" to "Doi chieu cong no" excel file                            
                             switch (loaiTk.Text)
                             {
                                 case "Tổng":
