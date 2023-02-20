@@ -154,6 +154,7 @@ namespace CongNo
                             rs.Fields["so_tai_khoan"].Value = NullToString(worksheet.Cells["C" + row].Value);
                             rs.Fields["so_tham_chieu"].Value = NullToString(worksheet.Cells["F" + row].Value);
                             rs.Fields["loai_tien_draft"].Value = NullToString(worksheet.Cells["J" + row].Value);
+                            rs.Fields["ma_can_bo_draft"].Value = NullToString(worksheet.Cells["AB" + row].Value);
 
                             if (rs.Fields["loai_tien_draft"].Value == "USD")
                             {
