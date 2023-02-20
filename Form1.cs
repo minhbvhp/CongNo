@@ -1369,6 +1369,7 @@ namespace CongNo
                         worksheet.Cells["Q1"].Value = "SOHOADON";
                         worksheet.Cells["R1"].Value = "NGAYHOADONGOC";
                         worksheet.Cells["S1"].Value = "USERNHAP";
+                        worksheet.Cells["T1"].Value = "T8";
 
                         package.Save();
                     }
