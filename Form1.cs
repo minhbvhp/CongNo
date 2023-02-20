@@ -594,6 +594,7 @@ namespace CongNo
                                 worksheet.Cells["AV" + currentRow].Value = rs.Fields["m_so_tham_chieu"].Value;
                                 worksheet.Cells["AW" + currentRow].Value = rs.Fields["m_loai_tien"].Value;
                                 worksheet.Cells["AX" + currentRow].Value = rs.Fields["m_tong_nguyen_te"].Value;
+                                worksheet.Cells["AY" + currentRow].Value = rs.Fields["m_full_name"].Value;
 
                                 String fNgayQuaHan = String.Format("IF(AND(AK{0} > 0, $E$1 >= G{0}), ($E$1 - G{0}) + 1, 0)", currentRow);
                                 worksheet.Cells["I" + currentRow].Formula = fNgayQuaHan;
@@ -770,10 +771,10 @@ namespace CongNo
                                 worksheet.Cells["J" + rowTong].Copy(worksheet.Cells[rowTong, i]);
 
                             //Add border
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AX" + rowTong].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AX" + rowTong].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AX" + rowTong].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AX" + rowTong].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AY" + rowTong].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AY" + rowTong].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AY" + rowTong].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AY" + rowTong].Style.Border.Right.Style = ExcelBorderStyle.Thin;
 
                             //Content at end of report
                             int rowXacNhan = rowTong + 3;
@@ -801,11 +802,11 @@ namespace CongNo
                             sb.AppendLine("         If Sheets(2).AutoFilterMode Then");
                             sb.AppendLine("             Sheets(2).AutoFilter.ShowAllData");
                             sb.AppendLine("         Else");
-                            sb.AppendLine("             Range(\"A9:AX9\").AutoFilter");
+                            sb.AppendLine("             Range(\"A9:AY9\").AutoFilter");
                             sb.AppendLine("         End If");
                             sb.AppendLine("     Else");
-                            sb.AppendLine("         Range(\"A9: AX9\").AutoFilter Field:=2, Criteria1:=Range(\"F1\").Value, Operator:=xlOr, Criteria2:=\"=\"");
-                            sb.AppendLine("         Range(\"A9: AX9\").AutoFilter Field:=37, Criteria1:=\"<>0\"");
+                            sb.AppendLine("         Range(\"A9: AY9\").AutoFilter Field:=2, Criteria1:=Range(\"F1\").Value, Operator:=xlOr, Criteria2:=\"=\"");
+                            sb.AppendLine("         Range(\"A9: AY9\").AutoFilter Field:=37, Criteria1:=\"<>0\"");
                             sb.AppendLine("     End If");
                             sb.AppendLine(" End If");
                             sb.AppendLine("End Sub");
@@ -834,7 +835,7 @@ namespace CongNo
                             condition.Formula = statement;
 
                             //Filter, Scale, Freeze view
-                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AX" + ROW_BEFORE_START_EXCEL].AutoFilter = true;
+                            worksheet.Cells["A" + ROW_BEFORE_START_EXCEL + ":AY" + ROW_BEFORE_START_EXCEL].AutoFilter = true;
                             worksheet.View.FreezePanes(ROW_BEFORE_START_EXCEL + 1, 8);
                             worksheet.View.ZoomScale = 85;
 
@@ -1055,6 +1056,9 @@ namespace CongNo
 
                                             writerOutstanding.WritePropertyName("NguyenTe");
                                             writerOutstanding.WriteValue(rs.Fields["m_tong_nguyen_te"].Value);
+
+                                            writerOutstanding.WritePropertyName("MaCanBo");
+                                            writerOutstanding.WriteValue(rs.Fields["m_id"].Value);
 
                                             writerOutstanding.WriteEndObject();
                                         }
