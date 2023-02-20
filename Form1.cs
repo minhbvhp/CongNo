@@ -154,7 +154,7 @@ namespace CongNo
                             rs.Fields["so_tai_khoan"].Value = NullToString(worksheet.Cells["C" + row].Value);
                             rs.Fields["so_tham_chieu"].Value = NullToString(worksheet.Cells["F" + row].Value);
                             rs.Fields["loai_tien_draft"].Value = NullToString(worksheet.Cells["J" + row].Value);
-                            rs.Fields["ma_can_bo_draft"].Value = NullToString(worksheet.Cells["AB" + row].Value);
+                            rs.Fields["ma_can_bo_draft"].Value = NullToString(worksheet.Cells["T" + row].Value);
 
                             if (rs.Fields["loai_tien_draft"].Value == "USD")
                             {
@@ -312,7 +312,7 @@ namespace CongNo
                             rs.MoveFirst();
                         for (i = 1; i <= rs.RecordCount; i++)
                         {
-                            employees.Add(rs.Fields["ten_phong"].Value, rs.Fields["ten_day_du"].Value);
+                            employees.Add(rs.Fields["id"].Value, rs.Fields["full_name"].Value);
                             rs.MoveNext();
                         }
 
@@ -363,9 +363,9 @@ namespace CongNo
                                 worksheet.Column(i).Width = GetTrueColumnWidth(10.00);
                             }
 
-                            worksheet.Cells["A:AX"].Style.Font.Name = "Times New Roman";
-                            worksheet.Cells["A:AX"].Style.Font.Size = 11;
-                            worksheet.Cells["A:AX"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                            worksheet.Cells["A:AY"].Style.Font.Name = "Times New Roman";
+                            worksheet.Cells["A:AY"].Style.Font.Size = 11;
+                            worksheet.Cells["A:AY"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                             worksheet.Row(1).Height = 35.25;
                             worksheet.Row(2).Height = 9.75;
                             worksheet.Row(3).Height = 35.25;
@@ -659,6 +659,9 @@ namespace CongNo
 
                                 rs.MoveNext();
                             }
+
+                            //Autofit column Ten can bo                            
+                            worksheet.Column(51).AutoFit();
 
                             //Get "ki_hieu_hoa_don" and "so_hoa_don" from "tra_tien", match with "cong_no"
                             rs = db.OpenRecordset("tra_tien");
@@ -1340,8 +1343,8 @@ namespace CongNo
                         package.Workbook.Properties.Company = "Bảo Việt Hải Phòng";
 
                         ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Du lieu Sunweb");
-                        worksheet.Cells["A:S"].Style.Font.Name = "Calibri";
-                        worksheet.Cells["A1:S1"].Style.Font.Bold = true;
+                        worksheet.Cells["A:T"].Style.Font.Name = "Calibri";
+                        worksheet.Cells["A1:T1"].Style.Font.Bold = true;
 
                         worksheet.Column(1).Width = GetTrueColumnWidth(6);
                         worksheet.Column(2).Width = GetTrueColumnWidth(9);
@@ -1363,11 +1366,11 @@ namespace CongNo
                         worksheet.Column(18).Width = GetTrueColumnWidth(15);
                         worksheet.Column(19).Width = GetTrueColumnWidth(15.20);
 
-                        worksheet.Cells["A:S"].Style.Font.Size = 8;
-                        worksheet.Cells["A:S"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                        worksheet.Cells["A:S"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                        worksheet.Cells["A:S"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                        worksheet.Cells["A:S"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                        worksheet.Cells["A:T"].Style.Font.Size = 8;
+                        worksheet.Cells["A:T"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        worksheet.Cells["A:T"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        worksheet.Cells["A:T"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                        worksheet.Cells["A:T"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
 
                         worksheet.Cells["A1"].Value = "LOAICT";
                         worksheet.Cells["B1"].Value = "NGAYCT";
