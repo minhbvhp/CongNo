@@ -138,23 +138,23 @@ namespace CongNo
                             rs.Fields["dong"].Value = row;
                             rs.Fields["loai_ct"].Value = NullToString(worksheet.Cells["A" + row].Value);
                             rs.Fields["no_co"].Value = NullToString(worksheet.Cells["E" + row].Value);
-                            rs.Fields["mst_draft"].Value = NullToString(worksheet.Cells["O" + row].Value);
+                            rs.Fields["mst_draft"].Value = NullToString(worksheet.Cells["P" + row].Value);
                             rs.Fields["cong_ty1"].Value = NullToString(worksheet.Cells["G" + row].Value);
                             rs.Fields["cong_ty2"].Value = NullToString(worksheet.Cells["H" + row].Value);
-                            rs.Fields["ky_hieu_hd"].Value = NullToString(worksheet.Cells["P" + row].Value);
-                            rs.Fields["so_hoa_don"].Value = NullToString(worksheet.Cells["Q" + row].Value);
-                            rs.Fields["ngay_hoa_don_draft"].Value = NullToString(worksheet.Cells["R" + row].Value);
+                            rs.Fields["ky_hieu_hd"].Value = NullToString(worksheet.Cells["Q" + row].Value);
+                            rs.Fields["so_hoa_don"].Value = NullToString(worksheet.Cells["R" + row].Value);
+                            rs.Fields["ngay_hoa_don_draft"].Value = NullToString(worksheet.Cells["S" + row].Value);
                             rs.Fields["ma_nv"].Value = NullToString(worksheet.Cells["L" + row].Value);
                             rs.Fields["ma_phong"].Value = NullToString(worksheet.Cells["M" + row].Value);
                             rs.Fields["so_tien"].Value = NullToString(worksheet.Cells["D" + row].Value);
                             rs.Fields["han_tt_draft"].Value = NullToString(worksheet.Cells["I" + row].Value);
                             rs.Fields["ngay_ct_draft"].Value = NullToString(worksheet.Cells["B" + row].Value);
-                            rs.Fields["user"].Value = NullToString(worksheet.Cells["S" + row].Value);
+                            rs.Fields["user"].Value = NullToString(worksheet.Cells["T" + row].Value);
                             rs.Fields["kenh_kt"].Value = NullToString(worksheet.Cells["N" + row].Value);
                             rs.Fields["so_tai_khoan"].Value = NullToString(worksheet.Cells["C" + row].Value);
                             rs.Fields["so_tham_chieu"].Value = NullToString(worksheet.Cells["F" + row].Value);
                             rs.Fields["loai_tien_draft"].Value = NullToString(worksheet.Cells["J" + row].Value);
-                            rs.Fields["ma_can_bo_draft"].Value = NullToString(worksheet.Cells["T" + row].Value);
+                            rs.Fields["ma_can_bo_draft"].Value = NullToString(worksheet.Cells["O" + row].Value);
 
                             if (rs.Fields["loai_tien_draft"].Value == "USD")
                             {
@@ -1386,12 +1386,13 @@ namespace CongNo
                         worksheet.Cells["L1"].Value = "T2";
                         worksheet.Cells["M1"].Value = "T3";
                         worksheet.Cells["N1"].Value = "T5";
-                        worksheet.Cells["O1"].Value = "MASOTHUE";
-                        worksheet.Cells["P1"].Value = "KYHIEUHOADON";
-                        worksheet.Cells["Q1"].Value = "SOHOADON";
-                        worksheet.Cells["R1"].Value = "NGAYHOADONGOC";
-                        worksheet.Cells["S1"].Value = "USERNHAP";
-                        worksheet.Cells["T1"].Value = "T8";
+                        worksheet.Cells["O1"].Value = "T8";
+                        worksheet.Cells["P1"].Value = "MASOTHUE";
+                        worksheet.Cells["Q1"].Value = "KYHIEUHOADON";
+                        worksheet.Cells["R1"].Value = "SOHOADON";
+                        worksheet.Cells["S1"].Value = "NGAYHOADONGOC";
+                        worksheet.Cells["T1"].Value = "USERNHAP";
+                        
 
                         package.Save();
                     }
