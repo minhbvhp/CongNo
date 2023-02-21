@@ -154,7 +154,15 @@ namespace CongNo
                             rs.Fields["so_tai_khoan"].Value = NullToString(worksheet.Cells["C" + row].Value);
                             rs.Fields["so_tham_chieu"].Value = NullToString(worksheet.Cells["F" + row].Value);
                             rs.Fields["loai_tien_draft"].Value = NullToString(worksheet.Cells["J" + row].Value);
-                            rs.Fields["ma_can_bo_draft"].Value = NullToString(worksheet.Cells["O" + row].Value);
+
+                            string _tempMaCanBo = NullToString(worksheet.Cells["O" + row].Value) ?? "";
+                            if (String.IsNullOrEmpty(_tempMaCanBo) || String.IsNullOrWhiteSpace(_tempMaCanBo)){
+                                rs.Fields["ma_can_bo_draft"].Value = "CB1460000";
+                            }
+                            else
+                            {
+                                rs.Fields["ma_can_bo_draft"].Value = NullToString(worksheet.Cells["O" + row].Value);
+                            }
 
                             if (rs.Fields["loai_tien_draft"].Value == "USD")
                             {
@@ -303,18 +311,7 @@ namespace CongNo
                         {
                             departments.Add(rs.Fields["ten_phong"].Value, rs.Fields["ten_day_du"].Value);
                             rs.MoveNext();
-                        }
-
-                        //Get employee list from Database
-                        Dictionary<String, String> employees = new Dictionary<String, String>();
-                        rs = db.OpenRecordset("can_bo");
-                        if (!rs.BOF)
-                            rs.MoveFirst();
-                        for (i = 1; i <= rs.RecordCount; i++)
-                        {
-                            employees.Add(rs.Fields["id"].Value, rs.Fields["full_name"].Value);
-                            rs.MoveNext();
-                        }
+                        }                        
 
                         //Create "Doi chieu cong no" form
                         var newFile = new FileInfo(saveFileDialog.FileName);
