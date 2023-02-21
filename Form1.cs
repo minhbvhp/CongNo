@@ -1798,6 +1798,7 @@ namespace CongNo
                                 rsInvoice.Fields["kenh_kt"].Value = outstanding.KenhKT;
                                 rsInvoice.Fields["loai_tien"].Value = outstanding.LoaiTien;
                                 rsInvoice.Fields["tong_nguyen_te"].Value = outstanding.NguyenTe;
+                                rsInvoice.Fields["ma_can_bo"].Value = outstanding.MaCanBo;
                                 rsInvoice.Update();
 
                                 rsRevenue.AddNew();
@@ -1808,6 +1809,7 @@ namespace CongNo
                                 rsRevenue.Fields["user_nhap"].Value = outstanding.User;
                                 rsRevenue.Fields["so_tai_khoan"].Value = outstanding.SoTk;
                                 rsRevenue.Fields["so_tham_chieu"].Value = outstanding.SoBk;
+                                rsRevenue.Fields["ma_can_bo"].Value = outstanding.MaCanBo;
                                 rsRevenue.Update();
 
                                 try
