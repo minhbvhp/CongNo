@@ -548,6 +548,10 @@ namespace CongNo
                                     rs = db.OpenRecordset("SELECT * FROM cong_no WHERE m_so_tai_khoan='13161'");
                                     rs.MoveLast();
                                     break;
+                                case "13155":
+                                    rs = db.OpenRecordset("SELECT * FROM cong_no WHERE m_so_tai_khoan='13155'");
+                                    rs.MoveLast();
+                                    break;
                             }
                             const byte ROW_BEFORE_START_EXCEL = 8;
                             int maxPhatSinh = rs.RecordCount;
