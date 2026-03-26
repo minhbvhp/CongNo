@@ -958,8 +958,8 @@
             this.loaiTk.Items.AddRange(new object[] {
             "Tổng",
             "13111",
-            "13161",
-            "13155"});
+            TK13115,
+            TK13116});
             this.loaiTk.Location = new System.Drawing.Point(606, 616);
             this.loaiTk.Name = "loaiTk";
             this.loaiTk.Size = new System.Drawing.Size(121, 21);

@@ -19,7 +19,10 @@ namespace CongNo
     
     public partial class Form1 : Form
     {
-        
+        const string TK13116 = "13116";
+        const string TK13115 = "13115";
+        const string TK13111 = "13111";
+
         public TextBox[] textBoxes = new TextBox[6];
         public DateTimePicker[] dateTimePickers = new DateTimePicker[4];
 
@@ -156,7 +159,11 @@ namespace CongNo
                             rs.Fields["loai_tien_draft"].Value = NullToString(worksheet.Cells["J" + row].Value);
 
                             string _tempMaCanBo = NullToString(worksheet.Cells["O" + row].Value) ?? "";
+
+
                             if (String.IsNullOrEmpty(_tempMaCanBo) || String.IsNullOrWhiteSpace(_tempMaCanBo)){
+                                
+                                //Kiểm tra lại trường hợp nếu mã cán bộ để trống thì cho vào đâu ???
                                 rs.Fields["ma_can_bo_draft"].Value = "CB1460000";
                             }
                             else
@@ -540,16 +547,16 @@ namespace CongNo
                                 case "Tổng":
                                     rs = db.OpenRecordset("cong_no");
                                     break;
-                                case "13111":
-                                    rs = db.OpenRecordset("SELECT * FROM cong_no WHERE m_so_tai_khoan='13111'");
+                                case TK13111:
+                                    rs = db.OpenRecordset($"SELECT * FROM cong_no WHERE m_so_tai_khoan = '{TK13111}'");
                                     rs.MoveLast();
                                     break;
-                                case "13161":
-                                    rs = db.OpenRecordset("SELECT * FROM cong_no WHERE m_so_tai_khoan='13161'");
+                                case TK13115:
+                                    rs = db.OpenRecordset($"SELECT * FROM cong_no WHERE m_so_tai_khoan = '{TK13115}'");
                                     rs.MoveLast();
                                     break;
-                                case "13155":
-                                    rs = db.OpenRecordset("SELECT * FROM cong_no WHERE m_so_tai_khoan='13155'");
+                                case TK13116:
+                                    rs = db.OpenRecordset($"SELECT * FROM cong_no WHERE m_so_tai_khoan = '{TK13116}'");
                                     rs.MoveLast();
                                     break;
                             }

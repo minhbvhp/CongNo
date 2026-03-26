@@ -145,6 +145,9 @@
     <EmbeddedResource Include="DB.mdb" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="DB - before 2026.mdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\EPPlus.dll" />
     <Content Include="Resources\EPPlus.xml" />
     <Content Include="Resources\Newtonsoft.Json.dll" />
