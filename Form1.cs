@@ -13,6 +13,9 @@ using OfficeOpenXml.Style;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Office.Interop.Access.Dao;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
+using Index = Microsoft.Office.Interop.Access.Dao.Index;
+using System.Reflection.Emit;
 
 namespace CongNo
 {
@@ -1879,6 +1882,360 @@ namespace CongNo
                 MessageBox.Show("Không nén được dữ liệu.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             
+        }
+
+        private void migrateButton_Click(object sender, EventArgs e)
+        {
+            MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+
+            DialogResult result = MessageBox.Show("Bạn có muốn chuyển đổi sang hệ thống kế toán mới (áp dụng từ năm 2026) không ?", "Cập nhật", buttons);
+            
+            if (result == DialogResult.Yes)
+            {
+                String strYear = Program.DbYear;
+                if (int.TryParse(strYear, out int currentDbYear))
+                {
+                    if (currentDbYear >= 2026)
+                    {
+                        DBEngine dBEngine = new DBEngine();
+                        Database oldDb = null;
+                        Database migrateDb = null;
+                        Recordset migrateRs;
+
+                        //Old database connection
+                        String oldDbName = strYear + ".mdb";
+                        String oldDbPath = Environment.CurrentDirectory + @"\Database\";
+                        String oldDbFile = oldDbPath + oldDbName;
+                        oldDb = dBEngine.OpenDatabase(oldDbFile);
+
+                        //Migrate connection
+                        String migrateDbPath = Environment.CurrentDirectory + @"\migrate\";
+                        String migrateDbFile = migrateDbPath + "change-department-employee.mdb";
+                        migrateDb = dBEngine.OpenDatabase(migrateDbFile);
+
+
+                        try
+                        {
+                            oldDb.BeginTrans();
+                            migrateDb.BeginTrans();
+
+                            #region Migrate draft
+                            oldDb.Execute("ALTER TABLE draft ALTER COLUMN kenh_kt TEXT(255)");
+                            #endregion
+
+                            #region Migrate invoice
+                            oldDb.Execute("ALTER TABLE invoice_draft ALTER COLUMN kenh_kt TEXT(255)");
+                            oldDb.Execute("ALTER TABLE invoice ALTER COLUMN kenh_kt TEXT(255)");
+                            #endregion
+
+                            #region Migrate department
+
+                            //1. Replace department table
+
+                            //Remove old index
+                            TableDef departmentTable = oldDb.TableDefs["department"];
+
+                            for (int i = departmentTable.Indexes.Count - 1; i >= 0; i--)
+                            {
+                                if (departmentTable.Indexes[i].Primary)
+                                {
+                                    departmentTable.Indexes.Delete(departmentTable.Indexes[i].Name);
+                                }
+                            }
+
+                            Index idx = departmentTable.CreateIndex("UX_department_ma_phong");
+                            idx.Fields.Append(idx.CreateField("ma_phong"));
+                            idx.Unique = false;
+
+                            departmentTable.Indexes.Append(idx);
+
+                            //Remove all relationship old department
+                            List<Relation> relationsToDelete = new List<Relation>();
+
+                            foreach (Relation rel in oldDb.Relations)
+                            {
+                                foreach (Field field in rel.Fields)
+                                {
+                                    if (field.Name.Equals("ma_phong", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        relationsToDelete.Add(rel);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            foreach (var rel in relationsToDelete)
+                            {
+                                oldDb.Relations.Delete(rel.Name);
+                            }
+
+                            //Add column ma_truong_phong to old department
+                            AddColumnIfNotExists(oldDb, "department", "ma_truong_phong", "TEXT(50)");
+
+                            //Delete old department
+                            oldDb.Execute("DELETE FROM department");
+
+                            //Change old deparment and related department design
+                            oldDb.Execute("ALTER TABLE department ALTER COLUMN ma_phong TEXT(255)");
+                            oldDb.Execute("ALTER TABLE department ALTER COLUMN ten_phong TEXT(50)");
+                            oldDb.Execute("ALTER TABLE department ALTER COLUMN stt COUNTER(1,1)");
+
+                            oldDb.Execute("ALTER TABLE draft ALTER COLUMN ma_phong TEXT(255)");
+                            oldDb.Execute("ALTER TABLE revenue ALTER COLUMN ma_phong TEXT(255)");
+
+                            //Recreate relationship old department
+                            Relation departmentRel = oldDb.CreateRelation(
+                                "FK_department_revenue",
+                                "department",
+                                "revenue",
+                                (int)RelationAttributeEnum.dbRelationDontEnforce);
+
+                            Field departmentRelField = departmentRel.CreateField("ma_phong");
+                            departmentRelField.ForeignName = "ma_phong";
+
+                            departmentRel.Fields.Append(departmentRelField);
+                            oldDb.Relations.Append(departmentRel);
+
+                            //Copy from change-department to department
+                            migrateRs = migrateDb.OpenRecordset("change-department");
+
+                            while (!migrateRs.EOF)
+                            {
+                                string maPhong = migrateRs.Fields["ma_phong_moi"].Value;
+                                string tenPhong = migrateRs.Fields["ten_phong_moi"].Value;
+                                string tenDayDu = migrateRs.Fields["ten_day_du_moi"].Value;
+                                string maTruongPhong = migrateRs.Fields["ma_truong_phong"].Value;
+
+                                string sql = $@"INSERT INTO department (ma_phong, ten_phong, ten_day_du, ma_truong_phong) VALUES ('{maPhong}', '{tenPhong}', '{tenDayDu}', '{maTruongPhong}')";
+
+                                oldDb.Execute(sql);
+                                migrateRs.MoveNext();
+                            }
+
+                            //2. Replace ma_phong all other tables
+
+                            //Load mapping
+                            Dictionary<string, string> departmentMapping = new Dictionary<string, string>();
+                            Recordset departmentMapRs = migrateDb.OpenRecordset("SELECT ma_phong_cu, ma_phong_moi FROM [change-department]");
+                            while (!departmentMapRs.EOF)
+                            {
+                                string oldCode = departmentMapRs.Fields["ma_phong_cu"].Value;
+                                string newCode = departmentMapRs.Fields["ma_phong_moi"].Value;
+
+                                departmentMapping[oldCode] = newCode;
+
+                                departmentMapRs.MoveNext();
+                            }
+                            departmentMapRs.Close();
+
+                            //Duyệt tất cả table
+                            foreach (TableDef otherTable in oldDb.TableDefs)
+                            {
+                                string tableName = otherTable.Name;
+
+                                // Bỏ qua system table
+                                if (tableName.StartsWith("MSys")) continue;
+
+                                // Duyệt column
+                                foreach (Field field in otherTable.Fields)
+                                {
+                                    string columnName = field.Name.ToLower();
+
+                                    // Chỉ xử lý các cột có thể chứa mã phòng
+                                    if (!columnName.Contains("ma_phong")) continue;
+
+                                    // Chỉ xử lý text field
+                                    if (field.Type != (int)DataTypeEnum.dbText) continue;
+
+                                    // Update theo mapping
+                                    foreach (var kv in departmentMapping)
+                                    {
+                                        string oldCode = kv.Key;
+                                        string newCode = kv.Value;
+
+                                        string sql = $@"UPDATE [{tableName}] SET [{field.Name}] = '{newCode}' WHERE [{field.Name}] = '{oldCode}'";
+
+                                        try
+                                        {
+                                            oldDb.Execute(sql);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            MessageBox.Show($"Bị lỗi tại {tableName}.{field.Name}: {ex.Message}");
+                                        }
+                                    }
+                                }
+                            }
+
+                            #endregion
+
+                            #region Migrate can_bo
+                            //Delete old can_bo
+                            oldDb.Execute("DELETE FROM can_bo");
+
+                            //Copy from change-employee to can_bo
+                            migrateRs = migrateDb.OpenRecordset("change-employee");
+
+                            while (!migrateRs.EOF)
+                            {
+                                string maCb = migrateRs.Fields["ma_cb_moi"].Value;
+                                string tenDayDu = migrateRs.Fields["full_name_moi"].Value.ToString();
+
+                                string sql = $@"INSERT INTO can_bo (id, full_name) VALUES ('{maCb}', '{tenDayDu}')";
+
+                                oldDb.Execute(sql);
+                                migrateRs.MoveNext();
+                            }
+
+                            //2. Replace ma_cb all other tables
+
+                            //Load mapping
+                            Dictionary<string, string> employeeMapping = new Dictionary<string, string>();
+                            Recordset employeeMapRs = migrateDb.OpenRecordset("SELECT ma_cb_cu, ma_cb_moi FROM [change-employee]");
+                            while (!employeeMapRs.EOF)
+                            {
+                                string oldCode = employeeMapRs.Fields["ma_cb_cu"].Value;
+                                string newCode = employeeMapRs.Fields["ma_cb_moi"].Value;
+
+                                employeeMapping[oldCode] = newCode;
+
+                                employeeMapRs.MoveNext();
+                            }
+                            employeeMapRs.Close();
+
+                            //Duyệt tất cả table
+                            foreach (TableDef otherTable in oldDb.TableDefs)
+                            {
+                                string tableName = otherTable.Name;
+
+                                // Bỏ qua system table
+                                if (tableName.StartsWith("MSys")) continue;
+
+                                // Duyệt column
+                                foreach (Field field in otherTable.Fields)
+                                {
+                                    string columnName = field.Name.ToLower();
+
+                                    // Chỉ xử lý các cột có thể chứa mã cán bộ
+                                    if (!columnName.Contains("ma_can_bo")) continue;
+
+                                    // Chỉ xử lý text field
+                                    if (field.Type != (int)DataTypeEnum.dbText) continue;
+
+                                    //Change other to defaultCode
+                                    string defaultCode = "CB1460000";
+
+                                    try
+                                    {
+                                        if (employeeMapping.Count == 0)
+                                        {
+                                            string sqlFallback = $@"UPDATE [{tableName}] SET [{field.Name}] = '{defaultCode}' WHERE [{field.Name}] IS NOT NULL";
+
+                                            oldDb.Execute(sqlFallback);
+                                        }
+                                        else
+                                        {
+                                            string notInList = string.Join(",", employeeMapping.Keys.Select(x => $"'{x}'"));
+
+                                            string sqlFallback = $@"UPDATE [{tableName}] SET [{field.Name}] = '{defaultCode}' WHERE [{field.Name}] IS NOT NULL AND [{field.Name}] NOT IN ({notInList})";
+
+                                            oldDb.Execute(sqlFallback);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        MessageBox.Show($"Fallback lỗi tại {tableName}.{field.Name}: {ex.Message}");
+                                    }
+
+                                    // Update theo mapping
+                                    foreach (var kv in employeeMapping)
+                                    {
+                                        string oldCode = kv.Key;
+                                        string newCode = kv.Value;
+
+                                        string sql = $@"UPDATE [{tableName}] SET [{field.Name}] = '{newCode}' WHERE [{field.Name}] = '{oldCode}'";
+
+                                        try
+                                        {
+                                            oldDb.Execute(sql);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            MessageBox.Show($"Bị lỗi tại {tableName}.{field.Name}: {ex.Message}");
+                                        }
+                                    }
+                                }
+                            }
+                            #endregion
+
+                            #region Migrate revenue
+                            String doiTK13155sang13116 = $@"UPDATE revenue SET so_tai_khoan = '{Constants.TK13116}' WHERE so_tai_khoan = '{Constants.TK13155}'";
+                            String doiTK13161sang13115 = $@"UPDATE revenue SET so_tai_khoan = '{Constants.TK13115}' WHERE so_tai_khoan = '{Constants.TK13161}'";
+
+                            oldDb.Execute(doiTK13155sang13116);
+                            oldDb.Execute(doiTK13161sang13115);
+                            #endregion
+
+                            //Commit
+                            oldDb.CommitTrans();
+                            migrateDb.CommitTrans();
+
+                            migrateRs.Close();
+
+                            MessageBox.Show("Đã chuyển đổi sang hệ thống mới", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Gặp lỗi khi chuyển đổi.\n" + ex.Message.ToString(), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            oldDb.Rollback();
+                            migrateDb.Rollback();
+                        }
+                        finally
+                        {
+                            oldDb.Close();
+                            migrateDb.Close();
+                        }
+
+                    }
+                    else
+                    {
+                        MessageBox.Show("Hệ thống mới chỉ áp dụng từ năm 2026");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Tên database không đúng", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            
+        }
+
+        bool ColumnExists(Database db, string tableName, string columnName)
+        {
+            try
+            {
+                TableDef table = db.TableDefs[tableName];
+                foreach (Field field in table.Fields)
+                {
+                    if (field.Name.Equals(columnName, StringComparison.OrdinalIgnoreCase))
+                        return true;
+                }
+            }
+            catch
+            {
+                MessageBox.Show($"Table {tableName} không tồn tại");
+            }
+
+            return false;
+        }
+
+        void AddColumnIfNotExists(Database db, string tableName, string columnName, string columnDef)
+        {
+            if (!ColumnExists(db, tableName, columnName))
+            {
+                string sql = $"ALTER TABLE [{tableName}] ADD COLUMN [{columnName}] {columnDef}";
+                db.Execute(sql);
+            }
         }
     }
 }
