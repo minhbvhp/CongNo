@@ -9,6 +9,7 @@ namespace CongNo
     static class Program
     {
         public static String DbYear = string.Empty;
+
         public static bool OpenDetailFormOnClose { get; set; }
         /// <summary>
         /// The main entry point for the application.

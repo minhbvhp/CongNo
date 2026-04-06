@@ -19,10 +19,6 @@ namespace CongNo
     
     public partial class Form1 : Form
     {
-        const string TK13116 = "13116";
-        const string TK13115 = "13115";
-        const string TK13111 = "13111";
-
         public TextBox[] textBoxes = new TextBox[6];
         public DateTimePicker[] dateTimePickers = new DateTimePicker[4];
 
@@ -547,16 +543,24 @@ namespace CongNo
                                 case "Tổng":
                                     rs = db.OpenRecordset("cong_no");
                                     break;
-                                case TK13111:
-                                    rs = db.OpenRecordset($"SELECT * FROM cong_no WHERE m_so_tai_khoan = '{TK13111}'");
+                                case Constants.TK13111:
+                                    rs = db.OpenRecordset($"SELECT * FROM cong_no WHERE m_so_tai_khoan = '{Constants.TK13111}'");
                                     rs.MoveLast();
                                     break;
-                                case TK13115:
-                                    rs = db.OpenRecordset($"SELECT * FROM cong_no WHERE m_so_tai_khoan = '{TK13115}'");
+                                case Constants.TK13115:
+                                    rs = db.OpenRecordset($"SELECT * FROM cong_no WHERE m_so_tai_khoan = '{Constants.TK13115}'");
                                     rs.MoveLast();
                                     break;
-                                case TK13116:
-                                    rs = db.OpenRecordset($"SELECT * FROM cong_no WHERE m_so_tai_khoan = '{TK13116}'");
+                                case Constants.TK13116:
+                                    rs = db.OpenRecordset($"SELECT * FROM cong_no WHERE m_so_tai_khoan = '{Constants.TK13116}'");
+                                    rs.MoveLast();
+                                    break;
+                                case Constants.TK13161:
+                                    rs = db.OpenRecordset($"SELECT * FROM cong_no WHERE m_so_tai_khoan = '{Constants.TK13161}'");
+                                    rs.MoveLast();
+                                    break;
+                                case Constants.TK13155:
+                                    rs = db.OpenRecordset($"SELECT * FROM cong_no WHERE m_so_tai_khoan = '{Constants.TK13155}'");
                                     rs.MoveLast();
                                     break;
                             }
